@@ -1,0 +1,14 @@
+*.iml
+.idea
+.gradle
+/local.properties
+.DS_Store
+/build
+/app/build
+/libs/AlexaAndroid/build
+/libs/OpenCV/build
+/libs/TouchFree/build
+
+/app/gen
+
+*.md5

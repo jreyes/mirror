@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="outside_padding">25dp</dimen>
+    <dimen name="icon_margin">10dp</dimen>
+    <dimen name="inter_group_margin">15dp</dimen>
+    <dimen name="intra_group_margin">10dp</dimen>
+
+    <dimen name="lb_playback_controls_padding_bottom">480dp</dimen>
+    <dimen name="lb_playback_controls_margin_start">20dp</dimen>
+    <dimen name="lb_playback_controls_margin_end">20dp</dimen>
+</resources>

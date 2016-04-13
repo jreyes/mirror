@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools"
+       tools:showIn="@layout/activity_mirror">
+
+    <TextView
+        android:id="@+id/temperature"
+        style="@style/TemperatureStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:gravity="start"
+        tools:text="72°"/>
+
+    <TextView
+        android:id="@+id/icon"
+        style="@style/TemperatureIconStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/temperature"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/temperature"
+        tools:text="+"/>
+
+    <TextView
+        android:id="@+id/weather_summary"
+        style="@style/WeatherTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/temperature"
+        android:layout_marginBottom="5dp"
+        android:enabled="false"
+        android:gravity="start"
+        android:maxWidth="240dp"
+        tools:text="Mostly cloudy until tomorrow evening"/>
+
+    <TextView
+        android:id="@+id/precipitation_icon"
+        style="@style/WeatherIconStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/weather_summary"
+        android:layout_marginTop="0dp"
+        android:enabled="false"
+        android:gravity="start"
+        tools:text="J"/>
+
+    <TextView
+        android:id="@+id/precipitation"
+        style="@style/WeatherTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/precipitation_icon"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/precipitation_icon"
+        tools:text="6%"/>
+
+</merge>

@@ -1,0 +1,27 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        flatDir { dir 'libs' }
+        maven { url 'https://houndify.com/maven/' }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://s3.amazonaws.com/repo.commonsware.com' }
+    }
+}
+
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

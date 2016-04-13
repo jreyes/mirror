@@ -1,0 +1,64 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="AppTheme" parent="@style/Theme.Leanback">
+        <item name="android:background">#ff000000</item>
+    </style>
+
+    <style name="FullscreenTheme" parent="AppTheme">
+        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="BaseTextStyle">
+        <item name="android:textColor">#ffffffff</item>
+    </style>
+
+    <style name="TemperatureStyle" parent="BaseTextStyle">
+        <item name="android:textSize">80dp</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
+    </style>
+
+    <style name="TemperatureIconStyle" parent="BaseTextStyle">
+        <item name="android:textSize">80dp</item>
+    </style>
+
+    <style name="WeatherTextStyle" parent="BaseTextStyle">
+        <item name="android:textSize">20dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:maxLines">3</item>
+    </style>
+
+    <style name="WeatherIconStyle" parent="BaseTextStyle">
+        <item name="android:textSize">20dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="TimeStyle" parent="BaseTextStyle">
+        <item name="android:textSize">80dp</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
+    </style>
+
+    <style name="DateStyle" parent="BaseTextStyle">
+        <item name="android:textSize">20dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="NewsStyle" parent="BaseTextStyle">
+        <item name="android:textSize">20dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Widget.Leanback.PlaybackControlsButtonStyle">
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+    </style>
+
+</resources>
