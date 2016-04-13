@@ -1,6 +1,6 @@
 Another Smart Mirror
 ====================
-[![Build Status](https://travis-ci.org/jreyes/mirror.png?branch=master)](https://travis-ci.org/jreyes/MirrorApp)
+[![Build Status](https://travis-ci.org/jreyes/mirror.png?branch=master)](https://travis-ci.org/jreyes/mirror)
 ![](https://img.shields.io/badge/Licence-Apache%20v2-green.svg)
 ![](https://img.shields.io/badge/platform-android-green.svg)
 ![](https://img.shields.io/badge/Min%20SDK-21-green.svg)
