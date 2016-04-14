@@ -14,6 +14,7 @@ For the hardware I've used:
 * A [Radius Network RadBeacon](http://www.amazon.com/Radius-Networks-RadBeacon-Dot-Technology/dp/B00JJ4P864)
 * A [HDMI monitor](http://www.amazon.com/VG278HE-1920x1080-Ergonomic-Back-lit-Monitor/dp/B00906HM6K)
 * A [shadowbox](http://www.michaels.com/frames/display-cases-and-shadowboxes/840874378)
+* [Mirror tint](http://www.amazon.com/Window-Film-Mirror-Silver-36in/dp/B00CWGIHBE)
 * A [powered usb hub](http://www.amazon.com/Anker-4-Port-Adapter-Charger-Included/dp/B0192LPK5M)
 * A [Wifi adapter](http://ameridroid.com/products/wifi-module-4)
 * A [bluetooth adapter](http://ameridroid.com/products/usb-bluetooth-module-2)
