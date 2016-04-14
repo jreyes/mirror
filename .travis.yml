@@ -2,15 +2,21 @@ language: android
 
 android:
   components:
-    - tools
-    - build-tools-23.0.2
+    - build-tools-23.0.3
     - android-21
+    - extra-android-support
     - extra-android-m2repository
   licenses:
     - 'android-sdk-license-.+'
 
 jdk:
-  - oraclejdk8
+  - oraclejdk7
+
+before_script:
+  # Retrolambda environment vars
+  - export JAVA7_HOME=/usr/lib/jvm/java-7-oracle
+  - export JAVA8_HOME=/usr/lib/jvm/java-8-oracle
+  - export JAVA_HOME=$JAVA7_HOME
 
 sudo: false
 
