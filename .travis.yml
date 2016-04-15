@@ -7,6 +7,7 @@ android:
     - extra-android-support
     - extra-android-m2repository
     - extra-google-m2repository
+    - sys-img-armeabi-v7a-android-18
   licenses:
     - 'android-sdk-license-.+'
 
@@ -18,11 +19,14 @@ before_script:
   - export JAVA7_HOME=/usr/lib/jvm/java-7-oracle
   - export JAVA8_HOME=/usr/lib/jvm/java-8-oracle
   - export JAVA_HOME=$JAVA7_HOME
+  # Create and start an emulator for instrumentation tests.
+  - echo no | android create avd --force -n test -t android-18 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82
 
 sudo: false
 
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+  - $HOME/.gradle
