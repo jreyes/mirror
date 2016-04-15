@@ -74,6 +74,11 @@ public class MirrorActivity extends Activity {
         mOverlayContainer.setVisibility(View.INVISIBLE);
     }
 
+    public void onError() {
+        MirrorApp.sound(this).error();
+        startListening();
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(UserInRangeEvent event) {
@@ -170,10 +175,6 @@ public class MirrorActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (mSpotifyManager != null) {
-            mSpotifyManager.onDestroy();
-        }
-
         super.onDestroy();
         MirrorApp.refWatcher(this).watch(this);
         Process.killProcess(Process.myPid());

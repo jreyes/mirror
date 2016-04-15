@@ -3,6 +3,7 @@ package com.vaporwarecorp.mirror.manager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -33,7 +34,33 @@ public class SpotifyManager implements PlayerNotificationCallback, Callback<Trac
     private String mClientRedirectUri;
     private Context mContext;
     private PlayerState mCurrentPlayerState;
+    private List<String> mCurrentTrackIds;
+    private Player.InitializationObserver mInitializationObserver = new Player.InitializationObserver() {
+        @Override
+        public void onInitialized(Player player) {
+            mPlayer = player;
+            mPlayer.addPlayerNotificationCallback(SpotifyManager.this);
+            mPlayer.play(mCurrentTrackIds);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            Timber.e(throwable, "Could not initialize player: %s", throwable.getMessage());
+        }
+    };
+    private AsyncTask<Object, Void, Void> mLoginAsyncTask = new AsyncTask<Object, Void, Void>() {
+        protected Void doInBackground(Object... params) {
+            final Integer resultCode = (Integer) params[0];
+            final Intent intent = (Intent) params[1];
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                mPlayerConfig = new Config(mContext, response.getAccessToken(), mClientId);
+            }
+            return null;
+        }
+    };
     private Player mPlayer;
+    private Config mPlayerConfig;
     private SpotifyService mService;
 
 // --------------------------- CONSTRUCTORS ---------------------------
@@ -42,7 +69,6 @@ public class SpotifyManager implements PlayerNotificationCallback, Callback<Trac
         mContext = context;
         mClientId = properties.getProperty(CLIENT_ID);
         mClientRedirectUri = properties.getProperty(CLIENT_REDIRECT_URI);
-        mCurrentPlayerState = new PlayerState();
         mService = new SpotifyApi().getService();
     }
 
@@ -76,7 +102,7 @@ public class SpotifyManager implements PlayerNotificationCallback, Callback<Trac
         }
         EventBus.getDefault().post(new SpotifyPlaybackEvent(lastPosition, eventType));
         if (eventType == EventType.END_OF_CONTEXT) {
-            EventBus.getDefault().post(new VideoCompletedEvent());
+            stop();
         }
     }
 
@@ -101,42 +127,23 @@ public class SpotifyManager implements PlayerNotificationCallback, Callback<Trac
         AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);
     }
 
-    public void onDestroy() {
-        Spotify.destroyPlayer(this);
-    }
-
     public void play(List<String> trackUris) {
         if (trackUris == null || trackUris.isEmpty()) {
             return;
         }
-        stop();
-        mPlayer.play(trackUris);
+
+        mCurrentPlayerState = new PlayerState();
+        mCurrentTrackIds = trackUris;
+        Spotify.getPlayer(mPlayerConfig, this, mInitializationObserver);
     }
 
     public void processAuthentication(int resultCode, Intent data) {
-        AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
-        if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-            Config playerConfig = new Config(mContext, response.getAccessToken(), mClientId);
-            Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                @Override
-                public void onInitialized(Player player) {
-                    mPlayer = player;
-                    mPlayer.addPlayerNotificationCallback(SpotifyManager.this);
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    Timber.e("Could not initialize player: %s", throwable.getMessage());
-                }
-            });
-        }
+        mLoginAsyncTask.execute(resultCode, data);
     }
 
     public void stop() {
-        if (mCurrentPlayerState.playing) {
-            mPlayer.pause();
-            mPlayer.clearQueue();
-        }
+        Spotify.destroyPlayer(this);
+        EventBus.getDefault().post(new VideoCompletedEvent());
     }
 
     public void togglePlay() {

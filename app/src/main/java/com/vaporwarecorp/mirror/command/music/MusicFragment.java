@@ -109,7 +109,7 @@ public class MusicFragment extends PlaybackOverlayFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(HandWaveRightEvent event) {
-        EventBus.getDefault().post(new VideoCompletedEvent());
+        mSpotifyManager.stop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

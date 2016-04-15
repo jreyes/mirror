@@ -16,8 +16,12 @@ abstract class AbstractMusicCommand extends AbstractHoundifyCommand {
 
     @Override
     public void executeCommand(CommandResult result, MirrorActivity activity) {
-        activity.displayFragment(MusicFragment.newInstance(getTrackIds(result)));
-        activity.startHandGestures();
+        ArrayList<String> trackIds = getTrackIds(result);
+        if (trackIds.isEmpty()) {
+            activity.onError();
+        } else {
+            onExecuteCommandSuccess(result, activity, trackIds);
+        }
     }
 
     @Override
@@ -33,6 +37,11 @@ abstract class AbstractMusicCommand extends AbstractHoundifyCommand {
     @Override
     public void registerHoundify(HoundifyManager houndifyManager) {
         houndifyManager.registerCommand(this);
+    }
+
+    protected void onExecuteCommandSuccess(CommandResult result, MirrorActivity activity, ArrayList<String> trackIds) {
+        activity.displayFragment(MusicFragment.newInstance(trackIds));
+        activity.startHandGestures();
     }
 
     @SuppressWarnings("Convert2streamapi")
