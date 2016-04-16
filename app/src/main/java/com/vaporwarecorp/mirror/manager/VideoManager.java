@@ -1,10 +1,13 @@
 package com.vaporwarecorp.mirror.manager;
 
+import android.net.Uri;
 import com.vaporwarecorp.mirror.event.VideoCompletedEvent;
 import com.vaporwarecorp.mirror.vendor.ijk.IjkVideoView;
 import org.greenrobot.eventbus.EventBus;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+
+import java.util.HashMap;
 
 public class VideoManager implements IMediaPlayer.OnCompletionListener {
 // ------------------------------ FIELDS ------------------------------
@@ -44,7 +47,7 @@ public class VideoManager implements IMediaPlayer.OnCompletionListener {
     }
 
     public void start(String videoUri) {
-        mView.setVideoPath(videoUri);
+        mView.setVideoURI(Uri.parse(videoUri).buildUpon().build(), new HashMap<>());
         mView.start();
     }
 

@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class IjkVideoView extends FrameLayout {
 // ------------------------------ FIELDS ------------------------------
 
@@ -97,7 +97,7 @@ public class IjkVideoView extends FrameLayout {
     private IMediaPlayer.OnErrorListener mErrorListener =
             new IMediaPlayer.OnErrorListener() {
                 public boolean onError(IMediaPlayer mp, int framework_err, int impl_err) {
-                    Timber.d("Error: " + framework_err + "," + impl_err);
+                    Timber.d("Error: %s, %s", framework_err, impl_err);
                     mCurrentState = STATE_ERROR;
                     mTargetState = STATE_ERROR;
 
@@ -131,7 +131,7 @@ public class IjkVideoView extends FrameLayout {
                             Timber.d("MEDIA_INFO_BUFFERING_END:");
                             break;
                         case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
-                            Timber.d("MEDIA_INFO_NETWORK_BANDWIDTH: " + arg2);
+                            Timber.d("MEDIA_INFO_NETWORK_BANDWIDTH: %d", arg2);
                             break;
                         case IMediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
                             Timber.d("MEDIA_INFO_BAD_INTERLEAVING:");
@@ -150,7 +150,7 @@ public class IjkVideoView extends FrameLayout {
                             break;
                         case IMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED:
                             mVideoRotationDegree = arg2;
-                            Timber.d("MEDIA_INFO_VIDEO_ROTATION_CHANGED: " + arg2);
+                            Timber.d("MEDIA_INFO_VIDEO_ROTATION_CHANGED: %d", arg2);
                             if (mRenderView != null)
                                 mRenderView.setVideoRotation(arg2);
                             break;
@@ -402,6 +402,24 @@ public class IjkVideoView extends FrameLayout {
         setVideoURI(cacheFile(path), null);
     }
 
+    /**
+     * Sets video URI using specific headers.
+     *
+     * @param uri     the URI of the video.
+     * @param headers the headers for the URI request.
+     *                Note that the cross domain redirection is allowed by default, but that can be
+     *                changed with key/value pairs through the headers parameter with
+     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+     *                to disallow or allow cross domain redirection.
+     */
+    public void setVideoURI(Uri uri, Map<String, String> headers) {
+        mUri = uri;
+        mHeaders = headers;
+        openVideo();
+        requestLayout();
+        invalidate();
+    }
+
     public void start() {
         if (isInPlaybackState()) {
             mMediaPlayer.start();
@@ -556,7 +574,7 @@ public class IjkVideoView extends FrameLayout {
             // target state that was there before.
             mCurrentState = STATE_PREPARING;
         } catch (IOException | IllegalArgumentException ex) {
-            Timber.w("Unable to open content: " + mUri, ex);
+            Timber.w(ex, "Unable to open content: %s", mUri);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
@@ -589,7 +607,7 @@ public class IjkVideoView extends FrameLayout {
                 break;
             }
             default:
-                Timber.e(String.format(Locale.getDefault(), "invalid render %d\n", render));
+                Timber.e("invalid render %d\n", render);
                 break;
         }
     }
@@ -625,23 +643,5 @@ public class IjkVideoView extends FrameLayout {
 
         mRenderView.addRenderCallback(mSHCallback);
         mRenderView.setVideoRotation(mVideoRotationDegree);
-    }
-
-    /**
-     * Sets video URI using specific headers.
-     *
-     * @param uri     the URI of the video.
-     * @param headers the headers for the URI request.
-     *                Note that the cross domain redirection is allowed by default, but that can be
-     *                changed with key/value pairs through the headers parameter with
-     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
-     *                to disallow or allow cross domain redirection.
-     */
-    private void setVideoURI(Uri uri, Map<String, String> headers) {
-        mUri = uri;
-        mHeaders = headers;
-        openVideo();
-        requestLayout();
-        invalidate();
     }
 }
