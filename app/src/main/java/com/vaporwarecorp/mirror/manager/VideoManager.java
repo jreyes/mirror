@@ -55,6 +55,7 @@ public class VideoManager implements IMediaPlayer.OnCompletionListener {
         if (mView != null) {
             mView.stopPlayback();
         }
+        EventBus.getDefault().post(new VideoCompletedEvent());
     }
 
     public void togglePlay() {

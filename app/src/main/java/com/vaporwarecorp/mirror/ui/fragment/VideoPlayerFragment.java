@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import com.vaporwarecorp.mirror.MirrorApp;
 import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.event.HandWaveClickEvent;
+import com.vaporwarecorp.mirror.event.HandWaveRightEvent;
 import com.vaporwarecorp.mirror.manager.VideoManager;
 import com.vaporwarecorp.mirror.vendor.ijk.IjkVideoView;
 import org.greenrobot.eventbus.EventBus;
@@ -45,6 +46,12 @@ public class VideoPlayerFragment extends Fragment {
         mVideoManager.onDestroy();
         super.onDestroy();
         MirrorApp.refWatcher(getActivity()).watch(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(HandWaveRightEvent event) {
+        mVideoManager.stop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

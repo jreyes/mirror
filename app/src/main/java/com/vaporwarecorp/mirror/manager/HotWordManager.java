@@ -2,10 +2,10 @@ package com.vaporwarecorp.mirror.manager;
 
 import android.content.Context;
 import com.vaporwarecorp.mirror.event.HotWordEvent;
+import com.vaporwarecorp.mirror.vendor.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.SpeechRecognizer;
 import org.greenrobot.eventbus.EventBus;
 import timber.log.Timber;
 
@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
+import static com.vaporwarecorp.mirror.vendor.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 
 public class HotWordManager implements RecognitionListener {
 // ------------------------------ FIELDS ------------------------------
@@ -96,7 +96,7 @@ public class HotWordManager implements RecognitionListener {
         mRecognizer = defaultSetup()
                 .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                 .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-                .setKeywordThreshold(1e-30f)
+                .setKeywordThreshold(1e-20f)
                 .setBoolean("-allphone_ci", true)
                 .getRecognizer();
         mRecognizer.addListener(this);
