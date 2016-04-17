@@ -17,6 +17,7 @@ import com.vaporwarecorp.mirror.command.mikutime.MikuTimeCommand;
 import com.vaporwarecorp.mirror.command.music.MusicChartsCommand;
 import com.vaporwarecorp.mirror.command.music.MusicSearchCommand;
 import com.vaporwarecorp.mirror.command.nomatch.NoMatchCommand;
+import com.vaporwarecorp.mirror.command.watch.WatchCBSCommand;
 import com.vaporwarecorp.mirror.manager.*;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
 import com.vaporwarecorp.mirror.util.WiFiUtil;
@@ -167,6 +168,7 @@ public class MirrorApp extends MultiDexApplication {
         new MikuTimeCommand().registerHoundify(mHoundifyManager);
         new MusicChartsCommand().registerHoundify(mHoundifyManager);
         new MusicSearchCommand().registerHoundify(mHoundifyManager);
+        new WatchCBSCommand().registerHoundify(mHoundifyManager);
         new NoMatchCommand().registerHoundify(mHoundifyManager);
     }
 
