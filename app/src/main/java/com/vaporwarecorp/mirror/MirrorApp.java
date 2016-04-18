@@ -17,6 +17,7 @@ import com.vaporwarecorp.mirror.command.mikutime.MikuTimeCommand;
 import com.vaporwarecorp.mirror.command.music.MusicChartsCommand;
 import com.vaporwarecorp.mirror.command.music.MusicSearchCommand;
 import com.vaporwarecorp.mirror.command.nomatch.NoMatchCommand;
+import com.vaporwarecorp.mirror.command.usermemory.RememberUserNameCommand;
 import com.vaporwarecorp.mirror.command.watch.WatchCBSCommand;
 import com.vaporwarecorp.mirror.manager.*;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
@@ -44,6 +45,7 @@ public class MirrorApp extends MultiDexApplication {
     private HoundifyManager mHoundifyManager;
     private LocalAssetManager mLocalAssetManager;
     private OkHttpClient mOkHttpClient;
+    private PreferenceManager mPreferenceManager;
     private Properties mProperties;
     private ProximityManager mProximityManager;
     private RefWatcher mRefWatcher;
@@ -76,6 +78,10 @@ public class MirrorApp extends MultiDexApplication {
 
     public static LocalAssetManager localAsset(@NonNull Context context) {
         return getApplication(context).mLocalAssetManager;
+    }
+
+    public static PreferenceManager preference(@NonNull Context context) {
+        return getApplication(context).mPreferenceManager;
     }
 
     public static ProximityManager proximity(@NonNull Context context) {
@@ -168,6 +174,7 @@ public class MirrorApp extends MultiDexApplication {
         new MikuTimeCommand().registerHoundify(mHoundifyManager);
         new MusicChartsCommand().registerHoundify(mHoundifyManager);
         new MusicSearchCommand().registerHoundify(mHoundifyManager);
+        new RememberUserNameCommand().registerHoundify(mHoundifyManager);
         new WatchCBSCommand().registerHoundify(mHoundifyManager);
         new NoMatchCommand().registerHoundify(mHoundifyManager);
     }
@@ -199,6 +206,10 @@ public class MirrorApp extends MultiDexApplication {
         mOkHttpClient.setConnectTimeout(10, SECONDS);
         mOkHttpClient.setReadTimeout(10, SECONDS);
         mOkHttpClient.setWriteTimeout(10, SECONDS);
+    }
+
+    private void initPreferenceManager() {
+        mPreferenceManager = new PreferenceManager(this);
     }
 
     private void initProperties() {
@@ -257,6 +268,7 @@ public class MirrorApp extends MultiDexApplication {
             initOkClient();
             initGlide();
             initTextToSpeech();
+            initPreferenceManager();
         }
     }
 }

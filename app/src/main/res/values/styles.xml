@@ -61,4 +61,19 @@
         <item name="android:focusableInTouchMode">false</item>
     </style>
 
+    <style name="GreetTypeTextStyle" parent="BaseTextStyle">
+        <item name="android:textSize">64dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="GreetNameTextStyle" parent="BaseTextStyle">
+        <item name="android:textSize">64dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
 </resources>

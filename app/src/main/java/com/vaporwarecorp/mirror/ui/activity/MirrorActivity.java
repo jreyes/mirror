@@ -18,6 +18,7 @@ import com.vaporwarecorp.mirror.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.manager.*;
 import com.vaporwarecorp.mirror.manager.HoundifyManager.HoundifyManagerListener;
+import com.vaporwarecorp.mirror.ui.fragment.GreeterFragment;
 import com.vaporwarecorp.mirror.ui.fragment.PictureFragment;
 import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
@@ -56,6 +57,7 @@ public class MirrorActivity extends Activity {
         }
     };
     private View mOverlayContainer;
+    private PreferenceManager mPreferenceManager;
     private SpotifyManager mSpotifyManager;
     private TextToSpeechManager mTextToSpeechManager;
 
@@ -82,8 +84,21 @@ public class MirrorActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(UserInRangeEvent event) {
+        displayFragment(GreeterFragment.newInstance(mPreferenceManager.getUserName(), "WELCOME"));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(GreetWelcomeEvent event) {
+        removeCurrentFragment();
         showScreen();
         startListening();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(GreetGoodbyeEvent event) {
+        removeCurrentFragment();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -99,7 +114,7 @@ public class MirrorActivity extends Activity {
         mHotWordManager.stopListening();
         stopHandGestures();
         hideScreen();
-        removeCurrentFragment();
+        displayFragment(GreeterFragment.newInstance(mPreferenceManager.getUserName(), "GOODBYE"));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -228,6 +243,7 @@ public class MirrorActivity extends Activity {
         mHandWaveManager = MirrorApp.handWave(this);
         mSpotifyManager = MirrorApp.spotify(this);
         mTextToSpeechManager = MirrorApp.textToSpeech(this);
+        mPreferenceManager = MirrorApp.preference(this);
     }
 
     private void onResumeFullScreen() {
