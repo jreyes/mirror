@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
@@ -65,6 +66,7 @@ android {
 
 dependencies {
 
+    final DAGGER2_VERSION = '2.3'
     final EVENTBUS_VERSION = '3.0.0'
     final IJKPLAYER_VERSION = '0.4.5.1'
     final LEAKCANARY_VERSION = '1.4-beta1'
@@ -90,6 +92,9 @@ dependencies {
 
     compile "tv.danmaku.ijk.media:ijkplayer-java:$IJKPLAYER_VERSION"
     compile "tv.danmaku.ijk.media:ijkplayer-armv7a:$IJKPLAYER_VERSION"
+
+    apt "com.google.dagger:dagger-compiler:$DAGGER2_VERSION"
+    compile "com.google.dagger:dagger:$DAGGER2_VERSION"
 
     compile 'com.squareup.retrofit2:retrofit:2.0.1'
     compile 'com.squareup.retrofit2:converter-gson:2.0.1'
