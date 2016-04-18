@@ -4,7 +4,10 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
-    <string name="google_maps_key">YourGoogleAPIKeyHere</string>
+    <string name="google_maps_key">AIzaSyDzv2bmnNVNVzZc-QWmmLTZp78tLc-6pa8</string>
+
+    <string name="greet_welcome">Welcome</string>
+    <string name="greet_goodbye">Goodbye</string>
 
     <string name="thunderstorms" translatable="false">&#xf01e;</string>
     <string name="lighting" translatable="false">&#xf016;</string>
