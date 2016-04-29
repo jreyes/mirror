@@ -1,1 +1,1 @@
-include ':libs:OpenCV', ':libs:TouchFree', ':app'
+include ':app'

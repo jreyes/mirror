@@ -1,4 +1,4 @@
 package com.vaporwarecorp.mirror.event;
 
-public class UserInRangeEvent {
+public class UserInRangeEvent implements Event {
 }

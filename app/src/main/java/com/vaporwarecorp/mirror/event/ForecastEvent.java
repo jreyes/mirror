@@ -1,11 +1,11 @@
 package com.vaporwarecorp.mirror.event;
 
-import com.vaporwarecorp.mirror.vendor.forecast.model.Forecast;
+import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 
-public class ForecastEvent {
+public class ForecastEvent implements Event {
 // ------------------------------ FIELDS ------------------------------
 
-    private Forecast forecast;
+    private final Forecast forecast;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 

@@ -1,10 +1,9 @@
 <resources>
-    <string name="app_name">Mirror</string>
+    <string name="app_name">Another Smart Mirror</string>
 
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="error_unknown_error">Unknown error</string>
 
-    <string name="google_maps_key">AIzaSyDzv2bmnNVNVzZc-QWmmLTZp78tLc-6pa8</string>
+    <string name="google_maps_key">YOUR API KEY</string>
 
     <string name="greet_welcome">Welcome</string>
     <string name="greet_goodbye">Goodbye</string>

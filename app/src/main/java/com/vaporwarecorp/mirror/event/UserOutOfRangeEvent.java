@@ -1,4 +1,4 @@
 package com.vaporwarecorp.mirror.event;
 
-public class UserOutOfRangeEvent {
+public class UserOutOfRangeEvent implements Event {
 }

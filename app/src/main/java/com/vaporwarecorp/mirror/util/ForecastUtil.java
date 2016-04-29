@@ -1,7 +1,6 @@
 package com.vaporwarecorp.mirror.util;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import com.vaporwarecorp.mirror.R;
 
 public class ForecastUtil {

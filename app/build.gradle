@@ -3,15 +3,17 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    def globalConfiguration = rootProject.extensions.getByName("ext")
+
+    compileSdkVersion globalConfiguration.getAt("androidCompileSdkVersion")
+    buildToolsVersion globalConfiguration.getAt("androidBuildToolsVersion")
 
     defaultConfig {
         applicationId "com.vaporwarecorp.mirror"
-        minSdkVersion 21
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion globalConfiguration.getAt("androidMinSdkVersion")
+        targetSdkVersion globalConfiguration.getAt("androidTargetSdkVersion")
+        versionCode globalConfiguration.getAt("androidVersionCode")
+        versionName globalConfiguration.getAt("androidVersionName")
         multiDexEnabled true
     }
     compileOptions {
@@ -66,57 +68,53 @@ android {
 
 dependencies {
 
-    final DAGGER2_VERSION = '2.3'
     final EVENTBUS_VERSION = '3.0.0'
+    final HOUNDIFY_VERSION = '0.2.15'
     final IJKPLAYER_VERSION = '0.4.5.1'
     final LEAKCANARY_VERSION = '1.4-beta1'
-    final MULTIDEX_VERSION = '1.0.1'
     final PLAY_VERSION = '8.4.0'
+    final PROXIMITY_KIT_VERSION = '0.10.2'
+    final RETROFIT_VERSION = '2.0.2'
+    final ROBOPUPU_VERSION = '0.4.4'
     final SPOTIFY_VERSION = '1.0.0-beta12'
     final SUPPORT_LIBRARY_VERSION = '23.3.0'
     final TIMBER_VERSION = '4.1.1'
     final JUNIT_VERSION = '4.12'
 
-
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    compile "com.google.android.gms:play-services-maps:$PLAY_VERSION"
-    compile 'com.github.jd-alexander:library:1.1.0'
 
     compile "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:leanback-v17:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:palette-v7:$SUPPORT_LIBRARY_VERSION"
-    compile "com.android.support:multidex:$MULTIDEX_VERSION"
+
+    compile "com.robopupu:robopupu:$ROBOPUPU_VERSION"
+    apt "com.robopupu:robopupu-compiler:$ROBOPUPU_VERSION"
+    apt 'com.squareup:javapoet:1.6.1'
+
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.3'
+
+    compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
+    compile "com.squareup.retrofit2:adapter-rxjava:$RETROFIT_VERSION"
+    compile "com.squareup.retrofit2:converter-gson:$RETROFIT_VERSION"
+
+    compile "info.android15.solid:streams:2.0.3"
+    compile "info.android15.solid:collections:2.0.3"
 
     compile "org.greenrobot:eventbus:$EVENTBUS_VERSION"
-
-    compile "tv.danmaku.ijk.media:ijkplayer-java:$IJKPLAYER_VERSION"
-    compile "tv.danmaku.ijk.media:ijkplayer-armv7a:$IJKPLAYER_VERSION"
-
-    apt "com.google.dagger:dagger-compiler:$DAGGER2_VERSION"
-    compile "com.google.dagger:dagger:$DAGGER2_VERSION"
-
-    compile 'com.squareup.retrofit2:retrofit:2.0.1'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.1'
-
-    compile "com.jakewharton.timber:timber:$TIMBER_VERSION"
-
-    compile('com.radiusnetworks.proximity:proximitykit-android:0.10.2@aar') { transitive = true }
-
-    compile('hound.android:hound-sdk:0.2.15@aar') { transitive = true }
-
-    compile "com.spotify.sdk:spotify-auth:$SPOTIFY_VERSION@aar"
-    compile "com.spotify.sdk:spotify-player:$SPOTIFY_VERSION@aar"
-    compile 'com.github.kaaes:spotify-web-api-android:0.3.0'
 
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'
 
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'commons-io:commons-io:2.4'
+    compile "com.jakewharton.timber:timber:$TIMBER_VERSION"
 
-    compile 'com.github.florent37:glidepalette:1.0.6@aar'
-    compile 'com.github.florent37:viewanimator:1.0.3@aar'
+    compile "com.radiusnetworks.proximity:proximitykit-android:$PROXIMITY_KIT_VERSION@aar"
+
+    compile("hound.android:hound-sdk:$HOUNDIFY_VERSION@aar") { transitive = true }
+
+    compile "com.spotify.sdk:spotify-auth:$SPOTIFY_VERSION@aar"
+    compile "com.spotify.sdk:spotify-player:$SPOTIFY_VERSION@aar"
+    compile 'com.github.kaaes:spotify-web-api-android:0.3.0'
 
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.daimajia.easing:library:1.0.1@aar'
@@ -124,8 +122,7 @@ dependencies {
 
     compile 'com.pixplicity.easyprefs:library:1.8.1@aar'
 
-    compile project(':libs:OpenCV')
-    compile project(':libs:TouchFree')
+    compile 'org.apache.commons:commons-lang3:3.4'
 
     testCompile "junit:junit:$JUNIT_VERSION"
 
@@ -133,7 +130,3 @@ dependencies {
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$LEAKCANARY_VERSION"
     testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$LEAKCANARY_VERSION"
 }
-
-ant.importBuild 'assets.xml'
-preBuild.dependsOn(list, checksum)
-clean.dependsOn(clean_assets)

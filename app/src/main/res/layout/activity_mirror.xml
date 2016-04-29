@@ -2,14 +2,15 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".ui.activity.MirrorActivity">
+                tools:context=".feature.main.view.MirrorActivity">
 
     <RelativeLayout
         android:id="@+id/background_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="invisible">
 
-        <com.vaporwarecorp.mirror.vendor.forecast.ForecastView
+        <com.vaporwarecorp.mirror.component.forecast.ForecastView
             android:id="@+id/forecast_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -17,14 +18,6 @@
             android:layout_alignParentTop="true"
             android:paddingLeft="@dimen/outside_padding"
             android:paddingRight="@dimen/outside_padding"/>
-
-        <org.opencv.android.JavaCameraView
-            android:id="@+id/camera_view"
-            android:layout_width="320dp"
-            android:layout_height="180dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:visibility="invisible"/>
 
     </RelativeLayout>
 
@@ -40,7 +33,8 @@
         android:id="@+id/overlay_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent">
+        android:background="@android:color/transparent"
+        android:visibility="invisible">
 
         <LinearLayout
             android:id="@+id/date_time_view"

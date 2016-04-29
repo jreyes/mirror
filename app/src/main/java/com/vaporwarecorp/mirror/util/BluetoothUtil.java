@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 public class BluetoothUtil {
 // -------------------------- STATIC METHODS --------------------------
 
-    public static boolean enableBluetooth() {
+    public static boolean isBluetoothAvailable() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (!adapter.isEnabled()) {
             if (adapter.getState() == BluetoothAdapter.STATE_OFF) {

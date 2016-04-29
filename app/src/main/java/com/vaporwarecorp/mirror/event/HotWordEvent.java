@@ -1,4 +1,4 @@
 package com.vaporwarecorp.mirror.event;
 
-public class HotWordEvent {
+public class HotWordEvent implements Event {
 }

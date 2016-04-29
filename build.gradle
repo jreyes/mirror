@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
     }
@@ -17,6 +17,18 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://s3.amazonaws.com/repo.commonsware.com' }
     }
+}
+
+ext {
+    // Application
+    androidVersionCode = 1
+    androidVersionName = "1.0"
+
+    // Android
+    androidBuildToolsVersion = "23.0.1"
+    androidMinSdkVersion = 21
+    androidTargetSdkVersion = 23
+    androidCompileSdkVersion = 23
 }
 
 subprojects {
