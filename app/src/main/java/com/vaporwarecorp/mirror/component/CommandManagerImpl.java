@@ -17,10 +17,14 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.command.HoundifyVoiceSearchActivity;
+import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
+import com.vaporwarecorp.mirror.feature.Command;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import timber.log.Timber;
+
+import java.util.List;
 
 @Plugin
 public class CommandManagerImpl extends AbstractManager implements CommandManager {
@@ -36,6 +40,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     @Plug
     PluginFeatureManager mFeatureManager;
 
+    private List<Command> mCommands;
     private JsonNode mConversationState;
     private Houndify mHoundify;
     private JsonNodeFactory mNodeFactory;
@@ -63,27 +68,20 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
             CommandResult commandResult = response.getResults().get(0);
             Timber.i(ToStringBuilder.reflectionToString(commandResult, ToStringStyle.MULTI_LINE_STYLE));
-            if (commandResult.getHtmlData() != null) {
-                Timber.i(ToStringBuilder.reflectionToString(commandResult.getHtmlData(), ToStringStyle.MULTI_LINE_STYLE));
-            }
 
             mConversationState = commandResult.getConversationState();
             mEventManager.post(new SpeechEvent(commandResult.getSpokenResponseLong()));
 
-            /*
-            for (HoundifyCommand command : mCommands) {
+            for (Command command : mCommands) {
                 if (command.matches(commandResult)) {
-                    listener.onSuccess(commandResult, command);
+                    command.executeCommand(commandResult);
                     return;
                 }
             }
-            */
         } else if (result.getErrorType() != null && result.getException() != null) {
-            Timber.e(result.getException(), "Exception on process command");
-            String error = result.getErrorType() + "\n\n" + result.getException().getMessage();
-            //listener.onError(error);
+            onError(result.getErrorType() + "\n\n" + result.getException().getMessage());
         } else {
-            //listener.onError("Aborted search");
+            onError("Aborted search");
         }
     }
 
@@ -98,6 +96,11 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     public void onPlugged(PluginBus bus) {
         super.onPlugged(bus);
         initializeHoundify();
+        initializeCommands();
+    }
+
+    private void initializeCommands() {
+        mCommands = PluginBus.getInstance().getPlugins(Command.class);
     }
 
     private void initializeHoundify() {
@@ -106,6 +109,12 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
         mHoundify.setClientKey(mAppManager.getApplicationProperties().getProperty(CLIENT_KEY));
         mHoundify.setRequestInfoFactory(new RequestInfoFactory());
     }
+
+    private void onError(String message) {
+        mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_ERROR, message));
+    }
+
+// -------------------------- INNER CLASSES --------------------------
 
     private class RequestInfoFactory extends DefaultRequestInfoFactory {
         RequestInfoFactory() {

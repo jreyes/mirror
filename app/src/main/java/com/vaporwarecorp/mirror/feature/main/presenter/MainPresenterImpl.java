@@ -14,10 +14,12 @@ import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.greet.presenter.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.main.view.MainView;
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
 
+import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 import static com.vaporwarecorp.mirror.feature.greet.presenter.GreetPresenter.GREET_TYPE;
@@ -48,6 +50,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void processCommand(int resultCode, Intent data) {
         mCommandManager.processCommand(resultCode, data);
+    }
+
+    public void speak(String textToSpeak) {
+        if (StringUtils.isNoneEmpty(textToSpeak)) {
+            mTextToSpeechManager.speak(textToSpeak);
+        }
     }
 
     @Override
@@ -101,7 +109,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(SpeechEvent event) {
-        mTextToSpeechManager.speak(event.getMessage());
+        speak(event.getMessage());
         startListening();
     }
 
@@ -110,6 +118,15 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     public void onEvent(ForecastEvent event) {
         Timber.i("Got ForecastEvent");
         mView.setForecast(event.getForecast());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(CommandEvent event) {
+        if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
+            mFeature.hideCurrentPresenter();
+        }
+        speak(event.getMessage());
     }
 
     @Override

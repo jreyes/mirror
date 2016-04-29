@@ -10,6 +10,8 @@ public interface MainPresenter extends FeaturePresenter {
 
     void processCommand(int resultCode, Intent data);
 
+    void speak(String textToSpeak);
+
     void startListening();
 
     void stopListening();
