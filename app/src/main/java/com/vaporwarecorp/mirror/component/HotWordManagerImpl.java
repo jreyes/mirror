@@ -48,6 +48,12 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 // --------------------- Interface HotWordManager ---------------------
 
     @Override
+    public void destroy() {
+        mRecognizer.shutdown();
+        mRecognizer = null;
+    }
+
+    @Override
     public void startListening() {
         mRecognizer.stop();
         mRecognizer.startListening(KWS_SEARCH);

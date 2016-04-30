@@ -7,5 +7,7 @@ import com.robopupu.api.plugin.PlugInterface;
 public interface TextToSpeechManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
+    void destroy();
+
     void speak(String textToSpeak);
 }

@@ -72,6 +72,8 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
             mConversationState = commandResult.getConversationState();
             mEventManager.post(new SpeechEvent(commandResult.getSpokenResponseLong()));
 
+            mCommands = PluginBus.getInstance().getPlugins(Command.class);
+            Timber.d("found %d commands", mCommands.size());
             for (Command command : mCommands) {
                 if (command.matches(commandResult)) {
                     command.executeCommand(commandResult);
@@ -100,7 +102,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     }
 
     private void initializeCommands() {
-        mCommands = PluginBus.getInstance().getPlugins(Command.class);
+        PluginBus.plug(Command.class);
     }
 
     private void initializeHoundify() {
@@ -113,8 +115,6 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     private void onError(String message) {
         mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_ERROR, message));
     }
-
-// -------------------------- INNER CLASSES --------------------------
 
     private class RequestInfoFactory extends DefaultRequestInfoFactory {
         RequestInfoFactory() {

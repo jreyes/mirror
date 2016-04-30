@@ -123,10 +123,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(CommandEvent event) {
+        speak(event.getMessage());
         if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
             mFeature.hideCurrentPresenter();
+        } else {
+            startListening();
         }
-        speak(event.getMessage());
     }
 
     @Override
@@ -137,6 +139,8 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     protected void onStop() {
+        mTextToSpeechManager.destroy();
+        mHotWordManager.destroy();
         mEventManager.unregister(this);
         super.onStop();
     }

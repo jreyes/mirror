@@ -7,6 +7,8 @@ import com.robopupu.api.plugin.PlugInterface;
 public interface HotWordManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
+    void destroy();
+
     void startListening();
 
     void stopListening();

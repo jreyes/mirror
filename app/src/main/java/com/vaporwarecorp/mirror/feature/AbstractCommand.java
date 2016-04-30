@@ -2,11 +2,12 @@ package com.vaporwarecorp.mirror.feature;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hound.core.model.sdk.CommandResult;
+import com.robopupu.api.plugin.AbstractPluginComponent;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class AbstractCommand implements Command {
+public abstract class AbstractCommand extends AbstractPluginComponent implements Command {
 // ------------------------ INTERFACE METHODS ------------------------
 
 

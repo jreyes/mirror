@@ -53,6 +53,10 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void hideCurrentPresenter() {
+        if (mCurrentPresenterClass == null) {
+            return;
+        }
+
         hideView(mCurrentPresenterClass, false, null);
         mCurrentPresenterClass = null;
     }

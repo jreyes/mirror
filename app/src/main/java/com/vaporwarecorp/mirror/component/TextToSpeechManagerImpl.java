@@ -53,17 +53,16 @@ public class TextToSpeechManagerImpl
 // --------------------- Interface TextToSpeechManager ---------------------
 
     @Override
+    public void destroy() {
+        mTextToSpeech.stop();
+        mTextToSpeech.shutdown();
+    }
+
+    @Override
     public void speak(String textToSpeak) {
         if (StringUtils.isEmpty(textToSpeak)) {
             return;
         }
         mTextToSpeech.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, String.valueOf(hashCode()));
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    public void destroy() {
-        mTextToSpeech.stop();
-        mTextToSpeech.shutdown();
     }
 }
