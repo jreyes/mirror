@@ -10,5 +10,9 @@ public interface CommandManager extends Manager {
 
     void processCommand(int resultCode, Intent data);
 
+    void start();
+
+    void stop();
+
     void voiceSearch();
 }

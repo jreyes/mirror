@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentTop="true"
+    android:background="@android:color/transparent"
+    android:gravity="end"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/outside_padding"
+    android:paddingRight="@dimen/outside_padding">
+
+    <TextClock
+        style="@style/TimeStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:format12Hour="h\uee01mm"/>
+
+    <TextClock
+        style="@style/DateStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:format12Hour="EEEE\nMMMM d"
+        android:gravity="end"/>
+
+</LinearLayout>

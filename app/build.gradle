@@ -75,7 +75,7 @@ dependencies {
     final PLAY_VERSION = '8.4.0'
     final PROXIMITY_KIT_VERSION = '0.10.2'
     final RETROFIT_VERSION = '2.0.2'
-    final ROBOPUPU_VERSION = '0.4.4'
+    final ROBOPUPU_VERSION = '0.4.7'
     final SPOTIFY_VERSION = '1.0.0-beta12'
     final SUPPORT_LIBRARY_VERSION = '23.3.0'
     final TIMBER_VERSION = '4.1.1'
@@ -123,6 +123,7 @@ dependencies {
     compile 'com.pixplicity.easyprefs:library:1.8.1@aar'
 
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-io:commons-io:2.4'
 
     testCompile "junit:junit:$JUNIT_VERSION"
 

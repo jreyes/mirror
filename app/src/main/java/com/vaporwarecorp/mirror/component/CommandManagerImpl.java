@@ -2,20 +2,22 @@ package com.vaporwarecorp.mirror.component;
 
 import android.content.Intent;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.hound.android.fd.DefaultRequestInfoFactory;
 import com.hound.android.fd.HoundSearchResult;
 import com.hound.android.fd.Houndify;
+import com.hound.core.model.sdk.ClientMatch;
 import com.hound.core.model.sdk.CommandResult;
 import com.hound.core.model.sdk.HoundRequestInfo;
 import com.hound.core.model.sdk.HoundResponse;
 import com.robopupu.api.component.AbstractManager;
+import com.robopupu.api.dependency.D;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyVoiceSearchActivity;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
@@ -24,7 +26,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import timber.log.Timber;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import static solid.stream.Stream.stream;
 
 @Plugin
 public class CommandManagerImpl extends AbstractManager implements CommandManager {
@@ -40,16 +46,19 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     @Plug
     PluginFeatureManager mFeatureManager;
 
-    private List<Command> mCommands;
+    private List<ClientMatch> mClientMatches;
+    private Collection<Command> mCommands;
     private JsonNode mConversationState;
     private Houndify mHoundify;
-    private JsonNodeFactory mNodeFactory;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
+    //
     @Scope(MirrorAppScope.class)
     @Provides(CommandManager.class)
     public CommandManagerImpl() {
+        mClientMatches = new ArrayList<>();
+        mCommands = new ArrayList<>();
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -72,8 +81,6 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
             mConversationState = commandResult.getConversationState();
             mEventManager.post(new SpeechEvent(commandResult.getSpokenResponseLong()));
 
-            mCommands = PluginBus.getInstance().getPlugins(Command.class);
-            Timber.d("found %d commands", mCommands.size());
             for (Command command : mCommands) {
                 if (command.matches(commandResult)) {
                     command.executeCommand(commandResult);
@@ -88,6 +95,22 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
     }
 
     @Override
+    public void start() {
+        initializeHoundify();
+        initializeCommands();
+    }
+
+    @Override
+    public void stop() {
+        stream(mCommands).forEach(PluginBus::unplug);
+
+        mClientMatches.clear();
+        mCommands.clear();
+        mHoundify.setRequestInfoFactory(null);
+        mHoundify = null;
+    }
+
+    @Override
     public void voiceSearch() {
         HoundifyVoiceSearchActivity.newInstance(mFeatureManager.getForegroundActivity());
     }
@@ -96,13 +119,25 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     @Override
     public void onPlugged(PluginBus bus) {
-        super.onPlugged(bus);
-        initializeHoundify();
-        initializeCommands();
+        PluginBus.plug(Command.class);
+    }
+
+    @Override
+    public void onUnplugged(PluginBus bus) {
+        PluginBus.unplug(Command.class);
     }
 
     private void initializeCommands() {
-        PluginBus.plug(Command.class);
+        if (mCommands.isEmpty()) {
+            stream(D.getAll(Command.class)).filter(c -> !mCommands.contains(c)).forEach((Command command) -> {
+                PluginBus.plug(command);
+                mCommands.add(command);
+                if (command instanceof HoundifyCommand) {
+                    mClientMatches.add(((HoundifyCommand) command).getClientMatch());
+                }
+                Timber.i("loaded %s command", command.getClass().getCanonicalName());
+            });
+        }
     }
 
     private void initializeHoundify() {
@@ -125,7 +160,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
         public HoundRequestInfo create() {
             final HoundRequestInfo requestInfo = super.create();
             requestInfo.setConversationState(mConversationState);
-            //requestInfo.setClientMatches(mClientMatches);
+            requestInfo.setClientMatches(mClientMatches);
             return requestInfo;
         }
     }

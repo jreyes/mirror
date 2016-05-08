@@ -8,6 +8,7 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.StringRes;
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import com.squareup.leakcanary.RefWatcher;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 
 import java.io.File;
@@ -52,6 +53,11 @@ public interface AppManager extends Manager {
      */
     String getApplicationDirectoryPath();
 
+    /**
+     * Returns the mirror.properties file as a java.util.Properties object.
+     *
+     * @return Application properties
+     */
     Properties getApplicationProperties();
 
     /**
@@ -70,6 +76,21 @@ public interface AppManager extends Manager {
      * @return An {@code int} value.
      */
     int getInteger(@IntegerRes int intResId);
+
+    /**
+     * Returns a physical location of an asset.
+     *
+     * @param assetPath asset path location.
+     * @return physical location of the asset.
+     */
+    String getLocalAssetPath(String assetPath);
+
+    /**
+     * Return the LocalAssets file object.
+     *
+     * @return Local assets file.
+     */
+    File getLocalAssetsDir();
 
     String getPackageName();
 
@@ -92,6 +113,13 @@ public interface AppManager extends Manager {
      * @return A {@code boolean} value.
      */
     boolean isNetworkAvailable();
+
+    /**
+     * Returns a LeakCanary RefWatcher instance.
+     *
+     * @return RefWatcher
+     */
+    RefWatcher refWatcher();
 
     /**
      * Starts the specified {@link Activity}.

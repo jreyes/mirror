@@ -52,10 +52,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mCommandManager.processCommand(resultCode, data);
     }
 
+    @Override
     public void speak(String textToSpeak) {
         if (StringUtils.isNoneEmpty(textToSpeak)) {
             mTextToSpeechManager.speak(textToSpeak);
         }
+        startListening();
     }
 
     @Override
@@ -96,7 +98,15 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(HotWordEvent event) {
+        stopListening();
         mCommandManager.voiceSearch();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(ResetEvent event) {
+        mFeature.hideCurrentPresenter();
+        startListening();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -110,7 +120,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @SuppressWarnings("unused")
     public void onEvent(SpeechEvent event) {
         speak(event.getMessage());
-        startListening();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -126,8 +135,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         speak(event.getMessage());
         if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
             mFeature.hideCurrentPresenter();
-        } else {
-            startListening();
         }
     }
 
@@ -135,12 +142,14 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     protected void onStart() {
         super.onStart();
         mEventManager.register(this);
+        mCommandManager.start();
     }
 
     @Override
     protected void onStop() {
         mTextToSpeechManager.destroy();
         mHotWordManager.destroy();
+        mCommandManager.stop();
         mEventManager.unregister(this);
         super.onStop();
     }

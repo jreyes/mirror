@@ -8,6 +8,19 @@ import com.vaporwarecorp.mirror.event.CommandEvent;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstractCommand extends AbstractPluginComponent implements Command {
+// ------------------------ CANONICAL METHODS ------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof AbstractCommand) {
+            AbstractCommand command = (AbstractCommand) o;
+            return getCommandKind().equals(command.getCommandKind()) &&
+                    getCommandTypeKey().equals(command.getCommandTypeKey()) &&
+                    getCommandTypeValue().equals(command.getCommandTypeValue());
+        }
+        return false;
+    }
+
 // ------------------------ INTERFACE METHODS ------------------------
 
 

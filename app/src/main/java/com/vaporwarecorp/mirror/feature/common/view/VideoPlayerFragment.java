@@ -1,21 +1,48 @@
 package com.vaporwarecorp.mirror.feature.common.view;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pili.pldroid.player.AVOptions;
-import com.pili.pldroid.player.widget.PLVideoView;
+import com.pili.pldroid.player.widget.PLVideoTextureView;
 import com.robopupu.api.feature.FeatureFragment;
 import com.robopupu.api.feature.FeaturePresenter;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter.Listener;
 
 public abstract class VideoPlayerFragment<T extends FeaturePresenter>
         extends FeatureFragment<T>
         implements VideoPlayerView {
 // ------------------------------ FIELDS ------------------------------
 
-    private PLVideoView mVideoView;
+    private PLVideoTextureView mVideoView;
+
+// ------------------------ INTERFACE METHODS ------------------------
+
+
+// --------------------- Interface VideoPlayerView ---------------------
+
+    @Override
+    public void setVideo(@NonNull String videoPath, @Nullable Listener listener) {
+        AVOptions options = new AVOptions();
+        if (isLiveStreaming(videoPath)) {
+            options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 10 * 1000);
+            options.setInteger(AVOptions.KEY_LIVE_STREAMING, 1);
+        }
+        options.setInteger(AVOptions.KEY_MEDIACODEC, 1);
+
+        mVideoView.setAVOptions(options);
+        mVideoView.setOnCompletionListener(mp -> {
+            if (listener != null) {
+                listener.onCompleted();
+            }
+        });
+        // After setVideoPath, the play will start automatically
+        mVideoView.setVideoPath(videoPath);
+    }
 
 // -------------------------- OTHER METHODS --------------------------
 
@@ -40,21 +67,6 @@ public abstract class VideoPlayerFragment<T extends FeaturePresenter>
     public void onResume() {
         super.onResume();
         mVideoView.start();
-    }
-
-    public void setVideoPath(String videoPath) {
-        AVOptions options = new AVOptions();
-        if (isLiveStreaming(videoPath)) {
-            options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 10 * 1000);
-            options.setInteger(AVOptions.KEY_LIVE_STREAMING, 1);
-        }
-        options.setInteger(AVOptions.KEY_MEDIACODEC, 1);
-
-        mVideoView.setAVOptions(options);
-
-        // After setVideoPath, the play will start automatically
-        // mVideoView.start() is not required
-        mVideoView.setVideoPath(videoPath);
     }
 
     @Override

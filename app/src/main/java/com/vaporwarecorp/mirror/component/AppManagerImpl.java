@@ -13,14 +13,19 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.AppToolkit;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
+import com.vaporwarecorp.mirror.component.app.LocalAssets;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
 import com.vaporwarecorp.mirror.util.LocationUtil;
 import com.vaporwarecorp.mirror.util.NetworkUtil;
 import com.vaporwarecorp.mirror.util.PropertiesUtil;
+import timber.log.Timber;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 @Plugin
@@ -34,7 +39,9 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
 
     private final MirrorApplication mApplication;
 
+    private LocalAssets mLocalAssets;
     private Properties mProperties;
+    private RefWatcher mRefWatcher;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -42,6 +49,7 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     @Provides(AppManager.class)
     public AppManagerImpl(final MirrorApplication application) {
         mApplication = application;
+        mRefWatcher = LeakCanary.install(application);
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -95,6 +103,16 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     }
 
     @Override
+    public String getLocalAssetPath(String assetPath) {
+        return getLocalAssets().getLocalAssetPath(assetPath);
+    }
+
+    @Override
+    public File getLocalAssetsDir() {
+        return getLocalAssets().getLocalAssetsDir();
+    }
+
+    @Override
     public String getPackageName() {
         return getAppContext().getPackageName();
     }
@@ -120,7 +138,23 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     }
 
     @Override
+    public RefWatcher refWatcher() {
+        return mRefWatcher;
+    }
+
+    @Override
     public void startActivity(final Intent intent) {
         mFeatureManager.getForegroundActivity().startActivity(intent);
+    }
+
+    private LocalAssets getLocalAssets() {
+        if (mLocalAssets == null) {
+            try {
+                mLocalAssets = new LocalAssets(mApplication);
+            } catch (IOException e) {
+                Timber.e(e, "There was an error creating the LocalAssets object");
+            }
+        }
+        return mLocalAssets;
     }
 }
