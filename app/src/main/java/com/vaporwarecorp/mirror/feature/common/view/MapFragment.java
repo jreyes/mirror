@@ -4,47 +4,62 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
-import com.google.android.youtube.player.YouTubePlayer.Provider;
-import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.directions.route.*;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.robopupu.api.binding.AdapterViewBinding;
 import com.robopupu.api.binding.ViewBinder;
 import com.robopupu.api.binding.ViewBinding;
 import com.robopupu.api.dependency.*;
 import com.robopupu.api.feature.Feature;
+import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.*;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Converter;
 import com.vaporwarecorp.mirror.R;
-import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.Listener;
 import timber.log.Timber;
 
-import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT;
+import java.util.ArrayList;
 
-public abstract class YoutubeFragment<T extends Presenter>
-        extends YouTubePlayerFragment
-        implements PresentedView<T>, FeatureView, YoutubeView, OnInitializedListener {
+public abstract class MapFragment<T extends FeaturePresenter>
+        extends com.google.android.gms.maps.MapFragment
+        implements PresentedView<T>, FeatureView, MapView, OnMapReadyCallback, RoutingListener {
 // ------------------------------ FIELDS ------------------------------
+
+    private static final int[] COLORS = new int[]{R.color.primary_dark, R.color.primary, R.color.primary_light, R.color.accent};
 
     private final ViewBinder mBinder;
     private Feature mFeature;
-    private Listener mListener;
-    private YouTubePlayer mPlayer;
+    private MarkerOptions mFromMarkerOptions;
+    private GoogleMap mMap;
     private DependencyScope mScope;
     private final ViewState mState;
-
-    private String mYoutubeVideoId;
+    private MarkerOptions mToMarkerOptions;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    protected YoutubeFragment() {
+    protected MapFragment() {
         mBinder = new ViewBinder(this);
         mState = new ViewState(this);
+
+        /*
+        GoogleMapOptions mapOptions = new GoogleMapOptions()
+                .liteMode(true)
+                .mapToolbarEnabled(true);
+
+        Bundle args = new Bundle();
+        args.putParcelable("MapOptions", mapOptions);
+        setArguments(args);
+        */
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -62,47 +77,49 @@ public abstract class YoutubeFragment<T extends Presenter>
         return false;
     }
 
-// --------------------- Interface OnInitializedListener ---------------------
+// --------------------- Interface MapView ---------------------
 
     @Override
-    public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        mPlayer = player;
-        mPlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
-        mPlayer.addFullscreenControlFlag(FULLSCREEN_FLAG_CUSTOM_LAYOUT);
-        mPlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
-            @Override
-            public void onLoading() {
-            }
-
-            @Override
-            public void onLoaded(String s) {
-                mPlayer.play();
-            }
-
-            @Override
-            public void onAdStarted() {
-            }
-
-            @Override
-            public void onVideoStarted() {
-            }
-
-            @Override
-            public void onVideoEnded() {
-                if (mListener != null) {
-                    mListener.onCompleted();
-                }
-            }
-
-            @Override
-            public void onError(YouTubePlayer.ErrorReason errorReason) {
-            }
-        });
-        mPlayer.loadVideo(mYoutubeVideoId, 0);
+    public void displayMap(MarkerOptions fromMarkerOptions) {
+        displayMap(fromMarkerOptions, null);
     }
 
     @Override
-    public void onInitializationFailure(Provider provider, YouTubeInitializationResult error) {
+    public void displayMap(MarkerOptions fromMarkerOptions, MarkerOptions toMarkerOptions) {
+        mFromMarkerOptions = fromMarkerOptions;
+        mToMarkerOptions = toMarkerOptions;
+        getMapAsync(this);
+    }
+
+// --------------------- Interface OnMapReadyCallback ---------------------
+
+    @SuppressWarnings("ResourceType")
+    @Override
+    public void onMapReady(GoogleMap map) {
+        // set the map
+        mMap = map;
+
+        // now display the map
+        mMap.setMyLocationEnabled(true);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mFromMarkerOptions.getPosition(), 14));
+        mMap.addMarker(mFromMarkerOptions);
+        if (mToMarkerOptions != null) {
+            mMap.addMarker(mToMarkerOptions);
+
+            LatLngBounds bounds = LatLngBounds.builder()
+                    .include(mFromMarkerOptions.getPosition())
+                    .include(mToMarkerOptions.getPosition())
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+
+            new Routing.Builder()
+                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                    .withListener(this)
+                    .alternativeRoutes(true)
+                    .waypoints(mFromMarkerOptions.getPosition(), mToMarkerOptions.getPosition())
+                    .build()
+                    .execute();
+        }
     }
 
 // --------------------- Interface PresentedView ---------------------
@@ -114,6 +131,33 @@ public abstract class YoutubeFragment<T extends Presenter>
      */
     @Override
     public abstract T getPresenter();
+
+// --------------------- Interface RoutingListener ---------------------
+
+    @Override
+    public void onRoutingFailure(RouteException e) {
+    }
+
+    @Override
+    public void onRoutingStart() {
+    }
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
+        for (int i = 0; i < routes.size(); i++) {
+            //In case of more than 5 alternative routes
+            int colorIndex = i % COLORS.length;
+            PolylineOptions polyOptions = new PolylineOptions()
+                    .color(getResources().getColor(COLORS[colorIndex]))
+                    .width(5 + i)
+                    .addAll(routes.get(i).getPoints());
+            mMap.addPolyline(polyOptions);
+        }
+    }
+
+    @Override
+    public void onRoutingCancelled() {
+    }
 
 // --------------------- Interface Scopeable ---------------------
 
@@ -138,15 +182,6 @@ public abstract class YoutubeFragment<T extends Presenter>
     @Override
     public String getViewTag() {
         return getClass().getName();
-    }
-
-// --------------------- Interface YoutubeView ---------------------
-
-    @Override
-    public void setYoutubeVideo(@NonNull String youtubeVideoId, @Nullable Listener listener) {
-        mYoutubeVideoId = youtubeVideoId;
-        mListener = listener;
-        initialize(getString(R.string.google_maps_key), this);
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -221,6 +256,11 @@ public abstract class YoutubeFragment<T extends Presenter>
                 onRestoreDependencies(dependencies);
             }
         }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
@@ -337,7 +377,6 @@ public abstract class YoutubeFragment<T extends Presenter>
     public void onViewCreated(final android.view.View view, final Bundle inState) {
         Timber.d("onViewCreated(...)");
         super.onViewCreated(view, inState);
-
         mState.onCreate();
 
         final T presenter = resolvePresenter();
@@ -349,7 +388,7 @@ public abstract class YoutubeFragment<T extends Presenter>
     }
 
     /**
-     * Invoked to bind {@link ViewBinding}s to {@link View}s. This method has to be overridden in
+     * Invoked to bind {@link ViewBinding}s to {@link com.robopupu.api.mvp.View}s. This method has to be overridden in
      * classes extended from {@link ViewFragment}.
      */
     @CallSuper

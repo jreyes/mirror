@@ -119,7 +119,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     @Override
     public void onPlugged(PluginBus bus) {
-        PluginBus.plug(Command.class);
+        //PluginBus.plug(Command.class);
     }
 
     @Override
@@ -129,6 +129,15 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     private void initializeCommands() {
         if (mCommands.isEmpty()) {
+            for (Command command : D.getAll(Command.class)) {
+                PluginBus.plug(command);
+                mCommands.add(command);
+                if (command instanceof HoundifyCommand) {
+                    mClientMatches.add(((HoundifyCommand) command).getClientMatch());
+                }
+                Timber.i("loaded %s command", command.getClass().getCanonicalName());
+            }
+            /*
             stream(D.getAll(Command.class)).filter(c -> !mCommands.contains(c)).forEach((Command command) -> {
                 PluginBus.plug(command);
                 mCommands.add(command);
@@ -137,6 +146,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
                 }
                 Timber.i("loaded %s command", command.getClass().getCanonicalName());
             });
+            */
         }
     }
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="com.vaporwarecorp.mirror"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="com.vaporwarecorp.mirror"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -37,13 +36,12 @@
         android:required="false"/>
 
     <application
-        android:allowBackup="true"
         android:name=".app.MirrorApplication"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".feature.main.view.MirrorActivity"
             android:clearTaskOnLaunch="true"
@@ -67,11 +65,16 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".receiver.ForecastReceiver">
+            android:name=".receiver.ForecastReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.vaporwarecorp.mirror.FORECAST_UPDATE"/>
             </intent-filter>
         </receiver>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key"/>
 
     </application>
 

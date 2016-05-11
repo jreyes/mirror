@@ -22,6 +22,15 @@
 
     </RelativeLayout>
 
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@android:color/transparent"/>
+
     <RelativeLayout
         android:id="@+id/overlay_container"
         android:layout_width="match_parent"
@@ -42,13 +51,5 @@
             tools:text="Result text"/>
 
     </RelativeLayout>
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@android:color/transparent"/>
 
 </RelativeLayout>

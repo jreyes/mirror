@@ -1,10 +1,8 @@
 package com.vaporwarecorp.mirror.feature;
 
 import com.hound.core.model.sdk.CommandResult;
-import com.robopupu.api.plugin.PlugInterface;
 import com.robopupu.api.plugin.PluginComponent;
 
-@PlugInterface
 public interface Command extends PluginComponent {
 // -------------------------- OTHER METHODS --------------------------
 
