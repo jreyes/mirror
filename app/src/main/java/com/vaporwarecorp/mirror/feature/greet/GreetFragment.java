@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.greet.view;
+package com.vaporwarecorp.mirror.feature.greet;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,7 +12,6 @@ import com.robopupu.api.feature.FeatureFragment;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
-import com.vaporwarecorp.mirror.feature.greet.presenter.GreetPresenter;
 
 import static com.daimajia.androidanimations.library.Techniques.FadeIn;
 

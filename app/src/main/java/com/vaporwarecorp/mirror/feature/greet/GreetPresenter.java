@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.greet.presenter;
+package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.plugin.PlugInterface;

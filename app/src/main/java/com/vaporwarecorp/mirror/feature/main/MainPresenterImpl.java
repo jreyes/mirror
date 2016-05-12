@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.main.presenter;
+package com.vaporwarecorp.mirror.feature.main;
 
 import android.content.Intent;
 import com.robopupu.api.dependency.Provides;
@@ -12,8 +12,7 @@ import com.vaporwarecorp.mirror.component.HotWordManager;
 import com.vaporwarecorp.mirror.component.TextToSpeechManager;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.greet.presenter.GreetPresenter;
-import com.vaporwarecorp.mirror.feature.main.view.MainView;
+import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -22,7 +21,7 @@ import timber.log.Timber;
 import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
-import static com.vaporwarecorp.mirror.feature.greet.presenter.GreetPresenter.GREET_TYPE;
+import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
 
 @Plugin
 @Provides(MainPresenter.class)

@@ -117,7 +117,7 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
             mRecognizer = defaultSetup()
                     .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                     .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-                    .setKeywordThreshold(1e-20f)
+                    .setKeywordThreshold(1e-10f)
                     .setBoolean("-allphone_ci", true)
                     .getRecognizer();
         } catch (IOException e) {

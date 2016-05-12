@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.main.view;
+package com.vaporwarecorp.mirror.feature.main;
 
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.mvp.View;

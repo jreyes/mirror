@@ -26,6 +26,9 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            signingConfig signingConfigs.debug
+        }
     }
     signingConfigs {
         // You must set up an environment var before release signing
@@ -56,14 +59,6 @@ android {
         exclude 'META-INF/dependencies.txt'
         exclude 'META-INF/LGPL2.1'
     }
-    splits {
-        abi {
-            enable true
-            reset()
-            include 'armeabi-v7a'
-            universalApk false
-        }
-    }
 }
 
 dependencies {
@@ -88,6 +83,9 @@ dependencies {
     compile "com.android.support:leanback-v17:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:palette-v7:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:multidex:$MULTIDEX_VERSION"
+
+    compile "com.google.android.gms:play-services-maps:$PLAY_VERSION"
+    compile 'com.github.jd-alexander:library:1.1.0'
 
     compile "com.robopupu:robopupu:$ROBOPUPU_VERSION"
     apt "com.robopupu:robopupu-compiler:$ROBOPUPU_VERSION"

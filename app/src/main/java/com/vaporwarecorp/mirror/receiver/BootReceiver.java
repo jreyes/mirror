@@ -3,7 +3,7 @@ package com.vaporwarecorp.mirror.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.vaporwarecorp.mirror.feature.main.view.MirrorActivity;
+import com.vaporwarecorp.mirror.feature.main.MirrorActivity;
 
 public class BootReceiver extends BroadcastReceiver {
 // -------------------------- OTHER METHODS --------------------------

@@ -11,7 +11,7 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.feature.AbstractCommand;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.showmap.ShowMapPresenter;
+import com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter;
 
 import static com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter.*;
 
@@ -39,13 +39,18 @@ public class ShowDirectionsCommand extends AbstractCommand implements Command {
         JsonNode data = result.getNativeData();
 
         final Params params = new Params();
-        params.put(MAP_FROM_TITLE, data.findValue("Label").textValue());
-        params.put(MAP_FROM_LATITUDE, data.findValue("Latitude").doubleValue());
-        params.put(MAP_FROM_LONGITUDE, data.findValue("Longitude").doubleValue());
-        params.put(MAP_TO_TITLE, data.findValue("Label").textValue());
-        params.put(MAP_TO_LATITUDE, data.findValue("Latitude").doubleValue());
-        params.put(MAP_TO_LONGITUDE, data.findValue("Longitude").doubleValue());
-        mFeature.showPresenter(ShowMapPresenter.class, params);
+
+        final JsonNode from = data.findValue("StartMapLocationSpec");
+        params.put(MAP_FROM_TITLE, from.findValue("Label").textValue());
+        params.put(MAP_FROM_LATITUDE, from.findValue("Latitude").doubleValue());
+        params.put(MAP_FROM_LONGITUDE, from.findValue("Longitude").doubleValue());
+
+        final JsonNode to = data.findValue("DestinationMapLocationSpec");
+        params.put(MAP_TO_TITLE, to.findValue("Label").textValue());
+        params.put(MAP_TO_LATITUDE, to.findValue("Latitude").doubleValue());
+        params.put(MAP_TO_LONGITUDE, to.findValue("Longitude").doubleValue());
+
+        mFeature.showPresenter(MapPresenter.class, params);
     }
 
     @Override

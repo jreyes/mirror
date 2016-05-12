@@ -1,10 +1,9 @@
-package com.vaporwarecorp.mirror.feature.splash.view;
+package com.vaporwarecorp.mirror.feature.splash;
 
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.feature.common.view.FullscreenFragment;
-import com.vaporwarecorp.mirror.feature.splash.presenter.SplashPresenter;
 
 @Plugin
 public class SplashFragment extends FullscreenFragment<SplashPresenter> implements SplashView {

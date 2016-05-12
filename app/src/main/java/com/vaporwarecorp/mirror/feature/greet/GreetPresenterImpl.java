@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.greet.presenter;
+package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
@@ -11,7 +11,6 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PreferenceManager;
 import com.vaporwarecorp.mirror.event.Event;
 import com.vaporwarecorp.mirror.event.GreetEvent;
-import com.vaporwarecorp.mirror.feature.greet.view.GreetView;
 import com.vaporwarecorp.mirror.util.RxUtil;
 
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;

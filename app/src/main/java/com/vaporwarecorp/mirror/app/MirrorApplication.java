@@ -1,9 +1,9 @@
 package com.vaporwarecorp.mirror.app;
 
+import android.support.multidex.MultiDexApplication;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.integration.okhttp.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.robopupu.api.app.BaseApplication;
 import com.robopupu.api.app.Robopupu;
 import com.robopupu.api.dependency.AppDependencyScope;
 import com.robopupu.api.plugin.PluginBus;
@@ -18,21 +18,37 @@ import java.io.InputStream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class MirrorApplication extends BaseApplication {
+public class MirrorApplication extends MultiDexApplication {
+// ------------------------------ FIELDS ------------------------------
+
+    private static MirrorApplication mInstance;
+
+// -------------------------- STATIC METHODS --------------------------
+
+    public static MirrorApplication getInstance() {
+        return mInstance;
+    }
+
+// --------------------------- CONSTRUCTORS ---------------------------
+
+    public MirrorApplication() {
+        mInstance = this;
+    }
+
 // -------------------------- OTHER METHODS --------------------------
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        initializeApplication();
         initializeTimber();
         initializeGlide();
 
         MirrorAppError.setContext(getApplicationContext());
     }
 
-    @Override
-    protected void configureApplication() {
+    private void initializeApplication() {
         final AppDependencyScope appScope = new MirrorAppScope(this);
 
         new Robopupu(appScope);

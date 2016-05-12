@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.showmap;
+package com.vaporwarecorp.mirror.feature.common.presenter;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -9,20 +9,21 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.component.AppManager;
+import com.vaporwarecorp.mirror.feature.common.view.MapView;
 
 @Plugin
-public class ShowMapPresenterImpl extends AbstractFeaturePresenter<ShowMapView> implements ShowMapPresenter {
+public class MapPresenterImpl extends AbstractFeaturePresenter<MapView> implements MapPresenter {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
     AppManager mAppManager;
     @Plug
-    ShowMapView mView;
+    MapView mView;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    @Provides(ShowMapPresenter.class)
-    public ShowMapPresenterImpl() {
+    @Provides(MapPresenter.class)
+    public MapPresenterImpl() {
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -33,19 +34,19 @@ public class ShowMapPresenterImpl extends AbstractFeaturePresenter<ShowMapView> 
     @Override
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
-        plug(ShowMapView.class);
+        plug(MapView.class);
     }
 
 // --------------------- Interface ViewObserver ---------------------
 
     @Override
-    public void onViewStart(final View view) {
-        super.onViewStart(view);
-        mView.displayMap(getFromMarkerOptions());
+    public void onViewResume(View view) {
+        super.onViewResume(view);
+        mView.displayMap(getFromMarkerOptions(), getToMarkerOptions());
     }
 
     @Override
-    protected ShowMapView getViewPlug() {
+    protected MapView getViewPlug() {
         return mView;
     }
 
@@ -67,4 +68,18 @@ public class ShowMapPresenterImpl extends AbstractFeaturePresenter<ShowMapView> 
         );
         return new MarkerOptions().position(latLng).title(title);
     }
+
+    private MarkerOptions getToMarkerOptions() {
+        String title = getParams().getString(MAP_TO_TITLE);
+        if (title == null) {
+            return null;
+        }
+
+        LatLng latLng = new LatLng(
+                getDouble(MAP_TO_LATITUDE),
+                getDouble(MAP_TO_LONGITUDE)
+        );
+        return new MarkerOptions().position(latLng).title(title);
+    }
 }
+

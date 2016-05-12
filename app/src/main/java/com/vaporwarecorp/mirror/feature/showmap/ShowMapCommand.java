@@ -11,6 +11,7 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.feature.AbstractCommand;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter;
 
 import static com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter.*;
 
@@ -41,7 +42,7 @@ public class ShowMapCommand extends AbstractCommand implements Command {
         params.put(MAP_FROM_TITLE, data.findValue("Label").textValue());
         params.put(MAP_FROM_LATITUDE, data.findValue("Latitude").doubleValue());
         params.put(MAP_FROM_LONGITUDE, data.findValue("Longitude").doubleValue());
-        mFeature.showPresenter(ShowMapPresenter.class, params);
+        mFeature.showPresenter(MapPresenter.class, params);
     }
 
     @Override

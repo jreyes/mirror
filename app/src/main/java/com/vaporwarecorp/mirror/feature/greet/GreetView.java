@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.greet.view;
+package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.PlugInterface;

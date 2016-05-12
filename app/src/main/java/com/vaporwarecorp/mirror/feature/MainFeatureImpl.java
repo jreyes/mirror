@@ -12,8 +12,8 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.ForecastManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
 import com.vaporwarecorp.mirror.component.ProximityManager;
-import com.vaporwarecorp.mirror.feature.main.view.MainView;
-import com.vaporwarecorp.mirror.feature.splash.presenter.SplashPresenter;
+import com.vaporwarecorp.mirror.feature.main.MainView;
+import com.vaporwarecorp.mirror.feature.splash.SplashPresenter;
 
 @Plugin
 public class MainFeatureImpl extends AbstractFeature implements MainFeature {

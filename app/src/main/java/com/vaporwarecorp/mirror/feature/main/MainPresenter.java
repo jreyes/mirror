@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.main.presenter;
+package com.vaporwarecorp.mirror.feature.main;
 
 import android.content.Intent;
 import com.robopupu.api.feature.FeaturePresenter;

@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.splash.presenter;
+package com.vaporwarecorp.mirror.feature.splash;
 
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
@@ -8,7 +8,6 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.splash.view.SplashView;
 
 import java.util.Random;
 

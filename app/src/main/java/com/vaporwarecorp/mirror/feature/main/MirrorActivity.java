@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.main.view;
+package com.vaporwarecorp.mirror.feature.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +17,6 @@ import com.vaporwarecorp.mirror.component.forecast.ForecastView;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
-import com.vaporwarecorp.mirror.feature.main.presenter.MainPresenter;
 import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
 
 @Plugin

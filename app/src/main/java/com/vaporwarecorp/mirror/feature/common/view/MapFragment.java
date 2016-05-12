@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import com.directions.route.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -20,22 +21,29 @@ import com.robopupu.api.binding.ViewBinder;
 import com.robopupu.api.binding.ViewBinding;
 import com.robopupu.api.dependency.*;
 import com.robopupu.api.feature.Feature;
-import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.*;
+import com.robopupu.api.plugin.Plug;
+import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Converter;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter;
 import timber.log.Timber;
 
 import java.util.ArrayList;
 
-public abstract class MapFragment<T extends FeaturePresenter>
+@Plugin
+public class MapFragment
         extends com.google.android.gms.maps.MapFragment
-        implements PresentedView<T>, FeatureView, MapView, OnMapReadyCallback, RoutingListener {
+        implements MapView, PresentedView<MapPresenter>, FeatureView, OnMapReadyCallback, RoutingListener {
 // ------------------------------ FIELDS ------------------------------
 
     private static final int[] COLORS = new int[]{R.color.primary_dark, R.color.primary, R.color.primary_light, R.color.accent};
+
+    @Plug
+    MapPresenter mPresenter;
 
     private final ViewBinder mBinder;
     private Feature mFeature;
@@ -47,11 +55,12 @@ public abstract class MapFragment<T extends FeaturePresenter>
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    protected MapFragment() {
+    @Scope(MirrorAppScope.class)
+    @Provides(MapView.class)
+    public MapFragment() {
         mBinder = new ViewBinder(this);
         mState = new ViewState(this);
 
-        /*
         GoogleMapOptions mapOptions = new GoogleMapOptions()
                 .liteMode(true)
                 .mapToolbarEnabled(true);
@@ -59,7 +68,6 @@ public abstract class MapFragment<T extends FeaturePresenter>
         Bundle args = new Bundle();
         args.putParcelable("MapOptions", mapOptions);
         setArguments(args);
-        */
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -78,11 +86,6 @@ public abstract class MapFragment<T extends FeaturePresenter>
     }
 
 // --------------------- Interface MapView ---------------------
-
-    @Override
-    public void displayMap(MarkerOptions fromMarkerOptions) {
-        displayMap(fromMarkerOptions, null);
-    }
 
     @Override
     public void displayMap(MarkerOptions fromMarkerOptions, MarkerOptions toMarkerOptions) {
@@ -124,13 +127,10 @@ public abstract class MapFragment<T extends FeaturePresenter>
 
 // --------------------- Interface PresentedView ---------------------
 
-    /**
-     * Gets the {@link Presenter} assigned for this {@link ViewCompatActivity}.
-     *
-     * @return A {@link Presenter}.
-     */
     @Override
-    public abstract T getPresenter();
+    public MapPresenter getPresenter() {
+        return mPresenter;
+    }
 
 // --------------------- Interface RoutingListener ---------------------
 
@@ -279,7 +279,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
             cache.removeDependencyScope(owner);
         }
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewDestroy(this);
         }
@@ -296,7 +296,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
         super.onPause();
         mState.onPause();
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewPause(this);
         }
@@ -312,7 +312,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
         super.onResume();
         mState.onResume();
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewResume(this);
         }
@@ -354,7 +354,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
         super.onStart();
         mState.onStart();
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewStart(this);
             mBinder.initialise();
@@ -367,7 +367,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
         super.onStop();
         mState.onStop();
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewStop(this);
         }
@@ -379,7 +379,7 @@ public abstract class MapFragment<T extends FeaturePresenter>
         super.onViewCreated(view, inState);
         mState.onCreate();
 
-        final T presenter = resolvePresenter();
+        final MapPresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewCreated(this, Converter.fromBundleToParams(inState));
         } else {
@@ -441,8 +441,8 @@ public abstract class MapFragment<T extends FeaturePresenter>
      *
      * @return A {@link Presenter}.
      */
-    protected T resolvePresenter() {
-        T presenter = getPresenter();
+    protected MapPresenter resolvePresenter() {
+        MapPresenter presenter = getPresenter();
 
         if (presenter == null) {
             if (PluginBus.isPlugin(getClass())) {
