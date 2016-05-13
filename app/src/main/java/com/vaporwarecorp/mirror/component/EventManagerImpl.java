@@ -3,6 +3,7 @@ package com.vaporwarecorp.mirror.component;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
+import com.robopupu.api.feature.Feature;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
@@ -44,7 +45,17 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
     }
 
     @Override
+    public void register(Feature feature) {
+        mEventBus.register(feature);
+    }
+
+    @Override
     public void unregister(Presenter presenter) {
         mEventBus.unregister(presenter);
+    }
+
+    @Override
+    public void unregister(Feature feature) {
+        mEventBus.unregister(feature);
     }
 }

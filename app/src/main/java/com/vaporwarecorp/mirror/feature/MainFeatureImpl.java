@@ -8,12 +8,17 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
-import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.component.ForecastManager;
-import com.vaporwarecorp.mirror.component.PluginFeatureManager;
-import com.vaporwarecorp.mirror.component.ProximityManager;
+import com.vaporwarecorp.mirror.component.*;
+import com.vaporwarecorp.mirror.event.ApplicationEvent;
+import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.feature.main.MainView;
 import com.vaporwarecorp.mirror.feature.splash.SplashPresenter;
+import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import static com.vaporwarecorp.mirror.event.ApplicationEvent.READY;
+import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 
 @Plugin
 public class MainFeatureImpl extends AbstractFeature implements MainFeature {
@@ -27,6 +32,8 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     ForecastManager mForecastManager;
     @Plug
     ProximityManager mProximityManager;
+    @Plug
+    TextToSpeechManager mTextToSpeechManager;
     @Plug
     MainView mView;
 
@@ -71,6 +78,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
         hideCurrentPresenter();
         mProximityManager.startProximityDetection();
         mForecastManager.startReceiver();
+        mEventManager.post(new ApplicationEvent(READY));
     }
 
     @Override
@@ -80,14 +88,34 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     }
 
     @Override
+    public void speak(String textToSpeak) {
+        if (StringUtils.isNoneEmpty(textToSpeak)) {
+            mTextToSpeechManager.speak(textToSpeak);
+        }
+    }
+
+// -------------------------- OTHER METHODS --------------------------
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(CommandEvent event) {
+        speak(event.getMessage());
+        if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
+            hideCurrentPresenter();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+        mEventManager.register(this);
         showPresenter(SplashPresenter.class);
     }
 
     @Override
     protected void onStop() {
         mProximityManager.stopProximityDetection();
+        mEventManager.unregister(this);
         super.onStop();
     }
 }

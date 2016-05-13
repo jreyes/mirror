@@ -1,27 +1,29 @@
 package com.vaporwarecorp.mirror.feature.main;
 
 import android.content.Intent;
+import com.hound.android.fd.Houndify;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
+import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.Params;
-import com.vaporwarecorp.mirror.component.CommandManager;
-import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.component.HotWordManager;
-import com.vaporwarecorp.mirror.component.TextToSpeechManager;
+import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
+import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
 
-import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
+import java.util.ArrayList;
+
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
+import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
 
 @Plugin
 @Provides(MainPresenter.class)
@@ -37,6 +39,8 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Plug
     HotWordManager mHotWordManager;
     @Plug
+    SpotifyManager mSpotifyManager;
+    @Plug
     TextToSpeechManager mTextToSpeechManager;
     @Plug
     MainView mView;
@@ -45,6 +49,15 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
 
 // --------------------- Interface MainPresenter ---------------------
+
+    @Override
+    public void onViewResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Houndify.REQUEST_CODE) {
+            processCommand(resultCode, data);
+        } else if (requestCode == SpotifyManager.REQUEST_CODE) {
+            mSpotifyManager.processAuthentication(resultCode, data);
+        }
+    }
 
     @Override
     public void processCommand(int resultCode, Intent data) {
@@ -64,9 +77,25 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mHotWordManager.startListening();
     }
 
+    public void startSpotify() {
+        ArrayList<String> trackIds = new ArrayList<>();
+        trackIds.add("spotify:track:1SscHHP2wlcyLI3ikIHDr9");
+        trackIds.add("spotify:track:3wIOZOjOle5KyCqcYJNnOH");
+        trackIds.add("spotify:track:4PS0VSN9j8za2aU0Ac14lt");
+        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, trackIds));
+    }
+
     @Override
     public void stopListening() {
         mHotWordManager.stopListening();
+    }
+
+// --------------------- Interface ViewObserver ---------------------
+
+    @Override
+    public void onViewStart(View view) {
+        super.onViewStart(view);
+        mSpotifyManager.authenticate(mView.activity());
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -128,15 +157,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mView.setForecast(event.getForecast());
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(CommandEvent event) {
-        speak(event.getMessage());
-        if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
-            mFeature.hideCurrentPresenter();
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -146,6 +166,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     protected void onStop() {
+        mSpotifyManager.stop();
         mTextToSpeechManager.destroy();
         mHotWordManager.destroy();
         mCommandManager.stop();

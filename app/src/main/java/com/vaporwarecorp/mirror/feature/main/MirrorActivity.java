@@ -1,11 +1,11 @@
 package com.vaporwarecorp.mirror.feature.main;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.view.View;
 import android.view.WindowManager;
-import com.hound.android.fd.Houndify;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.mvp.PluginActivity;
 import com.robopupu.api.plugin.Plug;
@@ -48,6 +48,11 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 // --------------------- Interface MainView ---------------------
 
     @Override
+    public Activity activity() {
+        return this;
+    }
+
+    @Override
     public void displayView() {
         mBackgroundContainer.setVisibility(View.VISIBLE);
         mOverlayContainer.setVisibility(View.VISIBLE);
@@ -78,9 +83,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Houndify.REQUEST_CODE) {
-            mPresenter.processCommand(resultCode, data);
-        }
+        mPresenter.onViewResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -91,6 +94,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mBackgroundContainer = findViewById(R.id.background_container);
         mOverlayContainer = findViewById(R.id.overlay_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
+        findViewById(R.id.spotify).setOnClickListener(v -> {
+            mPresenter.startSpotify();
+        });
     }
 
     @Override

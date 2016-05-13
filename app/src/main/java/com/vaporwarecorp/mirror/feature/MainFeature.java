@@ -18,4 +18,6 @@ public interface MainFeature extends Feature {
     void onApplicationReady();
 
     void showPresenter(Class<? extends Presenter> presenterClass, Params... params);
+
+    void speak(String textToSpeak);
 }

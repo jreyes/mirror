@@ -1,6 +1,7 @@
 package com.vaporwarecorp.mirror.component;
 
 import com.robopupu.api.component.Manager;
+import com.robopupu.api.feature.Feature;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.PlugInterface;
 import com.vaporwarecorp.mirror.event.Event;
@@ -13,5 +14,9 @@ public interface EventManager extends Manager {
 
     void register(Presenter presenter);
 
+    void register(Feature feature);
+
     void unregister(Presenter presenter);
+
+    void unregister(Feature feature);
 }

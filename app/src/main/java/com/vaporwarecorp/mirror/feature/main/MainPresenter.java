@@ -8,11 +8,15 @@ import com.robopupu.api.plugin.PlugInterface;
 public interface MainPresenter extends FeaturePresenter {
 // -------------------------- OTHER METHODS --------------------------
 
+    void onViewResult(int requestCode, int resultCode, Intent data);
+
     void processCommand(int resultCode, Intent data);
 
     void speak(String textToSpeak);
 
     void startListening();
+
+    void startSpotify();
 
     void stopListening();
 }

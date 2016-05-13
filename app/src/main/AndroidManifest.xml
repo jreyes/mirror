@@ -59,6 +59,9 @@
             android:name=".component.command.HoundifyVoiceSearchActivity"
             android:screenOrientation="portrait"
             android:theme="@style/houndify_Houndify"/>
+        <activity
+            android:name="com.spotify.sdk.android.authentication.LoginActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
 
         <receiver android:name=".receiver.BootReceiver">
             <intent-filter>

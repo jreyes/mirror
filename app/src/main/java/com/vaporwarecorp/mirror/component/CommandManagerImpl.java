@@ -79,7 +79,6 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
             Timber.i(ToStringBuilder.reflectionToString(commandResult, ToStringStyle.MULTI_LINE_STYLE));
 
             mConversationState = commandResult.getConversationState();
-            mEventManager.post(new SpeechEvent(commandResult.getSpokenResponseLong()));
 
             for (Command command : mCommands) {
                 if (command.matches(commandResult)) {
@@ -87,6 +86,8 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
                     return;
                 }
             }
+
+            mEventManager.post(new SpeechEvent(commandResult.getSpokenResponseLong()));
         } else if (result.getErrorType() != null && result.getException() != null) {
             onError(result.getErrorType() + "\n\n" + result.getException().getMessage());
         } else {

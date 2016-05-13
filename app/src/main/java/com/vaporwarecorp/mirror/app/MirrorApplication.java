@@ -60,6 +60,7 @@ public class MirrorApplication extends MultiDexApplication {
         PluginBus.plug(HotWordManager.class);
         PluginBus.plug(PreferenceManager.class);
         PluginBus.plug(ProximityManager.class);
+        PluginBus.plug(SpotifyManager.class);
         PluginBus.plug(TextToSpeechManager.class);
 
         final PluginFeatureManager featureManager = PluginBus.plug(PluginFeatureManager.class);
