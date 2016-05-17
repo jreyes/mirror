@@ -1,7 +1,6 @@
 language: android
 jdk:
-  - oraclejdk8
-
+    - oraclejdk8
 android:
   components:
     - build-tools-23.0.1
@@ -16,17 +15,6 @@ android:
 sudo: false
 
 before_script:
-  # Retrolambda environment vars
-  - export JAVA7_HOME=/usr/lib/jvm/java-7-oracle
-  - export JAVA8_HOME=/usr/lib/jvm/java-8-oracle
-  - export JAVA_HOME=$JAVA7_HOME
-before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+    - chmod +x gradlew
 
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
-script:
-  - ./gradlew build
+script: "./gradlew build"
