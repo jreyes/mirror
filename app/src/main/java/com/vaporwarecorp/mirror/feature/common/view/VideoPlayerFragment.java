@@ -8,20 +8,40 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pili.pldroid.player.AVOptions;
 import com.pili.pldroid.player.widget.PLVideoTextureView;
+import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.FeatureFragment;
-import com.robopupu.api.feature.FeaturePresenter;
+import com.robopupu.api.plugin.Plug;
+import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter.Listener;
 
-public abstract class VideoPlayerFragment<T extends FeaturePresenter>
-        extends FeatureFragment<T>
+@Plugin
+public class VideoPlayerFragment
+        extends FeatureFragment<VideoPlayerPresenter>
         implements VideoPlayerView {
 // ------------------------------ FIELDS ------------------------------
 
+    @Plug
+    VideoPlayerPresenter mPresenter;
+    
     private PLVideoTextureView mVideoView;
+
+// --------------------------- CONSTRUCTORS ---------------------------
+
+    @Provides(VideoPlayerView.class)
+    public VideoPlayerFragment() {
+    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
+
+// --------------------- Interface PresentedView ---------------------
+
+    @Override
+    public VideoPlayerPresenter getPresenter() {
+        return mPresenter;
+    }
 
 // --------------------- Interface VideoPlayerView ---------------------
 

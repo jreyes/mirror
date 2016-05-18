@@ -1,4 +1,4 @@
-package com.vaporwarecorp.mirror.feature.watch;
+package com.vaporwarecorp.mirror.feature.common.presenter;
 
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
@@ -6,25 +6,25 @@ import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
-import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.ResetEvent;
+import com.vaporwarecorp.mirror.feature.common.view.VideoPlayerView;
 
 @Plugin
-public class WatchCBSPresenterImpl extends AbstractFeaturePresenter<WatchCBSView> implements WatchCBSPresenter {
+public class VideoPlayerPresenterImpl
+        extends AbstractFeaturePresenter<VideoPlayerView>
+        implements VideoPlayerPresenter {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
-    AppManager mAppManager;
-    @Plug
     EventManager mEventManager;
     @Plug
-    WatchCBSView mView;
+    VideoPlayerView mView;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    @Provides(WatchCBSPresenter.class)
-    public WatchCBSPresenterImpl() {
+    @Provides(VideoPlayerPresenter.class)
+    public VideoPlayerPresenterImpl() {
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -35,7 +35,7 @@ public class WatchCBSPresenterImpl extends AbstractFeaturePresenter<WatchCBSView
     @Override
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
-        plug(WatchCBSView.class);
+        plug(VideoPlayerView.class);
     }
 
 // --------------------- Interface ViewObserver ---------------------
@@ -43,18 +43,12 @@ public class WatchCBSPresenterImpl extends AbstractFeaturePresenter<WatchCBSView
     @Override
     public void onViewResume(View view) {
         super.onViewResume(view);
-        String cbsUrl = "http://cbsnewshd-lh.akamaihd.net/i/CBSNHD_7@199302/index_700_av-p.m3u8?sd=10&rebase=on";
-        mView.setVideo(cbsUrl, () -> mEventManager.post(new ResetEvent()));
+        final String videoUrl = getParams().getString(VIDEO_URL);
+        mView.setVideo(videoUrl, () -> mEventManager.post(new ResetEvent()));
     }
 
     @Override
-    protected WatchCBSView getViewPlug() {
+    protected VideoPlayerView getViewPlug() {
         return mView;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mAppManager.refWatcher().watch(this);
     }
 }

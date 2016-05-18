@@ -5,11 +5,15 @@ import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.command.AbstractHoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
+
+import static com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter.VIDEO_URL;
 
 @Plugin
 public class WatchCBSCommand extends AbstractHoundifyCommand implements HoundifyCommand {
@@ -18,6 +22,8 @@ public class WatchCBSCommand extends AbstractHoundifyCommand implements Houndify
     private static final String COMMAND_EXPRESSION = "((\"watch\"|\"display\").(\"cbs\"|\"c b s\"|\"c. b. s.\"))";
     private static final String COMMAND_INTENT = "WatchCBS";
     private static final String COMMAND_RESPONSE = "Ok, displaying CBS";
+    private static final String COMMAND_URL =
+            "http://cbsnewshd-lh.akamaihd.net/i/CBSNHD_7@199302/index_700_av-p.m3u8?sd=10&rebase=on";
 
     @Plug
     MainFeature mFeature;
@@ -37,7 +43,7 @@ public class WatchCBSCommand extends AbstractHoundifyCommand implements Houndify
 
     @Override
     public void executeCommand(CommandResult result) {
-        mFeature.showPresenter(WatchCBSPresenter.class);
+        mFeature.showPresenter(VideoPlayerPresenter.class, new Params(VIDEO_URL, COMMAND_URL));
     }
 
     @Override
