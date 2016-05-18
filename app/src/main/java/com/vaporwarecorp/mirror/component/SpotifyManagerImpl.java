@@ -175,7 +175,7 @@ public class SpotifyManagerImpl
 
     @Override
     public void stop() {
-        if (mSession.isActive()) {
+        if (mSession != null && mSession.isActive()) {
             mSession.setActive(false);
         }
         Spotify.destroyPlayer(this);

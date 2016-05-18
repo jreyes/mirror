@@ -9,6 +9,8 @@ public interface HotWordManager extends Manager {
 
     void destroy();
 
+    void start();
+
     void startListening();
 
     void stopListening();

@@ -13,12 +13,14 @@ import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
+import com.vaporwarecorp.mirror.util.PermissionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
@@ -30,6 +32,8 @@ import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_ID
 public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implements MainPresenter {
 // ------------------------------ FIELDS ------------------------------
 
+    @Plug
+    AppManager mAppManager;
     @Plug
     CommandManager mCommandManager;
     @Plug
@@ -90,12 +94,31 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mHotWordManager.stopListening();
     }
 
+    @Override
+    public void verifyPermissions() {
+        if (PermissionUtil.checkPermissions(mView.activity()).isEmpty()) {
+            startManagers();
+        } else {
+            mAppManager.exitApplication();
+        }
+    }
+
 // --------------------- Interface ViewObserver ---------------------
 
     @Override
     public void onViewStart(View view) {
         super.onViewStart(view);
-        mSpotifyManager.authenticate(mView.activity());
+        checkPermissions();
+    }
+
+    @Override
+    public void onViewStop(View view) {
+        mSpotifyManager.stop();
+        mTextToSpeechManager.destroy();
+        mHotWordManager.destroy();
+        mCommandManager.stop();
+        mEventManager.unregister(this);
+        super.onViewStop(view);
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -157,20 +180,19 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mView.setForecast(event.getForecast());
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mEventManager.register(this);
-        mCommandManager.start();
+    private void checkPermissions() {
+        final List<String> neededPermissions = PermissionUtil.checkPermissions(mView.activity());
+        if (neededPermissions.isEmpty()) {
+            startManagers();
+        } else {
+            PermissionUtil.requestPermissions(mView.activity(), neededPermissions);
+        }
     }
 
-    @Override
-    protected void onStop() {
-        mSpotifyManager.stop();
-        mTextToSpeechManager.destroy();
-        mHotWordManager.destroy();
-        mCommandManager.stop();
-        mEventManager.unregister(this);
-        super.onStop();
+    private void startManagers() {
+        mSpotifyManager.authenticate(mView.activity());
+        mEventManager.register(this);
+        mCommandManager.start();
+        mHotWordManager.start();
     }
 }

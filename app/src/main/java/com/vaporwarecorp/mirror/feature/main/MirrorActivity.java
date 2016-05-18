@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
 import com.robopupu.api.feature.FeatureContainer;
@@ -18,6 +19,7 @@ import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
 import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
+import com.vaporwarecorp.mirror.util.PermissionUtil;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -81,6 +83,14 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         return mPresenter;
     }
 
+// -------------------------- OTHER METHODS --------------------------
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mPresenter.verifyPermissions();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mPresenter.onViewResult(requestCode, resultCode, data);
@@ -94,9 +104,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mBackgroundContainer = findViewById(R.id.background_container);
         mOverlayContainer = findViewById(R.id.overlay_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
-        findViewById(R.id.spotify).setOnClickListener(v -> {
-            mPresenter.startSpotify();
-        });
+        findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
     }
 
     @Override

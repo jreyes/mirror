@@ -5,7 +5,6 @@ import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.hotword.SpeechRecognizer;
 import com.vaporwarecorp.mirror.event.HotWordEvent;
@@ -49,9 +48,29 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
     @Override
     public void destroy() {
-        mRecognizer.stop();
+        mRecognizer.cancel();
         mRecognizer.shutdown();
         mRecognizer = null;
+    }
+
+    @Override
+    public void start() {
+        try {
+            File assetsDir = new Assets(mAppManager.getAppContext()).syncAssets();
+            mRecognizer = defaultSetup()
+                    .setAcousticModel(new File(assetsDir, "en-us-ptm"))
+                    .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
+                    .setKeywordThreshold(1e-10f)
+                    .setBoolean("-allphone_ci", true)
+                    .getRecognizer();
+
+            mKeyphrase = mAppManager.getApplicationProperties().getProperty(KEYPHRASE);
+            mRecognizer.addListener(this);
+            mRecognizer.addKeyphraseSearch(KWS_SEARCH, mKeyphrase);
+        } catch (IOException e) {
+            Timber.e(e, e.getMessage());
+            mAppManager.exitApplication();
+        }
     }
 
     @Override
@@ -63,15 +82,6 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
     @Override
     public void stopListening() {
         mRecognizer.stop();
-    }
-
-// --------------------- Interface PluginComponent ---------------------
-
-    @Override
-    public void onPlugged(PluginBus bus) {
-        super.onPlugged(bus);
-        mKeyphrase = mAppManager.getApplicationProperties().getProperty(KEYPHRASE);
-        initializeRecognizer();
     }
 
 // --------------------- Interface RecognitionListener ---------------------
@@ -110,23 +120,5 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
     @Override
     public void onTimeout() {
-    }
-
-    private void initializeRecognizer() {
-        try {
-            File assetsDir = new Assets(mAppManager.getAppContext()).syncAssets();
-            mRecognizer = defaultSetup()
-                    .setAcousticModel(new File(assetsDir, "en-us-ptm"))
-                    .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-                    .setKeywordThreshold(1e-10f)
-                    .setBoolean("-allphone_ci", true)
-                    .getRecognizer();
-        } catch (IOException e) {
-            Timber.e(e, e.getMessage());
-            mAppManager.exitApplication();
-        }
-
-        mRecognizer.addListener(this);
-        mRecognizer.addKeyphraseSearch(KWS_SEARCH, mKeyphrase);
     }
 }
