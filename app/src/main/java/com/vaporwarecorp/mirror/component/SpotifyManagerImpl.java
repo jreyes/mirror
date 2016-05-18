@@ -3,6 +3,7 @@ package com.vaporwarecorp.mirror.component;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.session.MediaSession;
 import android.os.AsyncTask;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
@@ -22,12 +23,18 @@ import com.vaporwarecorp.mirror.event.SpotifyTrackEvent;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import timber.log.Timber;
 
 import java.util.List;
+
+import static android.media.session.MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
+import static android.media.session.MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
+import static solid.collectors.ToList.toList;
+import static solid.stream.Stream.stream;
 
 @Plugin
 public class SpotifyManagerImpl
@@ -44,7 +51,7 @@ public class SpotifyManagerImpl
     private String mClientRedirectUri;
     private Context mContext;
     private PlayerState mCurrentPlayerState;
-    private List<String> mCurrentTrackIds;
+    private List<Track> mCurrentTracks;
     private AsyncTask<Object, Void, Void> mLoginAsyncTask = new AsyncTask<Object, Void, Void>() {
         protected Void doInBackground(Object... params) {
             final Integer resultCode = (Integer) params[0];
@@ -59,6 +66,7 @@ public class SpotifyManagerImpl
     private Player mPlayer;
     private Config mPlayerConfig;
     private SpotifyService mService;
+    private MediaSession mSession;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -92,8 +100,8 @@ public class SpotifyManagerImpl
 
         int lastPosition = playerState.positionInMs;
         if (eventType == EventType.TRACK_CHANGED) {
-            String trackId = playerState.trackUri.replaceAll("spotify:track:", "");
-            mService.getTrack(trackId, this);
+            //String trackId = playerState.trackUri.replaceAll("spotify:track:", "");
+            //mService.getTrack(trackId, this);
         }
 
         mEventManager.post(new SpotifyPlaybackEvent(lastPosition, eventType));
@@ -135,25 +143,27 @@ public class SpotifyManagerImpl
     }
 
     @Override
-    public void play(List<String> trackUris) {
+    public void play(List<String> trackUris, Listener listener) {
         if (trackUris == null || trackUris.isEmpty()) {
             return;
         }
 
-        mCurrentPlayerState = new PlayerState();
-        mCurrentTrackIds = trackUris;
-
-        Spotify.getPlayer(mPlayerConfig, this, new InitializationObserver() {
+        String trackIds = stream(trackUris)
+                .map(t -> t.replaceAll("spotify:track:", ""))
+                .reduce((t, u) -> t + "," + u)
+                .get();
+        mService.getTracks(trackIds, new Callback<Tracks>() {
             @Override
-            public void onInitialized(Player player) {
-                mPlayer = player;
-                mPlayer.addPlayerNotificationCallback(SpotifyManagerImpl.this);
-                mPlayer.play(mCurrentTrackIds);
+            public void success(Tracks tracks, Response response) {
+                play(tracks);
+                if (listener != null) {
+                    listener.onTracksLoaded(tracks.tracks);
+                }
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                Timber.e(throwable, "Could not initialize player: %s", throwable.getMessage());
+            public void failure(RetrofitError error) {
+                Timber.e(error, "Problem retrieving the tracks information");
             }
         });
     }
@@ -165,6 +175,9 @@ public class SpotifyManagerImpl
 
     @Override
     public void stop() {
+        if (mSession.isActive()) {
+            mSession.setActive(false);
+        }
         Spotify.destroyPlayer(this);
         mEventManager.post(new ResetEvent());
     }
@@ -177,5 +190,30 @@ public class SpotifyManagerImpl
         } else {
             mPlayer.resume();
         }
+    }
+
+    private void play(Tracks tracks) {
+        mCurrentPlayerState = new PlayerState();
+        mCurrentTracks = tracks.tracks;
+
+        Spotify.getPlayer(mPlayerConfig, this, new InitializationObserver() {
+            @Override
+            public void onInitialized(Player player) {
+                // create a session so that a now playing card is active on the homescreen
+                mSession = new MediaSession(mContext, "SpotifySession");
+                //mSession.setCallback(new SpotifyMediaSessionCallback(player));
+                mSession.setFlags(FLAG_HANDLES_TRANSPORT_CONTROLS | FLAG_HANDLES_MEDIA_BUTTONS);
+                //mSession.setSessionActivity(getSessionActivity());
+
+                mPlayer = player;
+                mPlayer.addPlayerNotificationCallback(SpotifyManagerImpl.this);
+                mPlayer.play(stream(mCurrentTracks).map(t -> t.uri).collect(toList()));
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Timber.e(throwable, "Could not initialize player: %s", throwable.getMessage());
+            }
+        });
     }
 }

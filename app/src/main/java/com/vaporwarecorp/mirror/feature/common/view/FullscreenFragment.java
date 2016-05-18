@@ -11,6 +11,9 @@ import com.robopupu.api.feature.FeatureFragment;
 import com.robopupu.api.feature.FeaturePresenter;
 import com.vaporwarecorp.mirror.R;
 
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
+
 public abstract class FullscreenFragment<T extends FeaturePresenter> extends FeatureFragment<T> implements FullscreenView {
 // ------------------------------ FIELDS ------------------------------
 
@@ -20,6 +23,12 @@ public abstract class FullscreenFragment<T extends FeaturePresenter> extends Fea
 
 
 // --------------------- Interface FullscreenView ---------------------
+
+    @Override
+    public boolean isLandscape() {
+        final int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+        return rotation == ROTATION_0 || rotation == ROTATION_180;
+    }
 
     @Override
     public void setPictureUrl(String pictureUrl) {

@@ -49,6 +49,7 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
     @Override
     public void destroy() {
+        mRecognizer.stop();
         mRecognizer.shutdown();
         mRecognizer = null;
     }

@@ -47,7 +47,6 @@
             android:name=".feature.main.MirrorActivity"
             android:clearTaskOnLaunch="true"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:stateNotNeeded="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

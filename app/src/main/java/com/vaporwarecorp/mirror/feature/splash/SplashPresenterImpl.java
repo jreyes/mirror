@@ -17,13 +17,22 @@ import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> implements SplashPresenter {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String[] SPLASH_COVERS = {
+    private static final String[] SPLASH_COVERS_PORTRAIT = {
             "http://i.giphy.com/rR2AWZ3ip77r2.gif",
             "http://i.giphy.com/eebmNnxxtSNiw.gif",
             "http://i.giphy.com/2XXGmo4Q1yPjq.gif",
             "http://i.giphy.com/3Ow6njmLYdchW.gif",
             "http://i.giphy.com/AWqRqyyLYhZxS.gif",
             "http://i.giphy.com/UKIUEcSrcvNKM.gif"
+    };
+    private static final String[] SPLASH_COVERS_LANDSCAPE = {
+            "http://k39.kn3.net/taringa/2/0/4/3/3/4/63/piledro/A12.gif",
+            "http://i.giphy.com/rR2AWZ3ip77r2.gif",
+            "http://i.giphy.com/vncgdgPWLwGRi.gif",
+            "http://m.popkey.co/76b5e7/NlZaX.gif",
+            "http://i.giphy.com/3Ow6njmLYdchW.gif",
+            "http://i.giphy.com/tptFQ8QAJYYvu.gif",
+            "http://i.giphy.com/pDLNJlazF9ljG.gif"
     };
 
     @Plug
@@ -55,8 +64,12 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
     @Override
     public void onViewResume(final View view) {
         super.onViewResume(view);
-        getViewPlug().setPictureUrl(SPLASH_COVERS[new Random().nextInt(SPLASH_COVERS.length)]);
+        setPictureUrl(mView.isLandscape() ? SPLASH_COVERS_LANDSCAPE : SPLASH_COVERS_PORTRAIT);
         isApplicationReady();
+    }
+
+    private void setPictureUrl(String[] pictureUrls) {
+        mView.setPictureUrl(pictureUrls[new Random().nextInt(pictureUrls.length)]);
     }
 
     @Override

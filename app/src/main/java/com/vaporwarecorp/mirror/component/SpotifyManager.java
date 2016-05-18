@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import kaaes.spotify.webapi.android.models.Track;
 
 import java.util.List;
 
@@ -19,9 +20,13 @@ public interface SpotifyManager extends Manager {
 
     void authenticate(Activity activity);
 
-    void play(List<String> trackUris);
+    void play(List<String> trackUris, Listener listener);
 
     void processAuthentication(int resultCode, Intent data);
 
     void stop();
+
+    interface Listener {
+        void onTracksLoaded(List<Track> tracks);
+    }
 }

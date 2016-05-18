@@ -7,12 +7,7 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.component.AppManager;
-import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.SpotifyManager;
-import com.vaporwarecorp.mirror.event.SpotifyPlaybackEvent;
-import com.vaporwarecorp.mirror.event.SpotifyTrackEvent;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -22,8 +17,6 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
 
     @Plug
     AppManager mAppManager;
-    @Plug
-    EventManager mEventManager;
     @Plug
     SpotifyManager mSpotifyManger;
     @Plug
@@ -50,48 +43,23 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onViewStart(View view) {
-        super.onViewStart(view);
+    public void onViewResume(View view) {
+        super.onViewResume(view);
 
         List<String> trackIds = (List<String>) getParams().get(TRACK_IDS);
-        mSpotifyManger.play(trackIds);
+        mSpotifyManger.play(trackIds, tracks -> mView.updateQueue(tracks));
     }
 
-// -------------------------- OTHER METHODS --------------------------
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(SpotifyTrackEvent event) {
-        mView.updateMetadata(event.getTrack());
+    @Override
+    public void onViewStop(View view) {
+        mSpotifyManger.stop();
+        super.onViewStop(view);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(SpotifyPlaybackEvent event) {
-        mView.updateProgress(event.getEventType(), event.getLastPosition());
-    }
-
+    //mView.updateMetadata(event.getTrack());
+    //mView.updateProgress(event.getEventType(), event.getLastPosition());
     @Override
     protected SpotifyView getViewPlug() {
         return mView;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mAppManager.refWatcher().watch(this);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mEventManager.register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        mSpotifyManger.stop();
-        mEventManager.unregister(this);
-        super.onStop();
     }
 }

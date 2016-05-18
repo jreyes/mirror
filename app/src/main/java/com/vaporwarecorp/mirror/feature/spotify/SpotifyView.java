@@ -1,19 +1,8 @@
 package com.vaporwarecorp.mirror.feature.spotify;
 
-import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.PlugInterface;
-import com.spotify.sdk.android.player.PlayerNotificationCallback.EventType;
-import kaaes.spotify.webapi.android.models.Track;
-
-import java.util.ArrayList;
+import com.vaporwarecorp.mirror.feature.common.view.PlaybackOverlayView;
 
 @PlugInterface
-public interface SpotifyView extends View {
-// -------------------------- OTHER METHODS --------------------------
-
-    void play(ArrayList<String> trackIds);
-
-    void updateMetadata(Track track);
-
-    void updateProgress(EventType eventType, int lastPosition);
+public interface SpotifyView extends PlaybackOverlayView {
 }
