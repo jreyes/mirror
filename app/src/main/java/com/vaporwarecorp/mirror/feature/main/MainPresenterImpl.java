@@ -14,7 +14,6 @@ import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
@@ -45,8 +44,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Plug
     SpotifyManager mSpotifyManager;
     @Plug
-    TextToSpeechManager mTextToSpeechManager;
-    @Plug
     MainView mView;
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -66,14 +63,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void processCommand(int resultCode, Intent data) {
         mCommandManager.processCommand(resultCode, data);
-    }
-
-    @Override
-    public void speak(String textToSpeak) {
-        if (StringUtils.isNoneEmpty(textToSpeak)) {
-            mTextToSpeechManager.speak(textToSpeak);
-        }
-        startListening();
     }
 
     @Override
@@ -114,7 +103,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void onViewStop(View view) {
         mSpotifyManager.stop();
-        mTextToSpeechManager.destroy();
         mHotWordManager.destroy();
         mCommandManager.stop();
         mEventManager.unregister(this);
@@ -165,12 +153,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     public void onEvent(UserOutOfRangeEvent event) {
         mFeature.hideView();
         mFeature.showPresenter(GreetPresenter.class, new Params(GREET_TYPE, TYPE_GOODBYE));
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(SpeechEvent event) {
-        speak(event.getMessage());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

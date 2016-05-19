@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.session.MediaSession;
-import android.os.AsyncTask;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
@@ -27,6 +26,10 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import java.util.List;
@@ -52,17 +55,6 @@ public class SpotifyManagerImpl
     private Context mContext;
     private PlayerState mCurrentPlayerState;
     private List<Track> mCurrentTracks;
-    private AsyncTask<Object, Void, Void> mLoginAsyncTask = new AsyncTask<Object, Void, Void>() {
-        protected Void doInBackground(Object... params) {
-            final Integer resultCode = (Integer) params[0];
-            final Intent intent = (Intent) params[1];
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                mPlayerConfig = new Config(mContext, response.getAccessToken(), mClientId);
-            }
-            return null;
-        }
-    };
     private Player mPlayer;
     private Config mPlayerConfig;
     private SpotifyService mService;
@@ -170,7 +162,26 @@ public class SpotifyManagerImpl
 
     @Override
     public void processAuthentication(int resultCode, Intent data) {
-        mLoginAsyncTask.execute(resultCode, data);
+        Observable
+                .just(AuthenticationClient.getResponse(resultCode, data))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<AuthenticationResponse>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(AuthenticationResponse response) {
+                        if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                            mPlayerConfig = new Config(mContext, response.getAccessToken(), mClientId);
+                        }
+                    }
+                });
     }
 
     @Override

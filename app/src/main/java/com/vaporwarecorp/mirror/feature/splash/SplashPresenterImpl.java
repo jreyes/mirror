@@ -11,6 +11,8 @@ import com.vaporwarecorp.mirror.feature.MainFeature;
 
 import java.util.Random;
 
+import timber.log.Timber;
+
 import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 
 @Plugin
@@ -56,7 +58,11 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
     @Override
     public void onViewResume(final View view) {
         super.onViewResume(view);
-        setPictureUrl(SPLASH_COVERS);
+
+        final String pictureUrl = SPLASH_COVERS[new Random().nextInt(SPLASH_COVERS.length)];
+        Timber.d("Displaying %s", pictureUrl);
+        mView.setPictureUrl(pictureUrl);
+
         isApplicationReady();
     }
 
@@ -74,9 +80,5 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
                 isApplicationReady();
             }
         }, 20);
-    }
-
-    private void setPictureUrl(String[] pictureUrls) {
-        mView.setPictureUrl(pictureUrls[new Random().nextInt(pictureUrls.length)]);
     }
 }

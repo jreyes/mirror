@@ -37,7 +37,7 @@ public class NetworkUtil {
             if (networks != null) {
                 for (final Network network : networks) {
                     final NetworkInfo info = manager.getNetworkInfo(network);
-                    if (info.getType() == TYPE_WIFI && info.getState() == CONNECTED) {
+                    if (info.getState() == CONNECTED) {
                         return true;
                     }
                 }

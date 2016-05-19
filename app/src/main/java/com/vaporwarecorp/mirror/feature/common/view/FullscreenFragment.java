@@ -25,7 +25,8 @@ public abstract class FullscreenFragment<T extends FeaturePresenter>
 
     @Override
     public void setPictureUrl(String pictureUrl) {
-        Glide.with(this)
+        Glide
+                .with(this)
                 .load(pictureUrl)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(mImageView);

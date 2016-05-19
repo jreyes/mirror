@@ -1,6 +1,7 @@
 package com.vaporwarecorp.mirror.app;
 
 import android.support.multidex.MultiDexApplication;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.integration.okhttp.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -10,11 +11,21 @@ import com.robopupu.api.plugin.PluginBus;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.error.MirrorAppError;
-import com.vaporwarecorp.mirror.component.*;
-import timber.log.Timber;
+import com.vaporwarecorp.mirror.component.AppManager;
+import com.vaporwarecorp.mirror.component.CommandManager;
+import com.vaporwarecorp.mirror.component.EventManager;
+import com.vaporwarecorp.mirror.component.ForecastManager;
+import com.vaporwarecorp.mirror.component.HotWordManager;
+import com.vaporwarecorp.mirror.component.PluginFeatureManager;
+import com.vaporwarecorp.mirror.component.PreferenceManager;
+import com.vaporwarecorp.mirror.component.ProximityManager;
+import com.vaporwarecorp.mirror.component.SpotifyManager;
+import com.vaporwarecorp.mirror.component.TextToSpeechManager;
 
 import java.io.File;
 import java.io.InputStream;
+
+import timber.log.Timber;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 

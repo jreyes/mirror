@@ -114,6 +114,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     protected void onStop() {
+        mTextToSpeechManager.stop();
         mProximityManager.stopProximityDetection();
         mEventManager.unregister(this);
         super.onStop();
