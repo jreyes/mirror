@@ -8,18 +8,37 @@ import android.os.SystemClock;
 import android.support.annotation.CallSuper;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.v17.leanback.widget.*;
+import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter.ViewHolder;
+import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.ClassPresenterSelector;
+import android.support.v17.leanback.widget.ControlButtonPresenterSelector;
+import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
+import android.support.v17.leanback.widget.ListRow;
+import android.support.v17.leanback.widget.ListRowPresenter;
+import android.support.v17.leanback.widget.PlaybackControlsRow;
 import android.support.v17.leanback.widget.PlaybackControlsRow.PlayPauseAction;
 import android.support.v17.leanback.widget.PlaybackControlsRow.SkipNextAction;
 import android.support.v17.leanback.widget.PlaybackControlsRow.SkipPreviousAction;
+import android.support.v17.leanback.widget.PlaybackControlsRowPresenter;
 import android.support.v4.content.ContextCompat;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.robopupu.api.binding.AdapterViewBinding;
 import com.robopupu.api.binding.ViewBinder;
 import com.robopupu.api.binding.ViewBinding;
-import com.robopupu.api.dependency.*;
+import com.robopupu.api.dependency.D;
+import com.robopupu.api.dependency.DependenciesCache;
+import com.robopupu.api.dependency.DependencyMap;
+import com.robopupu.api.dependency.DependencyScope;
+import com.robopupu.api.dependency.DependencyScopeOwner;
 import com.robopupu.api.feature.Feature;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PresentedView;
@@ -27,19 +46,23 @@ import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.ViewState;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Converter;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerNotificationCallback.EventType;
 import com.vaporwarecorp.mirror.R;
 
 import java.util.List;
+
+import kaaes.spotify.webapi.android.models.Track;
 
 public abstract class PlaybackOverlayFragment<T_Presenter extends Presenter, U extends Object>
         extends android.support.v17.leanback.app.PlaybackOverlayFragment
         implements PlaybackOverlayView, FeatureView, PresentedView<T_Presenter> {
 // ------------------------------ FIELDS ------------------------------
 
+    private static final int CARD_HEIGHT = 200;
+    private static final int CARD_WIDTH = 200;
     private static final int DEFAULT_UPDATE_PERIOD = 1000;
     private static final int UPDATE_PERIOD = 16;
+
     private final ViewBinder mBinder;
     private int mDuration;
     private Feature mFeature;
@@ -112,13 +135,15 @@ public abstract class PlaybackOverlayFragment<T_Presenter extends Presenter, U e
 
         addPlaybackControlsRow();
 
-        /*
+        mDuration = (int) ((Track) mSelectedItem).duration_ms;
+        mPlaybackControlsRow.setTotalTime(mDuration);
+        updateVideoImage(((Track) mSelectedItem).album.images.get(0).url);
+
         final ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         listRowAdapter.addAll(0, items);
 
         final HeaderItem header = new HeaderItem(0, "Queue");
         mRowsAdapter.add(new ListRow(header, listRowAdapter));
-        */
 
         setAdapter(mRowsAdapter);
     }
@@ -427,6 +452,22 @@ public abstract class PlaybackOverlayFragment<T_Presenter extends Presenter, U e
         return presenter;
     }
 
+    protected void updateVideoImage(String uri) {
+        Glide
+                .with(getActivity())
+                .load(uri)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .centerCrop()
+                .into(new SimpleTarget<GlideDrawable>(CARD_WIDTH, CARD_HEIGHT) {
+                    @Override
+                    public void onResourceReady(GlideDrawable resource,
+                                                GlideAnimation<? super GlideDrawable> glideAnimation) {
+                        mPlaybackControlsRow.setImageDrawable(resource);
+                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                    }
+                });
+    }
+
     private void addPlaybackControlsRow() {
         PlaybackControlsRowPresenter playbackControlsRowPresenter = new PlaybackControlsRowPresenter(new DescriptionPresenter());
         playbackControlsRowPresenter.setSecondaryActionsHidden(true);
@@ -454,48 +495,12 @@ public abstract class PlaybackOverlayFragment<T_Presenter extends Presenter, U e
         mPlaybackControlsRow.setPrimaryActionsAdapter(mPrimaryActionsAdapter);
     }
 
-    /*
-    private void addPlaybackControlsRow(U data) {
-        mPlaybackControlsRow = new PlaybackControlsRow(new MutableDataHolder(data));
-        mRowsAdapter.add(mPlaybackControlsRow);
-
-        resetPlaybackRow();
-
-        mPlayPauseAction = new PlayPauseAction(getActivity());
-
-        ArrayObjectAdapter primaryActionsAdapter = new ArrayObjectAdapter(new ControlButtonPresenterSelector());
-        primaryActionsAdapter.add(mPlayPauseAction);
-        mPlaybackControlsRow.setPrimaryActionsAdapter(primaryActionsAdapter);
-    }
-    */
-
     private int getUpdatePeriod() {
         if (getView() == null || mPlaybackControlsRow.getTotalTime() <= 0) {
             return DEFAULT_UPDATE_PERIOD;
         }
         return Math.max(UPDATE_PERIOD, mPlaybackControlsRow.getTotalTime() / getView().getWidth());
     }
-
-    /*
-    private void initializePlaybackControls(U data) {
-        setupRows();
-        addPlaybackControlsRow(data);
-        setAdapter(mRowsAdapter);
-    }
-
-    private void resetPlaybackRow() {
-        mDuration = 0;
-        mPlaybackControlsRow.setTotalTime(0);
-        mPlaybackControlsRow.setCurrentTime(0);
-        mRowsAdapter.notifyArrayItemRangeChanged(mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
-    }
-
-    private void setupRows() {
-        PlaybackControlsRowPresenter playbackControlsRowPresenter =
-                new PlaybackControlsRowPresenter(new DescriptionPresenter());
-        mPresenterSelector.addClassPresenter(PlaybackControlsRow.class, playbackControlsRowPresenter);
-    }
-    */
 
     private void startProgressAutomation() {
         if (mHandler != null && mRunnable != null) {
@@ -534,9 +539,6 @@ public abstract class PlaybackOverlayFragment<T_Presenter extends Presenter, U e
     }
 
     private class CardPresenter extends android.support.v17.leanback.widget.Presenter {
-        private static final int CARD_WIDTH = 300;
-        private static final int CARD_HEIGHT = 300;
-
         private int mSelectedBackgroundColor = -1;
         private int mDefaultBackgroundColor = -1;
 

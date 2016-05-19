@@ -92,9 +92,11 @@ public class SpotifyFragment
         cardView.setTitleText(track.name);
         cardView.setContentText(artistNames(track.artists));
 
-        Glide.with(getActivity())
+        Glide
+                .with(getActivity())
                 .load(track.album.images.get(0).url)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .centerCrop()
                 .into(cardView.getMainImageView());
     }
 
