@@ -57,4 +57,11 @@
 
     </RelativeLayout>
 
+    <com.vaporwarecorp.mirror.feature.common.view.DottedGridView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.vaporwarecorp.mirror.feature.common.view.DottedGridView>
+
+
 </RelativeLayout>
