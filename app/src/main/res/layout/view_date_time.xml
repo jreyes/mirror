@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentEnd="true"
-    android:layout_alignParentTop="true"
-    android:background="@android:color/transparent"
-    android:gravity="end"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/outside_padding"
-    android:paddingRight="@dimen/outside_padding">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools"
+       tools:showIn="@layout/activity_mirror">
 
     <TextClock
         style="@style/TimeStyle"
@@ -26,4 +18,4 @@
         android:format12Hour="EEEE\nMMMM d"
         android:gravity="end"/>
 
-</LinearLayout>
+</merge>

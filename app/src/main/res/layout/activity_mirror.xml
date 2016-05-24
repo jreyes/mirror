@@ -1,32 +1,40 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/black"
-                tools:context=".feature.main.MirrorActivity">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@android:color/black"
+             tools:context=".feature.main.MirrorActivity">
 
-    <RelativeLayout
-        android:id="@+id/background_container"
+    <LinearLayout
+        android:id="@+id/header_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:visibility="invisible">
 
         <com.vaporwarecorp.mirror.component.forecast.ForecastView
             android:id="@+id/forecast_view"
-            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
             android:paddingLeft="@dimen/outside_padding"
             android:paddingRight="@dimen/outside_padding"/>
 
-    </RelativeLayout>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"/>
+        <com.vaporwarecorp.mirror.component.datetime.DateTimeView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/outside_padding"
+            android:paddingRight="@dimen/outside_padding"/>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/overlay_container"
@@ -35,17 +43,31 @@
         android:background="@android:color/transparent"
         android:visibility="invisible">
 
-        <include layout="@layout/view_date_time"/>
 
-        <TextView
-            android:id="@+id/result_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            tools:text="Result text"/>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_solid_border">
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:background="@drawable/bg_dotted_grid"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fullscreen_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <Button
             android:layout_width="wrap_content"
@@ -55,13 +77,6 @@
             android:text="Spotify"
             android:id="@+id/spotify"/>
 
-    </RelativeLayout>
+    </FrameLayout>
 
-    <com.vaporwarecorp.mirror.feature.common.view.DottedGridView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </com.vaporwarecorp.mirror.feature.common.view.DottedGridView>
-
-
-</RelativeLayout>
+</FrameLayout>

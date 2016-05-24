@@ -57,7 +57,7 @@
         </activity>
         <activity
             android:name=".component.command.HoundifyVoiceSearchActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="landscape"
             android:theme="@style/houndify_Houndify"/>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"

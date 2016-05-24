@@ -25,7 +25,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     private View mGreetContainer;
     private TextView mGreetNameText;
     private TextView mGreetTypeText;
-    private boolean mIsWelcome;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -59,7 +58,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
 
     @Override
     public void displayGreet(String greetName, boolean isWelcome) {
-        mIsWelcome = isWelcome;
         mGreetTypeText.setText(getString(isWelcome ? R.string.greet_welcome : R.string.greet_goodbye));
         mGreetNameText.setText(greetName);
     }
