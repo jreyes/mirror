@@ -1,8 +1,6 @@
 package com.vaporwarecorp.mirror.feature.common.view;
 
-import com.robopupu.api.mvp.View;
-
-public interface FullscreenView extends View {
+public interface FullscreenView extends MirrorView {
 // -------------------------- OTHER METHODS --------------------------
 
     void setPictureUrl(String pictureUrl);

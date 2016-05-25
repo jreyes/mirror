@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       tools:showIn="@layout/activity_mirror">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/temperature"
@@ -34,7 +35,6 @@
         android:layout_marginBottom="5dp"
         android:enabled="false"
         android:gravity="start"
-        android:maxWidth="240dp"
         tools:text="Mostly cloudy until tomorrow evening"/>
 
     <TextView
@@ -59,4 +59,4 @@
         android:layout_toEndOf="@id/precipitation_icon"
         tools:text="6%"/>
 
-</merge>
+</RelativeLayout>

@@ -32,6 +32,13 @@ public abstract class FullscreenFragment<T extends FeaturePresenter>
                 .into(mImageView);
     }
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return true;
+    }
+
 // -------------------------- OTHER METHODS --------------------------
 
     @Override

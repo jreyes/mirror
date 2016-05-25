@@ -1,6 +1,6 @@
 package com.vaporwarecorp.mirror.feature.main;
 
-import android.app.Activity;
+import android.app.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
 import com.robopupu.api.feature.FeatureContainer;
+import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
@@ -18,8 +19,8 @@ import com.vaporwarecorp.mirror.component.forecast.ForecastView;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
+import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
 import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
-import com.vaporwarecorp.mirror.util.PermissionUtil;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -32,9 +33,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Plug(MainScope.class)
     MainPresenter mPresenter;
 
-    private View mBackgroundContainer;
+    private View mContentContainer;
     private ForecastView mForecastView;
-    private View mOverlayContainer;
+    private View mFullscreenContainer;
+    private View mHeaderContainer;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -47,6 +49,45 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         return R.id.fragment_container;
     }
 
+// --------------------- Interface FeatureTransitionManager ---------------------
+
+    @Override
+    public void showView(final FeatureView featureView, final boolean addToBackStack, final String fragmentTag) {
+        String tag = fragmentTag;
+
+        if (fragmentTag == null) {
+            tag = featureView.getViewTag();
+        }
+
+        final FragmentManager manager = getFragmentManager();
+        if (manager.findFragmentByTag(tag) == null) {
+            final FragmentTransaction transaction = manager.beginTransaction();
+
+            if (featureView instanceof DialogFragment) {
+                final DialogFragment dialogFragment = (DialogFragment) featureView;
+                transaction.add(dialogFragment, tag);
+
+                if (addToBackStack) {
+                    transaction.addToBackStack(tag);
+                }
+                transaction.commitAllowingStateLoss();
+            } else if (featureView instanceof Fragment) {
+                final Fragment fragment = (Fragment) featureView;
+                if (fragment instanceof MirrorView && ((MirrorView) fragment).isFullscreen()) {
+                    transaction.replace(R.id.fullscreen_container, fragment, tag);
+                    mFullscreenContainer.setVisibility(View.VISIBLE);
+                } else {
+                    transaction.replace(R.id.fragment_container, fragment, tag);
+                    mFullscreenContainer.setVisibility(View.GONE);
+                }
+                if (addToBackStack) {
+                    transaction.addToBackStack(tag);
+                }
+                transaction.commit();
+            }
+        }
+    }
+
 // --------------------- Interface MainView ---------------------
 
     @Override
@@ -56,8 +97,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     public void displayView() {
-        mBackgroundContainer.setVisibility(View.VISIBLE);
-        mOverlayContainer.setVisibility(View.VISIBLE);
+        mHeaderContainer.setVisibility(View.VISIBLE);
+        mContentContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -67,8 +108,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     public void hideView() {
-        mBackgroundContainer.setVisibility(View.INVISIBLE);
-        mOverlayContainer.setVisibility(View.INVISIBLE);
+        mHeaderContainer.setVisibility(View.INVISIBLE);
+        mContentContainer.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -101,10 +142,11 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         super.onCreate(inState);
         setContentView(R.layout.activity_mirror);
 
-        mBackgroundContainer = findViewById(R.id.background_container);
-        mOverlayContainer = findViewById(R.id.overlay_container);
+        mHeaderContainer = findViewById(R.id.header_container);
+        mContentContainer = findViewById(R.id.content_container);
+        mFullscreenContainer = findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
-        findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
+        //findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
     }
 
     @Override

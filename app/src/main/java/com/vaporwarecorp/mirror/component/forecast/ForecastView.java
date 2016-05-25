@@ -3,9 +3,9 @@ package com.vaporwarecorp.mirror.component.forecast;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.util.ForecastUtil;
@@ -23,8 +23,7 @@ public class ForecastView extends RelativeLayout {
 
     public ForecastView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        LayoutInflater.from(context).inflate(R.layout.view_forecast, this, true);
+        inflate(context, R.layout.view_forecast, this);
 
         mTemperature = (TextView) findViewById(R.id.temperature);
         mIcon = (TextView) findViewById(R.id.icon);

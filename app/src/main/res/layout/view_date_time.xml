@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       tools:showIn="@layout/activity_mirror">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
     <TextClock
+        android:id="@+id/time"
         style="@style/TimeStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:background="@android:color/transparent"
-        android:format12Hour="h\uee01mm"/>
+        android:format12Hour="h\uee01mm"
+        tools:text="12:00"/>
 
     <TextClock
         style="@style/DateStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/time"
         android:background="@android:color/transparent"
         android:format12Hour="EEEE\nMMMM d"
-        android:gravity="end"/>
+        android:gravity="end"
+        tools:text="Sunday\nMay 12"/>
 
-</merge>
+</RelativeLayout>
