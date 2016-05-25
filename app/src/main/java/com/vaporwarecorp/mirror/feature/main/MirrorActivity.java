@@ -99,6 +99,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     public void displayView() {
         mHeaderContainer.setVisibility(View.VISIBLE);
         mContentContainer.setVisibility(View.VISIBLE);
+        mFullscreenContainer.setVisibility(View.GONE);
     }
 
     @Override

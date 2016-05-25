@@ -62,6 +62,13 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         mGreetNameText.setText(greetName);
     }
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return true;
+    }
+
 // --------------------- Interface PresentedView ---------------------
 
     @Override
