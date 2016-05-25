@@ -1,16 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/black"
-                tools:context=".feature.main.MirrorActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".feature.main.MirrorActivity">
 
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/header_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:paddingBottom="@dimen/outside_padding"
         android:paddingEnd="@dimen/outside_padding"
         android:paddingStart="@dimen/outside_padding"
         android:visibility="invisible">
@@ -21,39 +23,36 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            app:layout_widthPercent="30%"/>
+            app:layout_widthPercent="30%" />
 
         <com.vaporwarecorp.mirror.component.datetime.DateTimeView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
-            app:layout_widthPercent="30%"/>
+            app:layout_widthPercent="30%" />
+
+        <Button
+            android:id="@+id/test_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test Container" />
 
     </android.support.percent.PercentRelativeLayout>
 
-    <FrameLayout
+    <com.vaporwarecorp.mirror.component.dottedgrid.DottedGridView
         android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_solid_border"
-        android:visibility="invisible"
         android:layout_below="@+id/header_container"
-        android:layout_centerHorizontal="true">
-
-        <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_dotted_grid"/>
-
-    </FrameLayout>
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
 
     <FrameLayout
         android:id="@+id/fullscreen_container"
-        android:background="@android:color/black"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:background="@android:color/black"
+        android:visibility="gone" />
 
 </RelativeLayout>
