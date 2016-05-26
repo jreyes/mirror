@@ -16,7 +16,7 @@ import com.vaporwarecorp.mirror.R;
 import static com.daimajia.androidanimations.library.Techniques.FadeIn;
 
 @Plugin
-public class GreetFragment extends FeatureFragment<GreetPresenter> implements GreetView, Animator.AnimatorListener {
+public class GreetFragment extends FeatureFragment<GreetPresenter> implements GreetView {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
@@ -34,26 +34,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
 
 // ------------------------ INTERFACE METHODS ------------------------
 
-
-// --------------------- Interface AnimatorListener ---------------------
-
-    @Override
-    public void onAnimationStart(Animator animation) {
-    }
-
-    @Override
-    public void onAnimationEnd(Animator animation) {
-        // todo nullpointer here
-        mPresenter.onAnimationEnd();
-    }
-
-    @Override
-    public void onAnimationCancel(Animator animation) {
-    }
-
-    @Override
-    public void onAnimationRepeat(Animator animation) {
-    }
 
 // --------------------- Interface GreetView ---------------------
 
@@ -91,6 +71,27 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     @Override
     public void onResume() {
         super.onResume();
-        YoYo.with(FadeIn).duration(1000).withListener(this).playOn(mGreetContainer);
+        YoYo
+                .with(FadeIn)
+                .duration(1000)
+                .withListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mPresenter.onAnimationEnd();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+                    }
+                })
+                .playOn(mGreetContainer);
     }
 }

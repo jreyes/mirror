@@ -10,8 +10,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.component.draggable.DraggableView;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class DottedGridView extends PercentRelativeLayout {
 // ------------------------------ FIELDS ------------------------------
@@ -58,11 +60,11 @@ public class DottedGridView extends PercentRelativeLayout {
         mContainer.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
         addView(mContainer);
 
-        LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
-        params.getPercentLayoutInfo().widthPercent = 40f;
-        params.getPercentLayoutInfo().fillLayoutParams(params, 40, 100);
+        LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
+        params.getPercentLayoutInfo().widthPercent = 0.4f;
 
-        mFragmentContainer = new FrameLayout(context);
+        mFragmentContainer = new DraggableView(context);
         mFragmentContainer.setId(R.id.fragment_container);
         mFragmentContainer.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
         mFragmentContainer.setLayoutParams(params);
