@@ -119,11 +119,6 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 // --------------------- Interface PluginComponent ---------------------
 
     @Override
-    public void onPlugged(PluginBus bus) {
-        //PluginBus.plug(Command.class);
-    }
-
-    @Override
     public void onUnplugged(PluginBus bus) {
         PluginBus.unplug(Command.class);
     }

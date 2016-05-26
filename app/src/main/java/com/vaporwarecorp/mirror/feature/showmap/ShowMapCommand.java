@@ -8,6 +8,8 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.EventManager;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.AbstractCommand;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
@@ -19,6 +21,8 @@ import static com.vaporwarecorp.mirror.feature.common.presenter.MapPresenter.*;
 public class ShowMapCommand extends AbstractCommand implements Command {
 // ------------------------------ FIELDS ------------------------------
 
+    @Plug
+    EventManager mEventManager;
     @Plug
     MainFeature mFeature;
 
@@ -43,6 +47,7 @@ public class ShowMapCommand extends AbstractCommand implements Command {
         params.put(MAP_FROM_LATITUDE, data.findValue("Latitude").doubleValue());
         params.put(MAP_FROM_LONGITUDE, data.findValue("Longitude").doubleValue());
         mFeature.showPresenter(MapPresenter.class, params);
+        mEventManager.post(new SpeechEvent(result.getSpokenResponseLong()));
     }
 
     @Override

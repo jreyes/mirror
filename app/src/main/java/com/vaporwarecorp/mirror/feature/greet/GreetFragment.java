@@ -43,6 +43,7 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
 
     @Override
     public void onAnimationEnd(Animator animation) {
+        // todo nullpointer here
         mPresenter.onAnimationEnd();
     }
 

@@ -147,6 +147,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mContentContainer = findViewById(R.id.content_container);
         mFullscreenContainer = findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
+        findViewById(R.id.test_button).setOnClickListener(v -> mPresenter.startSpotify());
         //findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
     }
 

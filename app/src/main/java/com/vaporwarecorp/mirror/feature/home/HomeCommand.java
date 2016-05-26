@@ -6,8 +6,10 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.command.AbstractHoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 
@@ -19,6 +21,8 @@ public class HomeCommand extends AbstractHoundifyCommand implements HoundifyComm
     private static final String COMMAND_INTENT = "Home";
     private static final String COMMAND_RESPONSE = "Ok";
 
+    @Plug
+    EventManager mEventManager;
     @Plug
     MainFeature mFeature;
 
@@ -38,6 +42,7 @@ public class HomeCommand extends AbstractHoundifyCommand implements HoundifyComm
     @Override
     public void executeCommand(CommandResult result) {
         mFeature.hideCurrentPresenter();
+        mEventManager.post(new SpeechEvent("Ok"));
     }
 
     @Override

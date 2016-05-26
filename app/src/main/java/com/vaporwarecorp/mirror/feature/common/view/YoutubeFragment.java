@@ -18,18 +18,25 @@ import com.robopupu.api.dependency.*;
 import com.robopupu.api.feature.Feature;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.*;
+import com.robopupu.api.plugin.Plug;
+import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Converter;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.Listener;
 import timber.log.Timber;
 
 import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT;
 
-public abstract class YoutubeFragment<T extends Presenter>
+@Plugin
+public class YoutubeFragment
         extends YouTubePlayerFragment
-        implements PresentedView<T>, FeatureView, YoutubeView, OnInitializedListener {
+        implements PresentedView<YoutubePresenter>, FeatureView, YoutubeView, OnInitializedListener {
 // ------------------------------ FIELDS ------------------------------
+
+    @Plug
+    YoutubePresenter mPresenter;
 
     private final ViewBinder mBinder;
     private Feature mFeature;
@@ -37,12 +44,12 @@ public abstract class YoutubeFragment<T extends Presenter>
     private YouTubePlayer mPlayer;
     private DependencyScope mScope;
     private final ViewState mState;
-
     private String mYoutubeVideoId;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    protected YoutubeFragment() {
+    @Provides(YoutubeView.class)
+    public YoutubeFragment() {
         mBinder = new ViewBinder(this);
         mState = new ViewState(this);
     }
@@ -113,7 +120,9 @@ public abstract class YoutubeFragment<T extends Presenter>
      * @return A {@link Presenter}.
      */
     @Override
-    public abstract T getPresenter();
+    public YoutubePresenter getPresenter() {
+        return mPresenter;
+    }
 
 // --------------------- Interface Scopeable ---------------------
 
@@ -239,7 +248,7 @@ public abstract class YoutubeFragment<T extends Presenter>
             cache.removeDependencyScope(owner);
         }
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewDestroy(this);
         }
@@ -256,7 +265,7 @@ public abstract class YoutubeFragment<T extends Presenter>
         super.onPause();
         mState.onPause();
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewPause(this);
         }
@@ -272,7 +281,7 @@ public abstract class YoutubeFragment<T extends Presenter>
         super.onResume();
         mState.onResume();
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewResume(this);
         }
@@ -314,7 +323,7 @@ public abstract class YoutubeFragment<T extends Presenter>
         super.onStart();
         mState.onStart();
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewStart(this);
             mBinder.initialise();
@@ -327,7 +336,7 @@ public abstract class YoutubeFragment<T extends Presenter>
         super.onStop();
         mState.onStop();
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewStop(this);
         }
@@ -340,7 +349,7 @@ public abstract class YoutubeFragment<T extends Presenter>
 
         mState.onCreate();
 
-        final T presenter = resolvePresenter();
+        final YoutubePresenter presenter = resolvePresenter();
         if (presenter != null) {
             presenter.onViewCreated(this, Converter.fromBundleToParams(inState));
         } else {
@@ -402,8 +411,8 @@ public abstract class YoutubeFragment<T extends Presenter>
      *
      * @return A {@link Presenter}.
      */
-    protected T resolvePresenter() {
-        T presenter = getPresenter();
+    protected YoutubePresenter resolvePresenter() {
+        YoutubePresenter presenter = getPresenter();
 
         if (presenter == null) {
             if (PluginBus.isPlugin(getClass())) {
