@@ -50,6 +50,47 @@ class DraggableViewCallback extends ViewDragHelper.Callback {
 // -------------------------- OTHER METHODS --------------------------
 
     /**
+     * Override method used to configure the horizontal drag. Restrict the motion of the dragged
+     * child view along the horizontal axis.
+     *
+     * @param child child view being dragged.
+     * @param left  attempted motion along the X axis.
+     * @param dx    proposed change in position for left.
+     * @return the new clamped position for left.
+     */
+    @Override
+    public int clampViewPositionHorizontal(View child, int left, int dx) {
+        int newLeft = draggedView.getLeft();
+        if (Math.abs(dx) > MINIMUM_DX_FOR_HORIZONTAL_DRAG) {
+            newLeft = left;
+        }
+        return newLeft;
+    }
+
+    /**
+     * Override method used to configure the vertical drag. Restrict the motion of the dragged child
+     * view along the vertical axis.
+     *
+     * @param child child view being dragged.
+     * @param top   attempted motion along the Y axis.
+     * @param dy    proposed change in position for top.
+     * @return the new clamped position for top.
+     */
+    @Override
+    public int clampViewPositionVertical(View child, int top, int dy) {
+        int newTop = draggableView.getHeight() - draggableView.getDraggedViewHeightPlusMarginTop();
+        if (Math.abs(dy) >= MINIMUM_DY_FOR_VERTICAL_DRAG) {
+            final int topBound = draggableView.getPaddingTop();
+            final int bottomBound = draggableView.getHeight()
+                    - draggableView.getDraggedViewHeightPlusMarginTop()
+                    - draggedView.getPaddingBottom();
+
+            newTop = Math.min(Math.max(top, topBound), bottomBound);
+        }
+        return newTop;
+    }
+
+    /**
      * Override method used to apply different scale and alpha effects while the view is being
      * dragged.
      *
@@ -60,20 +101,7 @@ class DraggableViewCallback extends ViewDragHelper.Callback {
      */
     @Override
     public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-        //draggableView.changeDragViewPosition();
-    }
-
-    /**
-     * Override method used to apply different animations when the dragged view is released. The
-     * dragged view is going to be maximized or minimized if the view is above the middle of the
-     * custom view and the velocity is greater than a constant value.
-     *
-     * @param releasedChild the captured child view now being released.
-     * @param xVel          X velocity of the pointer as it left the screen in pixels per second.
-     * @param yVel          Y velocity of the pointer as it left the screen in pixels per second.
-     */
-    @Override
-    public void onViewReleased(View releasedChild, float xVel, float yVel) {
+        draggableView.changeDragViewPosition();
     }
 
     /**

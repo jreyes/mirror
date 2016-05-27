@@ -17,6 +17,7 @@ import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 
 @Plugin
+@Provides(GreetPresenter.class)
 public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> implements GreetPresenter {
 // ------------------------------ FIELDS ------------------------------
 
@@ -29,12 +30,6 @@ public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> impl
     @Plug
     GreetView mView;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(GreetPresenter.class)
-    public GreetPresenterImpl() {
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
 
@@ -42,7 +37,7 @@ public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> impl
 
     @Override
     public void onAnimationEnd() {
-        RxUtil.delay(l -> mEventManager.post(getGreetEvent()), 5);
+        RxUtil.delay(l -> mEventManager.post(getGreetEvent()), 10);
     }
 
 // --------------------- Interface PluginComponent ---------------------

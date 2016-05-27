@@ -6,13 +6,14 @@ import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import com.nineoldandroids.view.ViewHelper;
 import com.vaporwarecorp.mirror.R;
-import timber.log.Timber;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -40,6 +41,21 @@ public class DottedGridView extends PercentRelativeLayout {
     }
 
 // -------------------------- OTHER METHODS --------------------------
+
+    /**
+     * To ensure the animation is going to work this method has been override to call
+     * postInvalidateOnAnimation if the view is not settled yet.
+     */
+    @Override
+    public void computeScroll() {
+        if (!isInEditMode() && mViewDragHelper.continueSettling(true)) {
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+    }
+
+    public int getDraggedViewHeightPlusMarginTop() {
+        return mFragmentContainer.getHeight();
+    }
 
     /**
      * Checks if the top view is closed at the right or left place.
@@ -119,17 +135,7 @@ public class DottedGridView extends PercentRelativeLayout {
             return false;
         }
         mViewDragHelper.processTouchEvent(event);
-        if (isClosed()) {
-            return false;
-        }
-
-        boolean isDragViewHit = isViewHit(mFragmentContainer, (int) event.getX(), (int) event.getY());
-        Timber.d("isDragViewHit %s", isDragViewHit);
-        lastTouchActionDownXPosition = event.getX();
-        //analyzeTouchToMaximizeIfNeeded(event, isDragViewHit);
-        mFragmentContainer.dispatchTouchEvent(cloneMotionEventWithAction(event, MotionEvent.ACTION_CANCEL));
-        //mFragmentContainer.dispatchTouchEvent(event);
-        return true;
+        return !isClosed();
     }
 
     /**
@@ -192,5 +198,14 @@ public class DottedGridView extends PercentRelativeLayout {
                 && screenX < viewLocation[0] + view.getWidth()
                 && screenY >= viewLocation[1]
                 && screenY < viewLocation[1] + view.getHeight();
+    }
+
+    /**
+     * Modify dragged view pivot based on the dragged view vertical position to simulate a horizontal
+     * displacement while the view is dragged.
+     */
+    void changeDragViewPosition() {
+        ViewHelper.setPivotX(mFragmentContainer, mFragmentContainer.getWidth());
+        ViewHelper.setPivotY(mFragmentContainer, mFragmentContainer.getHeight());
     }
 }

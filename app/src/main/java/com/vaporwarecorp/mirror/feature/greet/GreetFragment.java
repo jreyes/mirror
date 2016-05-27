@@ -16,6 +16,7 @@ import com.vaporwarecorp.mirror.R;
 import static com.daimajia.androidanimations.library.Techniques.FadeIn;
 
 @Plugin
+@Provides(GreetView.class)
 public class GreetFragment extends FeatureFragment<GreetPresenter> implements GreetView {
 // ------------------------------ FIELDS ------------------------------
 
@@ -26,12 +27,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     private TextView mGreetNameText;
     private TextView mGreetTypeText;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(GreetView.class)
-    public GreetFragment() {
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
 
@@ -41,6 +36,29 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     public void displayGreet(String greetName, boolean isWelcome) {
         mGreetTypeText.setText(getString(isWelcome ? R.string.greet_welcome : R.string.greet_goodbye));
         mGreetNameText.setText(greetName);
+        YoYo
+                .with(FadeIn)
+                .duration(5000)
+                .withListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        getPresenter().onAnimationEnd();
+                        animation.removeAllListeners();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+                    }
+                })
+                .playOn(mGreetContainer);
     }
 
 // --------------------- Interface MirrorView ---------------------
@@ -66,32 +84,5 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         mGreetTypeText = (TextView) view.findViewById(R.id.greet_type_text);
         mGreetNameText = (TextView) view.findViewById(R.id.greet_name_text);
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        YoYo
-                .with(FadeIn)
-                .duration(2000)
-                .withListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mPresenter.onAnimationEnd();
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-                    }
-                })
-                .playOn(mGreetContainer);
     }
 }
