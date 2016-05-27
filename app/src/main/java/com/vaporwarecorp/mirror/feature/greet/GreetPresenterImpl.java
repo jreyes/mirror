@@ -53,11 +53,11 @@ public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> impl
         plug(GreetView.class);
     }
 
-// --------------------- Interface ViewListener ---------------------
+// --------------------- Interface ViewObserver ---------------------
 
     @Override
-    public void onViewStart(final View view) {
-        super.onViewStart(view);
+    public void onViewResume(final View view) {
+        super.onViewResume(view);
         mView.displayGreet(getGreetName(), isWelcome());
     }
 

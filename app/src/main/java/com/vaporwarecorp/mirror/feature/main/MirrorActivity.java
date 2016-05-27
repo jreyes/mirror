@@ -54,36 +54,18 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Override
     public void showView(final FeatureView featureView, final boolean addToBackStack, final String fragmentTag) {
         String tag = fragmentTag;
-
         if (fragmentTag == null) {
             tag = featureView.getViewTag();
         }
 
         final FragmentManager manager = getFragmentManager();
         if (manager.findFragmentByTag(tag) == null) {
-            final FragmentTransaction transaction = manager.beginTransaction();
-
             if (featureView instanceof DialogFragment) {
-                final DialogFragment dialogFragment = (DialogFragment) featureView;
-                transaction.add(dialogFragment, tag);
-
-                if (addToBackStack) {
-                    transaction.addToBackStack(tag);
-                }
-                transaction.commitAllowingStateLoss();
+                displayDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
+            } else if (featureView instanceof MirrorView) {
+                displayMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
             } else if (featureView instanceof Fragment) {
-                final Fragment fragment = (Fragment) featureView;
-                if (fragment instanceof MirrorView && ((MirrorView) fragment).isFullscreen()) {
-                    transaction.replace(R.id.fullscreen_container, fragment, tag);
-                    mFullscreenContainer.setVisibility(View.VISIBLE);
-                } else {
-                    transaction.replace(R.id.fragment_container, fragment, tag);
-                    mFullscreenContainer.setVisibility(View.GONE);
-                }
-                if (addToBackStack) {
-                    transaction.addToBackStack(tag);
-                }
-                transaction.commit();
+                displayFragment(manager, (Fragment) featureView, addToBackStack, tag);
             }
         }
     }
@@ -164,6 +146,49 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         if (!mFeature.isStarted()) {
             mFeatureManager.startFeature(this, mFeature);
         }
+    }
+
+    private void displayDialogFragment(final FragmentManager fragmentManager,
+                                       final DialogFragment dialogFragment,
+                                       final boolean addToBackStack,
+                                       final String tag) {
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(dialogFragment, tag);
+        if (addToBackStack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commitAllowingStateLoss();
+    }
+
+    private void displayFragment(final FragmentManager fragmentManager,
+                                 final Fragment fragment,
+                                 final boolean addToBackStack,
+                                 final String tag) {
+        mFullscreenContainer.setVisibility(View.GONE);
+
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment, tag);
+        if (addToBackStack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commitAllowingStateLoss();
+    }
+
+    private void displayMirrorView(final FragmentManager fragmentManager,
+                                   final MirrorView mirrorView,
+                                   final boolean addToBackStack,
+                                   final String tag) {
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (mirrorView.isFullscreen()) {
+            mFullscreenContainer.setVisibility(View.VISIBLE);
+            transaction.replace(R.id.fullscreen_container, (Fragment) mirrorView, tag);
+        } else {
+            mFullscreenContainer.setVisibility(View.GONE);
+        }
+        if (addToBackStack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commitAllowingStateLoss();
     }
 
     private void onResumeFullScreen() {

@@ -73,7 +73,7 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         super.onResume();
         YoYo
                 .with(FadeIn)
-                .duration(1000)
+                .duration(2000)
                 .withListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {

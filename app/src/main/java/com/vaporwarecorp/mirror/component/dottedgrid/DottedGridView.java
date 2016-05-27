@@ -5,12 +5,14 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.vaporwarecorp.mirror.R;
-import com.vaporwarecorp.mirror.component.draggable.DraggableView;
+import timber.log.Timber;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -18,24 +20,91 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 public class DottedGridView extends PercentRelativeLayout {
 // ------------------------------ FIELDS ------------------------------
 
+    private static final int INVALID_POINTER = -1;
+    private static final float SENSITIVITY = 1f;
+
+    private int activePointerId = INVALID_POINTER;
+    private float lastTouchActionDownXPosition;
     private Drawable mBackground;
     private Drawable mBorder;
     private FrameLayout mContainer;
-    private View mFragmentContainer;
+    private FrameLayout mFragmentContainer;
+    private ViewDragHelper mViewDragHelper;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
     public DottedGridView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        initLayout(context);
+        initializeLayout(context);
+        initializeViewDragHelper();
     }
 
 // -------------------------- OTHER METHODS --------------------------
 
+    /**
+     * Checks if the top view is closed at the right or left place.
+     *
+     * @return true if the view is closed.
+     */
+    public boolean isClosed() {
+        return isClosedAtLeft() || isClosedAtRight();
+    }
+
+    /**
+     * Checks if the top view is closed at the left place.
+     *
+     * @return true if the view is closed at left.
+     */
+    public boolean isClosedAtLeft() {
+        return mFragmentContainer.getRight() <= 0;
+    }
+
+    /**
+     * Checks if the top view closed at the right place.
+     *
+     * @return true if the view is closed at right.
+     */
+    public boolean isClosedAtRight() {
+        return mFragmentContainer.getLeft() >= getWidth();
+    }
+
+    /**
+     * Override method to intercept only touch events over the drag view and to cancel the drag when
+     * the action associated to the MotionEvent is equals to ACTION_CANCEL or ACTION_UP.
+     *
+     * @param ev captured.
+     * @return true if the view is going to process the touch event or false if not.
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            return false;
+        }
+        switch (MotionEventCompat.getActionMasked(ev) & MotionEventCompat.ACTION_MASK) {
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mViewDragHelper.cancel();
+                return false;
+            case MotionEvent.ACTION_DOWN:
+                int index = MotionEventCompat.getActionIndex(ev);
+                activePointerId = MotionEventCompat.getPointerId(ev, index);
+                if (activePointerId == INVALID_POINTER) {
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+        boolean interceptTap = mViewDragHelper.isViewUnder(mFragmentContainer, (int) ev.getX(), (int) ev.getY());
+        return mViewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
+        int actionMasked = MotionEventCompat.getActionMasked(event);
+        switch (actionMasked & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                activePointerId = MotionEventCompat.getPointerId(event, actionMasked);
                 setBackground(mBorder);
                 mContainer.setBackground(mBackground);
                 break;
@@ -43,16 +112,42 @@ public class DottedGridView extends PercentRelativeLayout {
             case MotionEvent.ACTION_UP:
                 setBackground(null);
                 mContainer.setBackground(null);
-                break;
-
-            default:
                 return false;
         }
 
+        if (activePointerId == INVALID_POINTER) {
+            return false;
+        }
+        mViewDragHelper.processTouchEvent(event);
+        if (isClosed()) {
+            return false;
+        }
+
+        boolean isDragViewHit = isViewHit(mFragmentContainer, (int) event.getX(), (int) event.getY());
+        Timber.d("isDragViewHit %s", isDragViewHit);
+        lastTouchActionDownXPosition = event.getX();
+        //analyzeTouchToMaximizeIfNeeded(event, isDragViewHit);
+        mFragmentContainer.dispatchTouchEvent(cloneMotionEventWithAction(event, MotionEvent.ACTION_CANCEL));
+        //mFragmentContainer.dispatchTouchEvent(event);
         return true;
     }
 
-    private void initLayout(Context context) {
+    /**
+     * Clone given motion event and set specified action. This method is useful, when we want to
+     * cancel event propagation in child views by sending event with {@link
+     * android.view.MotionEvent#ACTION_CANCEL}
+     * action.
+     *
+     * @param event  event to clone
+     * @param action new action
+     * @return cloned motion event
+     */
+    private MotionEvent cloneMotionEventWithAction(MotionEvent event, int action) {
+        return MotionEvent.obtain(event.getDownTime(), event.getEventTime(), action, event.getX(),
+                event.getY(), event.getMetaState());
+    }
+
+    private void initializeLayout(Context context) {
         mBorder = ContextCompat.getDrawable(context, R.drawable.bg_solid_border);
         mBackground = ContextCompat.getDrawable(context, R.drawable.bg_dotted_grid);
 
@@ -61,13 +156,41 @@ public class DottedGridView extends PercentRelativeLayout {
         addView(mContainer);
 
         LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
-        params.getPercentLayoutInfo().widthPercent = 0.4f;
+        //params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
+        params.getPercentLayoutInfo().widthPercent = 0.3f;
 
-        mFragmentContainer = new DraggableView(context);
+        mFragmentContainer = new FrameLayout(context);
         mFragmentContainer.setId(R.id.fragment_container);
         mFragmentContainer.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
         mFragmentContainer.setLayoutParams(params);
         addView(mFragmentContainer);
+    }
+
+    /**
+     * Initialize the viewDragHelper.
+     */
+    private void initializeViewDragHelper() {
+        mViewDragHelper = ViewDragHelper.create(this, SENSITIVITY, new DraggableViewCallback(this, mFragmentContainer));
+    }
+
+    /**
+     * Calculate if one position is above any view.
+     *
+     * @param view to analyze.
+     * @param x    position.
+     * @param y    position.
+     * @return true if x and y positions are below the view.
+     */
+    private boolean isViewHit(View view, int x, int y) {
+        int[] viewLocation = new int[2];
+        view.getLocationOnScreen(viewLocation);
+        int[] parentLocation = new int[2];
+        this.getLocationOnScreen(parentLocation);
+        int screenX = parentLocation[0] + x;
+        int screenY = parentLocation[1] + y;
+        return screenX >= viewLocation[0]
+                && screenX < viewLocation[0] + view.getWidth()
+                && screenY >= viewLocation[1]
+                && screenY < viewLocation[1] + view.getHeight();
     }
 }
