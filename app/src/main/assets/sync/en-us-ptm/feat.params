@@ -1,5 +1,5 @@
--lowerf 15000
--upperf 25000
+-lowerf 130
+-upperf 6800
 -nfilt 25
 -transform dct
 -lifter 22

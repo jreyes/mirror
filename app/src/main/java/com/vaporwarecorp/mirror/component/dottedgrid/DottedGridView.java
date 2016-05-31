@@ -10,9 +10,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
-import com.nineoldandroids.view.ViewHelper;
 import com.vaporwarecorp.mirror.R;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -26,7 +24,6 @@ public class DottedGridView extends PercentRelativeLayout {
 
     private int activePointerId = INVALID_POINTER;
     private float lastTouchActionDownXPosition;
-    private Drawable mBackground;
     private Drawable mBorder;
     private FrameLayout mContainer;
     private FrameLayout mFragmentContainer;
@@ -119,50 +116,39 @@ public class DottedGridView extends PercentRelativeLayout {
     public boolean onTouchEvent(MotionEvent event) {
         int actionMasked = MotionEventCompat.getActionMasked(event);
         switch (actionMasked & MotionEventCompat.ACTION_MASK) {
+            case MotionEvent.ACTION_CANCEL:
+                return false;
+            case MotionEvent.ACTION_UP:
+                mContainer.setVisibility(INVISIBLE);
+                break;
             case MotionEvent.ACTION_DOWN:
                 activePointerId = MotionEventCompat.getPointerId(event, actionMasked);
-                setBackground(mBorder);
-                mContainer.setBackground(mBackground);
+                mContainer.setVisibility(VISIBLE);
                 break;
-
-            case MotionEvent.ACTION_UP:
-                setBackground(null);
-                mContainer.setBackground(null);
-                return false;
         }
-
         if (activePointerId == INVALID_POINTER) {
             return false;
         }
         mViewDragHelper.processTouchEvent(event);
-        return !isClosed();
-    }
-
-    /**
-     * Clone given motion event and set specified action. This method is useful, when we want to
-     * cancel event propagation in child views by sending event with {@link
-     * android.view.MotionEvent#ACTION_CANCEL}
-     * action.
-     *
-     * @param event  event to clone
-     * @param action new action
-     * @return cloned motion event
-     */
-    private MotionEvent cloneMotionEventWithAction(MotionEvent event, int action) {
-        return MotionEvent.obtain(event.getDownTime(), event.getEventTime(), action, event.getX(),
-                event.getY(), event.getMetaState());
+        return true;
     }
 
     private void initializeLayout(Context context) {
         mBorder = ContextCompat.getDrawable(context, R.drawable.bg_solid_border);
-        mBackground = ContextCompat.getDrawable(context, R.drawable.bg_dotted_grid);
+
+        FrameLayout gridLayout = new FrameLayout(context);
+        gridLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_dotted_grid));
+        gridLayout.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
         mContainer = new FrameLayout(context);
+        mContainer.addView(gridLayout);
+        mContainer.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_solid_border));
         mContainer.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mContainer.setVisibility(INVISIBLE);
         addView(mContainer);
 
         LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        //params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
+        params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
         params.getPercentLayoutInfo().widthPercent = 0.3f;
 
         mFragmentContainer = new FrameLayout(context);
@@ -177,35 +163,5 @@ public class DottedGridView extends PercentRelativeLayout {
      */
     private void initializeViewDragHelper() {
         mViewDragHelper = ViewDragHelper.create(this, SENSITIVITY, new DraggableViewCallback(this, mFragmentContainer));
-    }
-
-    /**
-     * Calculate if one position is above any view.
-     *
-     * @param view to analyze.
-     * @param x    position.
-     * @param y    position.
-     * @return true if x and y positions are below the view.
-     */
-    private boolean isViewHit(View view, int x, int y) {
-        int[] viewLocation = new int[2];
-        view.getLocationOnScreen(viewLocation);
-        int[] parentLocation = new int[2];
-        this.getLocationOnScreen(parentLocation);
-        int screenX = parentLocation[0] + x;
-        int screenY = parentLocation[1] + y;
-        return screenX >= viewLocation[0]
-                && screenX < viewLocation[0] + view.getWidth()
-                && screenY >= viewLocation[1]
-                && screenY < viewLocation[1] + view.getHeight();
-    }
-
-    /**
-     * Modify dragged view pivot based on the dragged view vertical position to simulate a horizontal
-     * displacement while the view is dragged.
-     */
-    void changeDragViewPosition() {
-        ViewHelper.setPivotX(mFragmentContainer, mFragmentContainer.getWidth());
-        ViewHelper.setPivotY(mFragmentContainer, mFragmentContainer.getHeight());
     }
 }

@@ -25,12 +25,14 @@
             android:layout_alignParentTop="true"
             app:layout_widthPercent="30%" />
 
+        <!--
         <com.vaporwarecorp.mirror.component.datetime.DateTimeView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             app:layout_widthPercent="30%" />
+            -->
 
         <Button
             android:id="@+id/test_button"

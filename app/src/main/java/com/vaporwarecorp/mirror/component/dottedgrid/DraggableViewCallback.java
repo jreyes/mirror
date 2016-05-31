@@ -49,6 +49,13 @@ class DraggableViewCallback extends ViewDragHelper.Callback {
 
 // -------------------------- OTHER METHODS --------------------------
 
+    @Override
+    public void onViewReleased(View releasedChild, float xvel, float yvel) {
+        draggedView.setLeft(releasedChild.getLeft());
+        draggedView.setTop(releasedChild.getTop());
+        //draggableView.changeDragViewPosition(releasedChild);
+    }
+
     /**
      * Override method used to configure the horizontal drag. Restrict the motion of the dragged
      * child view along the horizontal axis.
@@ -60,11 +67,9 @@ class DraggableViewCallback extends ViewDragHelper.Callback {
      */
     @Override
     public int clampViewPositionHorizontal(View child, int left, int dx) {
-        int newLeft = draggedView.getLeft();
-        if (Math.abs(dx) > MINIMUM_DX_FOR_HORIZONTAL_DRAG) {
-            newLeft = left;
-        }
-        return newLeft;
+        final int leftBound = draggableView.getPaddingLeft() + 4;
+        final int rightBound = draggableView.getWidth() - draggedView.getWidth() - 4;
+        return Math.min(Math.max(left, leftBound), rightBound);
     }
 
     /**
@@ -78,30 +83,9 @@ class DraggableViewCallback extends ViewDragHelper.Callback {
      */
     @Override
     public int clampViewPositionVertical(View child, int top, int dy) {
-        int newTop = draggableView.getHeight() - draggableView.getDraggedViewHeightPlusMarginTop();
-        if (Math.abs(dy) >= MINIMUM_DY_FOR_VERTICAL_DRAG) {
-            final int topBound = draggableView.getPaddingTop();
-            final int bottomBound = draggableView.getHeight()
-                    - draggableView.getDraggedViewHeightPlusMarginTop()
-                    - draggedView.getPaddingBottom();
-
-            newTop = Math.min(Math.max(top, topBound), bottomBound);
-        }
-        return newTop;
-    }
-
-    /**
-     * Override method used to apply different scale and alpha effects while the view is being
-     * dragged.
-     *
-     * @param left position.
-     * @param top  position.
-     * @param dx   change in X position from the last call.
-     * @param dy   change in Y position from the last call.
-     */
-    @Override
-    public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-        draggableView.changeDragViewPosition();
+        final int topBound = draggableView.getPaddingTop() + 4;
+        final int bottomBound = draggableView.getHeight() - draggedView.getHeight() - 4;
+        return Math.min(Math.max(top, topBound), bottomBound);
     }
 
     /**

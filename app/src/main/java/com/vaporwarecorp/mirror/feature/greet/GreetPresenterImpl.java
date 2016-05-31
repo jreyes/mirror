@@ -37,7 +37,7 @@ public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> impl
 
     @Override
     public void onAnimationEnd() {
-        RxUtil.delay(l -> mEventManager.post(getGreetEvent()), 10);
+        RxUtil.delay(l -> mEventManager.post(getGreetEvent()), 5);
     }
 
 // --------------------- Interface PluginComponent ---------------------
