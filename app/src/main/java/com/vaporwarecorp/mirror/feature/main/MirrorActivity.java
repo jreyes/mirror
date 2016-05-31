@@ -3,10 +3,12 @@ package com.vaporwarecorp.mirror.feature.main;
 import android.app.*;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
+
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -14,6 +16,7 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
 import com.vaporwarecorp.mirror.component.forecast.ForecastView;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
@@ -32,11 +35,19 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     PluginFeatureManager mFeatureManager;
     @Plug(MainScope.class)
     MainPresenter mPresenter;
+    @Plug
+    AppManager mAppManager;
 
     private View mContentContainer;
     private ForecastView mForecastView;
     private View mFullscreenContainer;
     private View mHeaderContainer;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAppManager.refWatcher().watch(this);
+    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 

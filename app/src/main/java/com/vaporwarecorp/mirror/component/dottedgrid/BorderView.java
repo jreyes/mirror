@@ -8,12 +8,12 @@ import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
+
 import com.vaporwarecorp.mirror.R;
 
-public class BorderView extends FrameLayout {
-// ------------------------------ FIELDS ------------------------------
+import static com.vaporwarecorp.mirror.util.DisplayMetricsUtil.convertDpToPixel;
 
-    private Drawable mBorder;
+public class BorderView extends FrameLayout {
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -27,26 +27,25 @@ public class BorderView extends FrameLayout {
 
     public BorderView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initializeLayout(context);
     }
 
-// -------------------------- OTHER METHODS --------------------------
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int actionMasked = MotionEventCompat.getActionMasked(event);
-        switch (actionMasked & MotionEventCompat.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                setBackground(mBorder);
-                break;
-
-            case MotionEvent.ACTION_UP:
-                setBackground(null);
-                return false;
-        }
-        return true;
+    public void showBorder() {
+        setBackgroundColor(mColorWhite);
     }
 
-    private void initializeLayout(Context context) {
-        mBorder = ContextCompat.getDrawable(context, R.drawable.bg_solid_border);
+    public void hideBorder() {
+        setBackgroundColor(mColorTransparent);
+    }
+
+    private int mColorWhite;
+    private int mColorTransparent;
+
+    private void initializeLayout(final Context context) {
+        mColorTransparent = ContextCompat.getColor(context, android.R.color.transparent);
+        mColorWhite = ContextCompat.getColor(context, android.R.color.white);
+
+        final int borderPadding = Math.round(convertDpToPixel(2, context));
+        setPadding(borderPadding, borderPadding, borderPadding, borderPadding);
     }
 }

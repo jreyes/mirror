@@ -38,7 +38,7 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         mGreetNameText.setText(greetName);
         YoYo
                 .with(FadeIn)
-                .duration(5000)
+                .duration(1000)
                 .withListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {

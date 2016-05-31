@@ -2,6 +2,7 @@ package com.vaporwarecorp.mirror.component;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Process;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.IntegerRes;
@@ -61,6 +62,7 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     public void exitApplication() {
         mExitObserver.onAppExit();
         mFeatureManager.getForegroundActivity().finish();
+        Process.killProcess(Process.myPid());
     }
 
     @Override
