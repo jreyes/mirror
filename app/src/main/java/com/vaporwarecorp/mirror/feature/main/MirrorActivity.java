@@ -3,12 +3,10 @@ package com.vaporwarecorp.mirror.feature.main;
 import android.app.*;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Process;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
-
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -18,6 +16,7 @@ import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
+import com.vaporwarecorp.mirror.component.dottedgrid.DottedGridView;
 import com.vaporwarecorp.mirror.component.forecast.ForecastView;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
@@ -29,25 +28,19 @@ import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
 // ------------------------------ FIELDS ------------------------------
 
+    @Plug
+    AppManager mAppManager;
     @Plug(MirrorAppScope.class)
     MainFeature mFeature;
     @Plug
     PluginFeatureManager mFeatureManager;
     @Plug(MainScope.class)
     MainPresenter mPresenter;
-    @Plug
-    AppManager mAppManager;
 
-    private View mContentContainer;
+    private DottedGridView mContentContainer;
     private ForecastView mForecastView;
     private View mFullscreenContainer;
     private View mHeaderContainer;
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mAppManager.refWatcher().watch(this);
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -137,11 +130,17 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         setContentView(R.layout.activity_mirror);
 
         mHeaderContainer = findViewById(R.id.header_container);
-        mContentContainer = findViewById(R.id.content_container);
+        mContentContainer = (DottedGridView) findViewById(R.id.content_container);
         mFullscreenContainer = findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
         findViewById(R.id.test_button).setOnClickListener(v -> mPresenter.startSpotify());
         //findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAppManager.refWatcher().watch(this);
     }
 
     @Override
@@ -177,8 +176,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                                  final String tag) {
         mFullscreenContainer.setVisibility(View.GONE);
 
+        final int viewId = mContentContainer.addBorderView(this);
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment, tag);
+        transaction.replace(viewId, fragment, tag);
         if (addToBackStack) {
             transaction.addToBackStack(tag);
         }
@@ -189,17 +189,18 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                                    final MirrorView mirrorView,
                                    final boolean addToBackStack,
                                    final String tag) {
-        final FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (mirrorView.isFullscreen()) {
             mFullscreenContainer.setVisibility(View.VISIBLE);
+
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(R.id.fullscreen_container, (Fragment) mirrorView, tag);
+            if (addToBackStack) {
+                transaction.addToBackStack(tag);
+            }
+            transaction.commitAllowingStateLoss();
         } else {
-            mFullscreenContainer.setVisibility(View.GONE);
+            displayFragment(fragmentManager, (Fragment) mirrorView, addToBackStack, tag);
         }
-        if (addToBackStack) {
-            transaction.addToBackStack(tag);
-        }
-        transaction.commitAllowingStateLoss();
     }
 
     private void onResumeFullScreen() {

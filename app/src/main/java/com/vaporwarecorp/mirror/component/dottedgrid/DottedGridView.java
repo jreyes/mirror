@@ -1,7 +1,21 @@
+/*
+ * Copyright 2016 Johann Reyes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.vaporwarecorp.mirror.component.dottedgrid;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
@@ -9,18 +23,17 @@ import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-
 import com.vaporwarecorp.mirror.R;
 
-import timber.log.Timber;
+import java.util.HashMap;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.vaporwarecorp.mirror.util.DisplayMetricsUtil.convertDpToPixel;
+import static solid.stream.Stream.stream;
 
 public class DottedGridView extends PercentRelativeLayout {
 // ------------------------------ FIELDS ------------------------------
@@ -28,10 +41,68 @@ public class DottedGridView extends PercentRelativeLayout {
     private static final int INVALID_POINTER = -1;
     private static final float SENSITIVITY = 1f;
 
+    ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            params.leftMargin = releasedChild.getLeft();
+            params.topMargin = releasedChild.getTop();
+            params.getPercentLayoutInfo().widthPercent = 0.3f;
+            releasedChild.setLayoutParams(params);
+        }
+
+        /**
+         * Override method used to configure the horizontal drag. Restrict the motion of the dragged
+         * child view along the horizontal axis.
+         *
+         * @param child child view being dragged.
+         * @param left  attempted motion along the X axis.
+         * @param dx    proposed change in position for left.
+         * @return the new clamped position for left.
+         */
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            final int leftBound = getPaddingLeft() + mBorderPadding;
+            final int rightBound = getWidth() - mDraggedView.getWidth() - mBorderPadding;
+            return Math.min(Math.max(left, leftBound), rightBound);
+        }
+
+        /**
+         * Override method used to configure the vertical drag. Restrict the motion of the dragged child
+         * view along the vertical axis.
+         *
+         * @param child child view being dragged.
+         * @param top   attempted motion along the Y axis.
+         * @param dy    proposed change in position for top.
+         * @return the new clamped position for top.
+         */
+        @Override
+        public int clampViewPositionVertical(View child, int top, int dy) {
+            final int topBound = getPaddingTop() + mBorderPadding;
+            final int bottomBound = getHeight() - mDraggedView.getHeight() - mBorderPadding;
+            return Math.min(Math.max(top, topBound), bottomBound);
+        }
+
+        /**
+         * Override method used to configure which is going to be the dragged view.
+         *
+         * @param view      child the user is attempting to capture.
+         * @param pointerId ID of the pointer attempting the capture,
+         * @return true if capture should be allowed, false otherwise.
+         */
+        @Override
+        public boolean tryCaptureView(View view, int pointerId) {
+            return view instanceof BorderView;
+        }
+    };
+
     private int activePointerId = INVALID_POINTER;
     private FrameLayout mBackground;
-    private FrameLayout mFragmentContainer;
+    private int mBorderPadding;
+    private BorderView mDraggedView;
     private ViewDragHelper mViewDragHelper;
+
+    private HashMap<Integer, BorderView> mViews;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -42,6 +113,22 @@ public class DottedGridView extends PercentRelativeLayout {
     }
 
 // -------------------------- OTHER METHODS --------------------------
+
+    public int addBorderView(final Context context) {
+        final int viewId = View.generateViewId();
+
+        final LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
+        params.getPercentLayoutInfo().widthPercent = 0.3f;
+
+        BorderView view = new BorderView(context);
+        view.setId(viewId);
+        view.setLayoutParams(params);
+        mViews.put(viewId, view);
+        addView(view);
+
+        return viewId;
+    }
 
     /**
      * To ensure the animation is going to work this method has been override to call
@@ -97,11 +184,12 @@ public class DottedGridView extends PercentRelativeLayout {
         if (!isEnabled()) {
             return false;
         }
-        View view = findViewById(MotionEventCompat.getSource(ev));
-        if (view != null && view instanceof BorderView) {
-            mDraggedView = (BorderView) view;
-        }
-        Timber.d("onInterceptTouchEvent");
+
+        mDraggedView = null;
+        stream(mViews.values())
+                .filter(v -> isViewHit(v, (int) ev.getX(), (int) ev.getY()))
+                .forEach((BorderView v) -> mDraggedView = v);
+
         switch (MotionEventCompat.getActionMasked(ev) & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
@@ -122,21 +210,8 @@ public class DottedGridView extends PercentRelativeLayout {
         return mViewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap;
     }
 
-    private void showDraggedViewBorder() {
-        if (mDraggedView != null) {
-            mDraggedView.showBorder();
-        }
-    }
-
-    private void hideDraggedViewBorder() {
-        if (mDraggedView != null) {
-            mDraggedView.hideBorder();
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Timber.d("onTouchEvent");
         int actionMasked = MotionEventCompat.getActionMasked(event);
         switch (actionMasked & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_CANCEL:
@@ -158,8 +233,15 @@ public class DottedGridView extends PercentRelativeLayout {
         return true;
     }
 
+    private void hideDraggedViewBorder() {
+        if (mDraggedView != null) {
+            mDraggedView.hideBorder();
+        }
+    }
+
     private void initializeLayout(Context context) {
         mBorderPadding = Math.round(convertDpToPixel(2, context));
+        mViews = new HashMap<>();
 
         FrameLayout gridLayout = new FrameLayout(context);
         gridLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_dotted_grid));
@@ -174,16 +256,6 @@ public class DottedGridView extends PercentRelativeLayout {
         mBackground.setTop(0);
         mBackground.setVisibility(INVISIBLE);
         addView(mBackground);
-
-        LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        params.addRule(PercentRelativeLayout.CENTER_IN_PARENT);
-        params.getPercentLayoutInfo().widthPercent = 0.3f;
-
-        mFragmentContainer = new BorderView(context);
-        mFragmentContainer.setId(R.id.fragment_container);
-        //mFragmentContainer.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
-        mFragmentContainer.setLayoutParams(params);
-        addView(mFragmentContainer);
     }
 
     /**
@@ -193,66 +265,30 @@ public class DottedGridView extends PercentRelativeLayout {
         mViewDragHelper = ViewDragHelper.create(this, SENSITIVITY, mCallback);
     }
 
-    private BorderView mDraggedView;
-    private int mBorderPadding;
+    /**
+     * Calculate if one position is above any view.
+     *
+     * @param view to analyze.
+     * @param x    position.
+     * @param y    position.
+     * @return true if x and y positions are below the view.
+     */
+    private boolean isViewHit(View view, int x, int y) {
+        int[] viewLocation = new int[2];
+        view.getLocationOnScreen(viewLocation);
+        int[] parentLocation = new int[2];
+        this.getLocationOnScreen(parentLocation);
+        int screenX = parentLocation[0] + x;
+        int screenY = parentLocation[1] + y;
+        return screenX >= viewLocation[0]
+                && screenX < viewLocation[0] + view.getWidth()
+                && screenY >= viewLocation[1]
+                && screenY < viewLocation[1] + view.getHeight();
+    }
 
-    private ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
-
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            mDraggedView.setLeft(releasedChild.getLeft());
-            mDraggedView.setTop(releasedChild.getTop());
+    private void showDraggedViewBorder() {
+        if (mDraggedView != null) {
+            mDraggedView.showBorder();
         }
-
-        /**
-         * Override method used to configure the horizontal drag. Restrict the motion of the dragged
-         * child view along the horizontal axis.
-         *
-         * @param child child view being dragged.
-         * @param left  attempted motion along the X axis.
-         * @param dx    proposed change in position for left.
-         * @return the new clamped position for left.
-         */
-        @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
-            final int leftBound = getPaddingLeft() + mBorderPadding;
-            final int rightBound = getWidth() - mDraggedView.getWidth() - mBorderPadding;
-            return Math.min(Math.max(left, leftBound), rightBound);
-        }
-
-        /**
-         * Override method used to configure the vertical drag. Restrict the motion of the dragged child
-         * view along the vertical axis.
-         *
-         * @param child child view being dragged.
-         * @param top   attempted motion along the Y axis.
-         * @param dy    proposed change in position for top.
-         * @return the new clamped position for top.
-         */
-        @Override
-        public int clampViewPositionVertical(View child, int top, int dy) {
-            final int topBound = getPaddingTop() + mBorderPadding;
-            final int bottomBound = getHeight() - mDraggedView.getHeight() - mBorderPadding;
-            return Math.min(Math.max(top, topBound), bottomBound);
-        }
-
-        /**
-         * Override method used to configure which is going to be the dragged view.
-         *
-         * @param view      child the user is attempting to capture.
-         * @param pointerId ID of the pointer attempting the capture,
-         * @return true if capture should be allowed, false otherwise.
-         */
-        @Override
-        public boolean tryCaptureView(View view, int pointerId) {
-            Timber.d("tryCaptureView");
-            if (view instanceof BorderView) {
-                mDraggedView = (BorderView) view;
-                return true;
-            } else {
-                mDraggedView = null;
-                return false;
-            }
-        }
-    };
+    }
 }
