@@ -101,7 +101,6 @@ public class DottedGridView extends PercentRelativeLayout {
     private int mBorderPadding;
     private BorderView mDraggedView;
     private ViewDragHelper mViewDragHelper;
-
     private HashMap<Integer, BorderView> mViews;
 
 // --------------------------- CONSTRUCTORS ---------------------------
