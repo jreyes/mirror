@@ -15,13 +15,18 @@
  */
 package com.vaporwarecorp.mirror.feature.main;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
+
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -65,7 +70,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Override
     @IdRes
     public int getContainerViewId() {
-        return R.id.fragment_container;
+        return R.id.fullscreen_container;
     }
 
 // --------------------- Interface FeatureTransitionManager ---------------------
@@ -78,14 +83,12 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
 
         final FragmentManager manager = getFragmentManager();
-        if (manager.findFragmentByTag(tag) == null) {
-            if (featureView instanceof DialogFragment) {
-                showDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
-            } else if (featureView instanceof MirrorView) {
-                showMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
-            } else if (featureView instanceof Fragment) {
-                showFragment(manager, (Fragment) featureView, addToBackStack, tag);
-            }
+        if (featureView instanceof DialogFragment) {
+            showDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
+        } else if (featureView instanceof MirrorView) {
+            showMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
+        } else if (featureView instanceof Fragment) {
+            showFragment(manager, (Fragment) featureView, addToBackStack, tag);
         }
     }
 
@@ -259,7 +262,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             mFullscreenContainer.setVisibility(View.VISIBLE);
 
             final FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.replace(R.id.fullscreen_container, (Fragment) mirrorView, tag);
+            transaction.replace(getContainerViewId(), (Fragment) mirrorView, tag);
             if (addToBackStack) {
                 transaction.addToBackStack(tag);
             }
