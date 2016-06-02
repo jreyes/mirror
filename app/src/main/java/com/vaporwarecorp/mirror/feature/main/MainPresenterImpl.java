@@ -79,6 +79,10 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, "u99kOUA5EpE"));
     }
 
+    public void startSpotify2() {
+        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, "UygC613BrmE"));
+    }
+
     @Override
     public void stopListening() {
         mHotWordManager.stopListening();

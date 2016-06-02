@@ -65,12 +65,25 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         final FragmentManager manager = getFragmentManager();
         if (manager.findFragmentByTag(tag) == null) {
             if (featureView instanceof DialogFragment) {
-                displayDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
+                showDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
             } else if (featureView instanceof MirrorView) {
-                displayMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
+                showMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
             } else if (featureView instanceof Fragment) {
-                displayFragment(manager, (Fragment) featureView, addToBackStack, tag);
+                showFragment(manager, (Fragment) featureView, addToBackStack, tag);
             }
+        }
+    }
+
+    @Override
+    public void removeView(final FeatureView featureView, final boolean addedToBackStack, final String fragmentTag) {
+        if (featureView instanceof DialogFragment) {
+            hideDialogFragment((DialogFragment) featureView);
+        } else if (featureView instanceof MirrorView) {
+            String tag = (fragmentTag != null) ? fragmentTag : featureView.getViewTag();
+            hideMirrorView((MirrorView) featureView, addedToBackStack, tag);
+        } else if (featureView instanceof Fragment) {
+            String tag = (fragmentTag != null) ? fragmentTag : featureView.getViewTag();
+            hideFragment((Fragment) featureView, true, addedToBackStack, tag);
         }
     }
 
@@ -134,7 +147,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mFullscreenContainer = findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
         findViewById(R.id.test_button).setOnClickListener(v -> mPresenter.startSpotify());
-        //findViewById(R.id.spotify).setOnClickListener(v -> mPresenter.startSpotify());
+        findViewById(R.id.test_another_button).setOnClickListener(v -> mPresenter.startSpotify2());
     }
 
     @Override
@@ -158,10 +171,48 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
     }
 
-    private void displayDialogFragment(final FragmentManager fragmentManager,
-                                       final DialogFragment dialogFragment,
-                                       final boolean addToBackStack,
-                                       final String tag) {
+    private void hideDialogFragment(final DialogFragment dialogFragment) {
+        dialogFragment.dismiss();
+    }
+
+    private void hideFragment(final Fragment fragment,
+                              final boolean removeParentView,
+                              final boolean addedToBackStack,
+                              final String tag) {
+        final FragmentManager manager = getFragmentManager();
+        if (manager.findFragmentByTag(tag) != null) {
+            Integer viewId = null;
+            if (fragment.getView() != null && fragment.getView().getParent() != null) {
+                viewId = ((View) fragment.getView().getParent()).getId();
+            }
+
+            final FragmentTransaction transaction = manager.beginTransaction();
+            transaction.remove(fragment);
+            transaction.commit();
+
+            if (addedToBackStack) {
+                manager.popBackStack();
+            }
+
+            if (removeParentView && viewId != null) {
+                mContentContainer.removeBorderView(viewId);
+            }
+        }
+    }
+
+    private void hideMirrorView(final MirrorView mirrorView, final boolean addedToBackStack, final String tag) {
+        hideFragment((Fragment) mirrorView, !mirrorView.isFullscreen(), addedToBackStack, tag);
+    }
+
+    private void onResumeFullScreen() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        FullScreenActivityUtil.onResume(this);
+    }
+
+    private void showDialogFragment(final FragmentManager fragmentManager,
+                                    final DialogFragment dialogFragment,
+                                    final boolean addToBackStack,
+                                    final String tag) {
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(dialogFragment, tag);
         if (addToBackStack) {
@@ -170,10 +221,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         transaction.commitAllowingStateLoss();
     }
 
-    private void displayFragment(final FragmentManager fragmentManager,
-                                 final Fragment fragment,
-                                 final boolean addToBackStack,
-                                 final String tag) {
+    private void showFragment(final FragmentManager fragmentManager,
+                              final Fragment fragment,
+                              final boolean addToBackStack,
+                              final String tag) {
         mFullscreenContainer.setVisibility(View.GONE);
 
         final int viewId = mContentContainer.addBorderView(this);
@@ -185,10 +236,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         transaction.commitAllowingStateLoss();
     }
 
-    private void displayMirrorView(final FragmentManager fragmentManager,
-                                   final MirrorView mirrorView,
-                                   final boolean addToBackStack,
-                                   final String tag) {
+    private void showMirrorView(final FragmentManager fragmentManager,
+                                final MirrorView mirrorView,
+                                final boolean addToBackStack,
+                                final String tag) {
         if (mirrorView.isFullscreen()) {
             mFullscreenContainer.setVisibility(View.VISIBLE);
 
@@ -199,12 +250,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             }
             transaction.commitAllowingStateLoss();
         } else {
-            displayFragment(fragmentManager, (Fragment) mirrorView, addToBackStack, tag);
+            showFragment(fragmentManager, (Fragment) mirrorView, addToBackStack, tag);
         }
-    }
-
-    private void onResumeFullScreen() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        FullScreenActivityUtil.onResume(this);
     }
 }

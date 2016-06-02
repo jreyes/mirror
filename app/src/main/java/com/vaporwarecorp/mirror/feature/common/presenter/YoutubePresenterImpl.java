@@ -11,6 +11,7 @@ import com.vaporwarecorp.mirror.event.ResetEvent;
 import com.vaporwarecorp.mirror.feature.common.view.YoutubeView;
 
 @Plugin
+@Provides(YoutubePresenter.class)
 public class YoutubePresenterImpl extends AbstractFeaturePresenter<YoutubeView> implements YoutubePresenter {
 // ------------------------------ FIELDS ------------------------------
 
@@ -18,12 +19,6 @@ public class YoutubePresenterImpl extends AbstractFeaturePresenter<YoutubeView> 
     EventManager mEventManager;
     @Plug
     YoutubeView mView;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(YoutubePresenter.class)
-    public YoutubePresenterImpl() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 

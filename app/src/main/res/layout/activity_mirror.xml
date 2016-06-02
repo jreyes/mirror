@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black"
-    tools:context=".feature.main.MirrorActivity">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black"
+                tools:context=".feature.main.MirrorActivity">
 
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/header_container"
@@ -37,20 +37,33 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            app:layout_widthPercent="30%" />
+            app:layout_widthPercent="30%"/>
 
         <com.vaporwarecorp.mirror.component.datetime.DateTimeView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
-            app:layout_widthPercent="30%" />
+            app:layout_widthPercent="30%"/>
 
-        <Button
-            android:id="@+id/test_button"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test Container" />
+            android:layout_centerInParent="true">
+
+            <Button
+                android:id="@+id/test_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Container 1"/>
+
+            <Button
+                android:id="@+id/test_another_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Container 2"/>
+
+        </LinearLayout>
 
     </android.support.percent.PercentRelativeLayout>
 
@@ -60,13 +73,13 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/header_container"
         android:layout_centerHorizontal="true"
-        android:visibility="invisible" />
+        android:visibility="invisible"/>
 
     <FrameLayout
         android:id="@+id/fullscreen_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/black"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 </RelativeLayout>

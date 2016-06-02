@@ -233,6 +233,14 @@ public class DottedGridView extends PercentRelativeLayout {
         return true;
     }
 
+    public void removeBorderView(final int viewId) {
+        View view = mViews.get(viewId);
+        if (view != null) {
+            mViews.remove(viewId);
+            removeView(view);
+        }
+    }
+
     private void hideDraggedViewBorder() {
         if (mDraggedView != null) {
             mDraggedView.hideBorder();

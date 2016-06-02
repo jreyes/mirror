@@ -16,6 +16,8 @@ public interface MainPresenter extends FeaturePresenter {
 
     void startSpotify();
 
+    void startSpotify2();
+
     void stopListening();
 
     void verifyPermissions();
