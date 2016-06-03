@@ -15,18 +15,13 @@
  */
 package com.vaporwarecorp.mirror.feature.main;
 
-import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
-
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -189,6 +184,13 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
     }
 
+    private int getParentId(final Fragment fragment) {
+        if (fragment.getView() != null && fragment.getView().getParent() != null) {
+            return ((View) fragment.getView().getParent()).getId();
+        }
+        return 0;
+    }
+
     private void hideDialogFragment(final DialogFragment dialogFragment) {
         dialogFragment.dismiss();
     }
@@ -199,20 +201,15 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                               final String tag) {
         final FragmentManager manager = getFragmentManager();
         if (manager.findFragmentByTag(tag) != null) {
-            Integer viewId = null;
-            if (fragment.getView() != null && fragment.getView().getParent() != null) {
-                viewId = ((View) fragment.getView().getParent()).getId();
-            }
-
             final FragmentTransaction transaction = manager.beginTransaction();
             transaction.remove(fragment);
             transaction.commit();
-
             if (addedToBackStack) {
                 manager.popBackStack();
             }
 
-            if (removeParentView && viewId != null) {
+            final int viewId = getParentId(fragment);
+            if (removeParentView && viewId != 0) {
                 mContentContainer.removeBorderView(viewId);
             }
         }
@@ -245,13 +242,21 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                               final String tag) {
         mFullscreenContainer.setVisibility(View.GONE);
 
-        final int viewId = mContentContainer.addBorderView(this);
-        final FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(viewId, fragment, tag);
-        if (addToBackStack) {
-            transaction.addToBackStack(tag);
+        if (fragmentManager.findFragmentByTag(tag) == null) {
+            final int viewId = mContentContainer.addBorderView(this);
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(viewId, fragment, tag);
+            if (addToBackStack) {
+                transaction.addToBackStack(tag);
+            }
+            transaction.commitAllowingStateLoss();
+        } else {
+            fragmentManager
+                    .beginTransaction()
+                    .detach(fragment)
+                    .attach(fragment)
+                    .commitAllowingStateLoss();
         }
-        transaction.commitAllowingStateLoss();
     }
 
     private void showMirrorView(final FragmentManager fragmentManager,
