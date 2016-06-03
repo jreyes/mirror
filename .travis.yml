@@ -36,7 +36,7 @@ addons:
       - patch
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_4888f714f3f6_key -iv $encrypted_4888f714f3f6_iv -in mirror_private_config.tar.gz.enc -out mirror_private_config.tar.gz -d
+  - openssl aes-256-cbc -K $encrypted_4888f714f3f6_key -iv $encrypted_4888f714f3f6_iv -in travis/configs/mirror_private_config.tar.gz.enc -out travis/configs/mirror_private_config.tar.gz -d
 
 install:
   # Extracts build configs into source tree
