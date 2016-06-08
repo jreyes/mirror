@@ -52,16 +52,22 @@
             android:layout_centerInParent="true">
 
             <Button
-                android:id="@+id/test_button"
+                android:id="@+id/test1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Test Container 1"/>
+                android:text="Test1"/>
 
             <Button
-                android:id="@+id/test_another_button"
+                android:id="@+id/test2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Test Container 2"/>
+                android:text="Test2"/>
+
+            <Button
+                android:id="@+id/test3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test3"/>
 
         </LinearLayout>
 

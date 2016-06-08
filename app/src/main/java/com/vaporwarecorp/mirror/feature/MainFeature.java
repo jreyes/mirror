@@ -28,6 +28,8 @@ public interface MainFeature extends Feature {
 
     void hideCurrentPresenter();
 
+    void hidePresenter(Class<? extends Presenter> presenterClass);
+
     void hideView();
 
     void onApplicationReady();

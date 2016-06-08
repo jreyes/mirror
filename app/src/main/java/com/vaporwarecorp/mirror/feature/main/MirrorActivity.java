@@ -25,6 +25,8 @@ import android.view.WindowManager;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
+import com.robopupu.api.mvp.PresentedView;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
@@ -53,6 +55,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     MainPresenter mPresenter;
 
     private DottedGridView mContentContainer;
+    private Class<? extends Presenter> mCurrentPresenterClass;
     private ForecastView mForecastView;
     private View mFullscreenContainer;
     private View mHeaderContainer;
@@ -159,8 +162,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mContentContainer = (DottedGridView) findViewById(R.id.content_container);
         mFullscreenContainer = findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
-        findViewById(R.id.test_button).setOnClickListener(v -> mPresenter.startSpotify());
-        findViewById(R.id.test_another_button).setOnClickListener(v -> mPresenter.startSpotify2());
+        findViewById(R.id.test1).setOnClickListener(v -> mPresenter.test1());
+        findViewById(R.id.test2).setOnClickListener(v -> mPresenter.test2());
+        findViewById(R.id.test3).setOnClickListener(v -> mPresenter.test3());
     }
 
     @Override
@@ -170,9 +174,16 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
     @Override
+    protected void onPause() {
+        removeDottedGridListener();
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         onResumeFullScreen();
+        addDottedGridListener();
     }
 
     @Override
@@ -182,6 +193,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         if (!mFeature.isStarted()) {
             mFeatureManager.startFeature(this, mFeature);
         }
+    }
+
+    private void addDottedGridListener() {
+        //mContentContainer.setListener(v -> mFeature.hidePresenter(v.getPresenter().getClass()));
     }
 
     private int getParentId(final Fragment fragment) {
@@ -224,6 +239,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         FullScreenActivityUtil.onResume(this);
     }
 
+    private void removeDottedGridListener() {
+        mContentContainer.setListener(null);
+    }
+
     private void showDialogFragment(final FragmentManager fragmentManager,
                                     final DialogFragment dialogFragment,
                                     final boolean addToBackStack,
@@ -243,6 +262,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mFullscreenContainer.setVisibility(View.GONE);
 
         if (fragmentManager.findFragmentByTag(tag) == null) {
+            updateCurrentPresenterClass(fragment);
+
             final int viewId = mContentContainer.addBorderView(this);
             final FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(viewId, fragment, tag);
@@ -274,6 +295,23 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             transaction.commitAllowingStateLoss();
         } else {
             showFragment(fragmentManager, (Fragment) mirrorView, addToBackStack, tag);
+        }
+    }
+
+    private void updateCurrentPresenterClass(Fragment fragment) {
+        if (mCurrentPresenterClass != null) {
+            mFeature.hidePresenter(mCurrentPresenterClass);
+            mCurrentPresenterClass = null;
+        }
+
+        if (fragment != null) {
+            if (!(fragment instanceof PresentedView)) {
+                throw new IllegalArgumentException("Fragment must implement PresentedView");
+            }
+            PresentedView presentedView = (PresentedView) fragment;
+            if (presentedView.getPresenter() != null) {
+                mCurrentPresenterClass = presentedView.getPresenter().getClass();
+            }
         }
     }
 }

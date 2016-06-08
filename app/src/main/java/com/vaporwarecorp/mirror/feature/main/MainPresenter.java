@@ -29,11 +29,13 @@ public interface MainPresenter extends FeaturePresenter {
 
     void startListening();
 
-    void startSpotify();
-
-    void startSpotify2();
-
     void stopListening();
+
+    void test1();
+
+    void test2();
+
+    void test3();
 
     void verifyPermissions();
 }

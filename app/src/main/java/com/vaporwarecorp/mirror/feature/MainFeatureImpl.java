@@ -75,12 +75,16 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void hideCurrentPresenter() {
-        if (mCurrentPresenterClass == null) {
+        hidePresenter(mCurrentPresenterClass);
+        mCurrentPresenterClass = null;
+    }
+
+    @Override
+    public void hidePresenter(Class<? extends Presenter> presenterClass) {
+        if (presenterClass == null) {
             return;
         }
-
-        hideView(mCurrentPresenterClass, false, null);
-        mCurrentPresenterClass = null;
+        hideView(presenterClass, false, null);
     }
 
     @Override

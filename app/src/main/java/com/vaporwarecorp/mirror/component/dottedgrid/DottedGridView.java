@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import com.robopupu.api.mvp.PresentedView;
 import com.vaporwarecorp.mirror.R;
 
 import java.util.HashMap;
@@ -40,15 +41,44 @@ public class DottedGridView extends PercentRelativeLayout {
 
     private static final int INVALID_POINTER = -1;
     private static final float SENSITIVITY = 1f;
+    private static final float X_MIN_VELOCITY = 1500;
+    private static final float Y_MIN_VELOCITY = 1000;
 
     ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            final int dropWidth = Math.round(releasedChild.getMeasuredWidth() / 2);
+            final int dropHeight = Math.round(releasedChild.getMeasuredHeight() / 2);
+            final int left = releasedChild.getLeft();
+            final int right = getMeasuredWidth() - releasedChild.getLeft() - releasedChild.getMeasuredWidth();
+            final int top = releasedChild.getTop();
+            final int bottom = getMeasuredHeight() - releasedChild.getTop() - releasedChild.getMeasuredHeight();
+
+            final int newLeft;
+            final int newTop;
+            if (right < dropWidth) {
+                newLeft = getMeasuredWidth() - releasedChild.getMeasuredWidth();
+                newTop = getNewTop(releasedChild, dropHeight, top, bottom, false);
+
+                if (xvel > 0 && xvel >= X_MIN_VELOCITY) {
+                }
+            } else if (left < dropWidth) {
+                newLeft = 0;
+                newTop = getNewTop(releasedChild, dropHeight, top, bottom, false);
+                //notifyUpdateCurrent();
+            } else {
+                newLeft = Math.round((getMeasuredWidth() - releasedChild.getMeasuredWidth()) / 2);
+                newTop = getNewTop(releasedChild, dropHeight, top, bottom, true);
+                //notifyUpdateViewOnCenter();
+            }
+
             LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            params.leftMargin = releasedChild.getLeft();
-            params.topMargin = releasedChild.getTop();
+            params.leftMargin = newLeft;
+            params.topMargin = newTop;
             params.getPercentLayoutInfo().widthPercent = 0.3f;
             releasedChild.setLayoutParams(params);
+
+            ViewCompat.postInvalidateOnAnimation(DottedGridView.this);
         }
 
         /**
@@ -100,6 +130,7 @@ public class DottedGridView extends PercentRelativeLayout {
     private FrameLayout mBackground;
     private int mBorderPadding;
     private BorderView mDraggedView;
+    private Listener mListener;
     private ViewDragHelper mViewDragHelper;
     private HashMap<Integer, BorderView> mViews;
 
@@ -240,6 +271,20 @@ public class DottedGridView extends PercentRelativeLayout {
         }
     }
 
+    public void setListener(Listener listener) {
+        mListener = listener;
+    }
+
+    private int getNewTop(View releasedChild, int dropHeight, int top, int bottom, boolean middleOnly) {
+        if (!middleOnly && top < dropHeight) {
+            return 0;
+        } else if (!middleOnly && bottom < dropHeight) {
+            return getMeasuredHeight() - releasedChild.getMeasuredHeight();
+        } else {
+            return Math.round((getMeasuredHeight() - releasedChild.getMeasuredHeight()) / 2);
+        }
+    }
+
     private void hideDraggedViewBorder() {
         if (mDraggedView != null) {
             mDraggedView.hideBorder();
@@ -293,9 +338,39 @@ public class DottedGridView extends PercentRelativeLayout {
                 && screenY < viewLocation[1] + view.getHeight();
     }
 
+    /**
+     * Notify te view is closed to the right to the Listener
+     */
+    private void notifyCloseToRightListener() {
+        if (mListener != null) {
+            //mListener.onClosedToRight();
+        }
+    }
+
+    private void notifyUpdateViewOnCenter(PresentedView presentedView) {
+        if (mListener != null) {
+            mListener.onViewOnCenter(presentedView);
+        }
+    }
+
     private void showDraggedViewBorder() {
         if (mDraggedView != null) {
+            mDraggedView.bringToFront();
             mDraggedView.showBorder();
         }
+    }
+
+// -------------------------- INNER CLASSES --------------------------
+
+    public interface Listener {
+        /**
+         * Called when the view is closed to the right.
+         */
+        void onClosedToRight(PresentedView presentedView);
+
+        /**
+         * Called when the view is set in the center
+         */
+        void onViewOnCenter(PresentedView presentedView);
     }
 }
