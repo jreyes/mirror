@@ -8,6 +8,24 @@ Another Smart Mirror
 This is another Smart Mirror project done in Android. Based on [Max Braun](https://github.com/maxbbraun/mirror) and
 [Nick Hall](https://github.com/ineptech/mirror) smart mirror projects.
 
+Currently this project is being rewritten using [Robopupu](https://robopupu.com/) as the base framework for this project.
+
+[![Demo of Another Smart Mirror v1](http://img.youtube.com/vi/7EBSTNqeX6Q/0.jpg)](http://www.youtube.com/watch?v=7EBSTNqeX6Q)
+
+## Todo
+
+- [X] Draggable panels
+- [X] Main container in middle that gets replaced by current action
+- [ ] Dismiss panels by dragging to the left or right borders
+- [ ] New grid layout, tentative 15/15/40/15/15 layout
+- [ ] New logo
+- [ ] Multiple user support
+- [ ] Integration with Alexa
+- [ ] Integration with Leap Motion
+- [ ] Configurable commands
+
+## Hardware
+
 For the hardware I've used:
 * An [Odroid C2](http://ameridroid.com/products/odroid-c2)
 * A [Logitech C920](http://www.amazon.com/Logitech-Webcam-Widescreen-Calling-Recording/dp/B006JH8T3S) webcam
@@ -20,39 +38,41 @@ For the hardware I've used:
 * A [bluetooth adapter](http://ameridroid.com/products/usb-bluetooth-module-2)
 * Some wood, nails, and glue
 
-## Pocketsphinx
+## Libraries
+
+### Pocketsphinx
 
 Hotword detection is being driven by the Pocketsphinx library. Implementation and instructions how to use this library
 it can be found on its [website](http://cmusphinx.sourceforge.net/wiki/tutorialandroid).
 
-## Houndify
+### Houndify
 
 For Voice Commands, [Houndify](http://www.houndify.com) is being used. They have a free tier with a daily quota of how
  many queries you can request per day. You need to register your application and get the Hound client ID and client key
  and set those values at [mirror.properties](https://github.com/jreyes/mirror/blob/master/app/src/main/assets/mirror.properties)
 
-## Proximity Recognition
+### Proximity Recognition
 
 To enable proximity recognition you need to have a Bluetooth beacon on hand like the
 [Radius Networks RadBeacon](http://www.amazon.com/Radius-Networks-RadBeacon-Dot-Technology/dp/B00JJ4P864). After that
 you need to follow the instructions detailed [here](https://github.com/RadiusNetworks/proximitykit-android).
 
-## Spotify
+### Spotify
 
 Song support is provided by Spotify. To use Spotify you need to register your application at
 [https://developer.spotify.com](https://developer.spotify.com) and also own a Premium Spotify account. Once you get
 your Spotify Client ID, add it to [mirror.properties](https://github.com/jreyes/mirror/blob/master/app/src/main/assets/mirror.properties)
 
-## HandWave Library
+### HandWave Library
 
 Credit goes to [Kriss](https://github.com/kritts/HandWave) for the original HandWave library and
 [Koalified](https://github.com/Koalified/NewHandwave) for the updated version.
 
-## OpenCV Library
+### OpenCV Library
 
 More information about OpenCV can be found in its [website](http://opencv.org/). This library is needed to use the
 HandWave library.
 
-##License
+#License
 
 The contents of this repository are covered under the [Apache License](LICENSE).
