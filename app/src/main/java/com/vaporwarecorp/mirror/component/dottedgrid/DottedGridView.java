@@ -26,8 +26,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import com.robopupu.api.mvp.PresentedView;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
 
 import java.util.HashMap;
 
@@ -59,17 +59,15 @@ public class DottedGridView extends PercentRelativeLayout {
             if (right < dropWidth) {
                 newLeft = getMeasuredWidth() - releasedChild.getMeasuredWidth();
                 newTop = getNewTop(releasedChild, dropHeight, top, bottom, false);
-
-                if (xvel > 0 && xvel >= X_MIN_VELOCITY) {
-                }
+                notifyUpdateViewOnRight((BorderView) releasedChild);
             } else if (left < dropWidth) {
                 newLeft = 0;
                 newTop = getNewTop(releasedChild, dropHeight, top, bottom, false);
-                //notifyUpdateCurrent();
+                notifyUpdateViewOnLeft((BorderView) releasedChild);
             } else {
                 newLeft = Math.round((getMeasuredWidth() - releasedChild.getMeasuredWidth()) / 2);
                 newTop = getNewTop(releasedChild, dropHeight, top, bottom, true);
-                //notifyUpdateViewOnCenter();
+                notifyUpdateViewOnCenter((BorderView) releasedChild);
             }
 
             LayoutParams params = new LayoutParams(MATCH_PARENT, WRAP_CONTENT);
@@ -341,15 +339,27 @@ public class DottedGridView extends PercentRelativeLayout {
     /**
      * Notify te view is closed to the right to the Listener
      */
-    private void notifyCloseToRightListener() {
+    private void notifyCloseToRightListener(MirrorView mirrorView) {
         if (mListener != null) {
             //mListener.onClosedToRight();
         }
     }
 
-    private void notifyUpdateViewOnCenter(PresentedView presentedView) {
+    private void notifyUpdateViewOnCenter(BorderView borderView) {
         if (mListener != null) {
-            mListener.onViewOnCenter(presentedView);
+            mListener.onViewOnCenter(borderView.getId());
+        }
+    }
+
+    private void notifyUpdateViewOnLeft(BorderView borderView) {
+        if (mListener != null) {
+            mListener.onViewOnLeft(borderView.getId());
+        }
+    }
+
+    private void notifyUpdateViewOnRight(BorderView borderView) {
+        if (mListener != null) {
+            mListener.onViewOnRight(borderView.getId());
         }
     }
 
@@ -366,11 +376,21 @@ public class DottedGridView extends PercentRelativeLayout {
         /**
          * Called when the view is closed to the right.
          */
-        void onClosedToRight(PresentedView presentedView);
+        void onClosedToRight(MirrorView mirrorView);
 
         /**
          * Called when the view is set in the center
          */
-        void onViewOnCenter(PresentedView presentedView);
+        void onViewOnCenter(int containerId);
+
+        /**
+         * Called when the view is set on the left
+         */
+        void onViewOnLeft(int containerId);
+
+        /**
+         * Called when the view is set on the right
+         */
+        void onViewOnRight(int containerId);
     }
 }

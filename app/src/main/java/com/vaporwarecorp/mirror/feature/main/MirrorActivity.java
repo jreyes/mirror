@@ -53,6 +53,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     MainPresenter mPresenter;
 
     private DottedGridView mContentContainer;
+    private Integer mCurrentContainerId;
     private Class mCurrentPresenterClass;
     private ForecastView mForecastView;
     private View mFullscreenContainer;
@@ -71,6 +72,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
 // --------------------- Interface FeatureTransitionManager ---------------------
 
+    /**
+     * Displays the DialogFragment or MirrorView Fragment.
+     */
     @Override
     public void showView(final FeatureView featureView, final boolean addToBackStack, final String fragmentTag) {
         String tag = fragmentTag;
@@ -83,11 +87,14 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             showDialogFragment(manager, (DialogFragment) featureView, addToBackStack, tag);
         } else if (featureView instanceof MirrorView) {
             showMirrorView(manager, (MirrorView) featureView, addToBackStack, tag);
-        } else if (featureView instanceof Fragment) {
-            showFragment(manager, (Fragment) featureView, addToBackStack, tag);
+        } else {
+            throw new IllegalArgumentException("View must be a DialogFragment or MirrorView");
         }
     }
 
+    /**
+     * Removes the DialogFragment or MirrorView Fragment.
+     */
     @Override
     public void removeView(final FeatureView featureView, final boolean addedToBackStack, final String fragmentTag) {
         if (featureView instanceof DialogFragment) {
@@ -95,9 +102,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         } else if (featureView instanceof MirrorView) {
             String tag = (fragmentTag != null) ? fragmentTag : featureView.getViewTag();
             hideMirrorView((MirrorView) featureView, addedToBackStack, tag);
-        } else if (featureView instanceof Fragment) {
-            String tag = (fragmentTag != null) ? fragmentTag : featureView.getViewTag();
-            hideFragment((Fragment) featureView, true, addedToBackStack, tag);
+        } else {
+            throw new IllegalArgumentException("View must be a DialogFragment or MirrorView");
         }
     }
 
@@ -193,8 +199,59 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addDottedGridListener() {
-        //mContentContainer.setListener(v -> mFeature.hidePresenter(v.getPresenter().getClass()));
+        mContentContainer.setListener(new DottedGridView.Listener() {
+            @Override
+            public void onClosedToRight(MirrorView mirrorView) {
+
+            }
+
+            @Override
+            public void onViewOnCenter(int containerId) {
+                MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+                if (mirrorView != null) {
+                    if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                        MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
+                        if (currentMirrorView != null) {
+                            mFeature.hidePresenter(currentMirrorView.presenterClass());
+                        }
+                    }
+                    mCurrentPresenterClass = mirrorView.presenterClass();
+                    mCurrentContainerId = containerId;
+                }
+            }
+
+            @Override
+            public void onViewOnLeft(int containerId) {
+                if (mCurrentPresenterClass != null) {
+                    final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+                    if (mirrorView != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                        mCurrentPresenterClass = null;
+                        mCurrentContainerId = null;
+                    }
+                }
+            }
+
+            @Override
+            public void onViewOnRight(int containerId) {
+                if (mCurrentPresenterClass != null) {
+                    final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+                    if (mirrorView != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                        mCurrentPresenterClass = null;
+                        mCurrentContainerId = null;
+                    }
+                }
+            }
+        });
+    }
+
+    private MirrorView getMirrorViewByContainerId(int containerId) {
+        Fragment fragment = getFragmentManager().findFragmentById(containerId);
+        if (fragment != null && fragment instanceof MirrorView) {
+            return (MirrorView) fragment;
+        }
+        return null;
     }
 
     private int getParentId(final Fragment fragment) {
@@ -260,9 +317,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mFullscreenContainer.setVisibility(View.GONE);
 
         if (fragmentManager.findFragmentByTag(tag) == null) {
-            updateCurrentPresenterClass(fragment);
-
             final int viewId = mContentContainer.addBorderView(this);
+            updateCurrentPresenterClass(fragment, viewId);
+
             final FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(viewId, fragment, tag);
             if (addToBackStack) {
@@ -296,7 +353,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
     }
 
-    private void updateCurrentPresenterClass(Fragment fragment) {
+    @SuppressWarnings("unchecked")
+    private void updateCurrentPresenterClass(Fragment fragment, int containerId) {
         if (mCurrentPresenterClass != null) {
             mFeature.hidePresenter(mCurrentPresenterClass);
             mCurrentPresenterClass = null;
@@ -307,6 +365,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                 throw new IllegalArgumentException("Fragment must implement MirrorView");
             }
             mCurrentPresenterClass = ((MirrorView) fragment).presenterClass();
+            mCurrentContainerId = containerId;
         }
     }
 }
