@@ -21,4 +21,6 @@ public interface MirrorView extends View {
 // -------------------------- OTHER METHODS --------------------------
 
     boolean isFullscreen();
+
+    Class presenterClass();
 }

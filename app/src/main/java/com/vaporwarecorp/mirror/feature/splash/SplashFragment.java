@@ -36,6 +36,13 @@ public class SplashFragment extends FullscreenFragment<SplashPresenter> implemen
 // ------------------------ INTERFACE METHODS ------------------------
 
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public Class presenterClass() {
+        return SplashPresenter.class;
+    }
+
 // --------------------- Interface PresentedView ---------------------
 
     @Override

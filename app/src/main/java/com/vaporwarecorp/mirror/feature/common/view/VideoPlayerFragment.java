@@ -39,7 +39,7 @@ public class VideoPlayerFragment
 
     @Plug
     VideoPlayerPresenter mPresenter;
-    
+
     private PLVideoTextureView mVideoView;
 
 // --------------------------- CONSTRUCTORS ---------------------------
@@ -50,6 +50,18 @@ public class VideoPlayerFragment
 
 // ------------------------ INTERFACE METHODS ------------------------
 
+
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public Class presenterClass() {
+        return VideoPlayerPresenter.class;
+    }
 
 // --------------------- Interface PresentedView ---------------------
 

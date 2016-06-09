@@ -109,6 +109,18 @@ public class MapFragment
         getMapAsync(this);
     }
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public Class presenterClass() {
+        return MapPresenter.class;
+    }
+
 // --------------------- Interface OnMapReadyCallback ---------------------
 
     @SuppressWarnings("ResourceType")

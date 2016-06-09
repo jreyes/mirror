@@ -34,6 +34,13 @@ public class GoogleFragment extends BrowserFragment<GooglePresenter> implements 
 // ------------------------ INTERFACE METHODS ------------------------
 
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public Class presenterClass() {
+        return GooglePresenter.class;
+    }
+
 // --------------------- Interface PresentedView ---------------------
 
     @Override

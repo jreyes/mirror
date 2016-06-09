@@ -121,4 +121,14 @@ public class SpotifyFragment
         viewHolder.getTitle().setText(track.name);
         viewHolder.getSubtitle().setText(artistNames(track.artists));
     }
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public Class presenterClass() {
+        return SpotifyPresenter.class;
+    }
 }

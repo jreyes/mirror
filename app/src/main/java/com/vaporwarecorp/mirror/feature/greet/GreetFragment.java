@@ -83,6 +83,11 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         return true;
     }
 
+    @Override
+    public Class presenterClass() {
+        return GreetPresenter.class;
+    }
+
 // --------------------- Interface PresentedView ---------------------
 
     @Override

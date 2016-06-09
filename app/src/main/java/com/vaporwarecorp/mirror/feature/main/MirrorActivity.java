@@ -25,8 +25,6 @@ import android.view.WindowManager;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
-import com.robopupu.api.mvp.PresentedView;
-import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
@@ -55,7 +53,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     MainPresenter mPresenter;
 
     private DottedGridView mContentContainer;
-    private Class<? extends Presenter> mCurrentPresenterClass;
+    private Class mCurrentPresenterClass;
     private ForecastView mForecastView;
     private View mFullscreenContainer;
     private View mHeaderContainer;
@@ -305,13 +303,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         }
 
         if (fragment != null) {
-            if (!(fragment instanceof PresentedView)) {
-                throw new IllegalArgumentException("Fragment must implement PresentedView");
+            if (!(fragment instanceof MirrorView)) {
+                throw new IllegalArgumentException("Fragment must implement MirrorView");
             }
-            PresentedView presentedView = (PresentedView) fragment;
-            if (presentedView.getPresenter() != null) {
-                mCurrentPresenterClass = presentedView.getPresenter().getClass();
-            }
+            mCurrentPresenterClass = ((MirrorView) fragment).presenterClass();
         }
     }
 }

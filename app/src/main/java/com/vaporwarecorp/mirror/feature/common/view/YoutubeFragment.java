@@ -84,6 +84,18 @@ public class YoutubeFragment
         return false;
     }
 
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public Class presenterClass() {
+        return YoutubePresenter.class;
+    }
+
 // --------------------- Interface OnInitializedListener ---------------------
 
     @Override
