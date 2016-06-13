@@ -52,7 +52,7 @@ public class YoutubePresenterImpl extends AbstractFeaturePresenter<YoutubeView> 
     public void onViewResume(View view) {
         super.onViewResume(view);
         final String youtubeVideoId = getParams().getString(YOUTUBE_VIDEO_ID);
-        mView.setYoutubeVideo(youtubeVideoId, () -> mEventManager.post(new ResetEvent()));
+        mView.setYoutubeVideo(youtubeVideoId, () -> mEventManager.post(new ResetEvent(YoutubePresenter.class)));
     }
 
     @Override

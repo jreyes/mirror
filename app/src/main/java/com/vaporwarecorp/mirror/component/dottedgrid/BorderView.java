@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.component.dottedgrid;
 
 import android.content.Context;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -26,8 +27,14 @@ import static com.vaporwarecorp.mirror.util.DisplayMetricsUtil.convertDpToPixel;
 class BorderView extends FrameLayout {
 // ------------------------------ FIELDS ------------------------------
 
+    @ColorInt
+    private int mColorRed;
+    @ColorInt
     private int mColorTransparent;
+    @ColorInt
     private int mColorWhite;
+    private boolean mLeftAligned;
+    private boolean mRightAligned;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -44,19 +51,53 @@ class BorderView extends FrameLayout {
         initializeLayout(context);
     }
 
-    private void initializeLayout(final Context context) {
-        mColorTransparent = ContextCompat.getColor(context, android.R.color.transparent);
-        mColorWhite = ContextCompat.getColor(context, android.R.color.white);
+// -------------------------- OTHER METHODS --------------------------
 
-        final int borderPadding = Math.round(convertDpToPixel(2, context));
-        setPadding(borderPadding, borderPadding, borderPadding, borderPadding);
-    }
-
-    void hideBorder() {
+    public void hideBorder() {
         setBackgroundColor(mColorTransparent);
     }
 
-    void showBorder() {
+    public boolean isCenterAligned() {
+        return !mLeftAligned && !mRightAligned;
+    }
+
+    public boolean isLeftAligned() {
+        return mLeftAligned;
+    }
+
+    public boolean isRightAligned() {
+        return mRightAligned;
+    }
+
+    public void setCenterAligned() {
+        mLeftAligned = false;
+        mRightAligned = false;
+    }
+
+    public void setLeftAligned() {
+        mLeftAligned = true;
+        mRightAligned = false;
+    }
+
+    public void setRightAligned() {
+        mLeftAligned = false;
+        mRightAligned = true;
+    }
+
+    public void showBorder() {
         setBackgroundColor(mColorWhite);
+    }
+
+    public void showBorderWarning() {
+        setBackgroundColor(mColorRed);
+    }
+
+    private void initializeLayout(final Context context) {
+        mColorTransparent = ContextCompat.getColor(context, android.R.color.transparent);
+        mColorWhite = ContextCompat.getColor(context, android.R.color.white);
+        mColorRed = ContextCompat.getColor(context, android.R.color.holo_red_dark);
+
+        final int borderPadding = Math.round(convertDpToPixel(4, context));
+        setPadding(borderPadding, borderPadding, borderPadding, borderPadding);
     }
 }

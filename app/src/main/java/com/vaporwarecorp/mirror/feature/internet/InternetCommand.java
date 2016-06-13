@@ -20,16 +20,12 @@ import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
-import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.command.AbstractHoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
-
-import static com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter.VIDEO_URL;
 
 @Plugin
 public class InternetCommand extends AbstractHoundifyCommand implements HoundifyCommand {
@@ -39,8 +35,6 @@ public class InternetCommand extends AbstractHoundifyCommand implements Houndify
     private static final String COMMAND_INTENT = "ConnectToTheInternet";
     private static final String COMMAND_RESPONSE = "Ok, connecting to the internet";
 
-    @Plug
-    AppManager mAppManager;
     @Plug
     MainFeature mFeature;
 
@@ -59,8 +53,7 @@ public class InternetCommand extends AbstractHoundifyCommand implements Houndify
 
     @Override
     public void executeCommand(CommandResult result) {
-        final String videoUrl = mAppManager.getLocalAssetPath("videos/aol.mp4");
-        mFeature.showPresenter(VideoPlayerPresenter.class, new Params(VIDEO_URL, videoUrl));
+        mFeature.showPresenter(InternetPresenter.class);
     }
 
     @Override

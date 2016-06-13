@@ -15,10 +15,8 @@
  */
 package com.vaporwarecorp.mirror.feature.common.view;
 
-import com.robopupu.api.plugin.PlugInterface;
 import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
 
-@PlugInterface
 public interface VideoPlayerView extends MirrorView {
 // -------------------------- OTHER METHODS --------------------------
 

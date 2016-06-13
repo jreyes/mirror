@@ -16,8 +16,9 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 
 - [X] Draggable panels
 - [X] Main container in middle that gets replaced by current action
-- [ ] Dismiss panels by dragging to the left or right borders
-- [ ] New grid layout, tentative 15/15/40/15/15 layout
+- [X] Dismiss panels by dragging to the left or right borders
+- [X] New grid layout, tentative 15/15/40/15/15 layout
+- [ ] On minimized panels, mute audio for videos? but no for audio play?
 - [ ] New logo
 - [ ] Multiple user support
 - [ ] Integration with Alexa

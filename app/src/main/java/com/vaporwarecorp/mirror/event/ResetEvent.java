@@ -15,5 +15,22 @@
  */
 package com.vaporwarecorp.mirror.event;
 
+import com.robopupu.api.mvp.Presenter;
+
 public class ResetEvent implements Event {
+// ------------------------------ FIELDS ------------------------------
+
+    private final Class<? extends Presenter> presenterClass;
+
+// --------------------------- CONSTRUCTORS ---------------------------
+
+    public ResetEvent(Class<? extends Presenter> presenterClass) {
+        this.presenterClass = presenterClass;
+    }
+
+// --------------------- GETTER / SETTER METHODS ---------------------
+
+    public Class<? extends Presenter> getPresenterClass() {
+        return presenterClass;
+    }
 }

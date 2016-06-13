@@ -34,6 +34,7 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.event.ResetEvent;
 import com.vaporwarecorp.mirror.event.SpotifyPlaybackEvent;
 import com.vaporwarecorp.mirror.event.SpotifyTrackEvent;
+import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -205,7 +206,7 @@ public class SpotifyManagerImpl
             mSession.setActive(false);
         }
         Spotify.destroyPlayer(this);
-        mEventManager.post(new ResetEvent());
+        mEventManager.post(new ResetEvent(SpotifyPresenter.class));
     }
 
 // -------------------------- OTHER METHODS --------------------------

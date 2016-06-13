@@ -23,52 +23,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pili.pldroid.player.AVOptions;
 import com.pili.pldroid.player.widget.PLVideoTextureView;
-import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.FeatureFragment;
-import com.robopupu.api.plugin.Plug;
-import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.mvp.Presenter;
 import com.vaporwarecorp.mirror.R;
-import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter.Listener;
 
-@Plugin
-public class VideoPlayerFragment
-        extends FeatureFragment<VideoPlayerPresenter>
+public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
+        extends FeatureFragment<T_Presenter>
         implements VideoPlayerView {
 // ------------------------------ FIELDS ------------------------------
 
-    @Plug
-    VideoPlayerPresenter mPresenter;
-
     private PLVideoTextureView mVideoView;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(VideoPlayerView.class)
-    public VideoPlayerFragment() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
-
-// --------------------- Interface MirrorView ---------------------
-
-    @Override
-    public boolean isFullscreen() {
-        return false;
-    }
-
-    @Override
-    public Class presenterClass() {
-        return VideoPlayerPresenter.class;
-    }
-
-// --------------------- Interface PresentedView ---------------------
-
-    @Override
-    public VideoPlayerPresenter getPresenter() {
-        return mPresenter;
-    }
 
 // --------------------- Interface VideoPlayerView ---------------------
 
@@ -117,21 +85,9 @@ public class VideoPlayerFragment
     }
 
     @Override
-    protected void onCreateBindings() {
-        super.onCreateBindings();
-
-        mVideoView = getView(R.id.video_view);
-
-        // Set some listeners
-        /*
-        mVideoView.setOnPreparedListener(mOnPreparedListener);
-        mVideoView.setOnInfoListener(mOnInfoListener);
-        mVideoView.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
-        mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        mVideoView.setOnCompletionListener(mOnCompletionListener);
-        mVideoView.setOnSeekCompleteListener(mOnSeekCompleteListener);
-        mVideoView.setOnErrorListener(mOnErrorListener);
-        */
+    public void onViewCreated(View view, Bundle inState) {
+        super.onViewCreated(view, inState);
+        mVideoView = (PLVideoTextureView) view.findViewById(R.id.video_view);
     }
 
     private boolean isLiveStreaming(String url) {

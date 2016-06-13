@@ -29,6 +29,8 @@ import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.google.GooglePresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
+import com.vaporwarecorp.mirror.feature.internet.InternetPresenter;
+import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -86,8 +88,13 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     }
 
     @Override
+    public void stopListening() {
+        mHotWordManager.stopListening();
+    }
+
+    @Override
     public void test1() {
-        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, "u99kOUA5EpE"));
+        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, "vbKPSskIhmQ"));
     }
 
     @Override
@@ -101,8 +108,13 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     }
 
     @Override
-    public void stopListening() {
-        mHotWordManager.stopListening();
+    public void test4() {
+        mFeature.showPresenter(WatchCBSPresenter.class);
+    }
+
+    @Override
+    public void test5() {
+        mFeature.showPresenter(InternetPresenter.class);
     }
 
     @Override
@@ -166,7 +178,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(ResetEvent event) {
-        mFeature.hideCurrentPresenter();
+        mFeature.hidePresenter(event.getPresenterClass());
         startListening();
     }
 

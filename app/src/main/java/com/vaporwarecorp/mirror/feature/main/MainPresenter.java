@@ -37,5 +37,9 @@ public interface MainPresenter extends FeaturePresenter {
 
     void test3();
 
+    void test4();
+
+    void test5();
+
     void verifyPermissions();
 }
