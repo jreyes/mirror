@@ -1,0 +1,51 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.splash.SplashPresenter",
+  "schema": {
+    "type": "object",
+    "title": "Splash Screen",
+    "required": [
+      "formItems"
+    ],
+    "properties": {
+      "formItems": {
+        "title": " ",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "title": "Image URL",
+              "type": "string",
+              "maxLength": 200,
+              "validationMessage": "The URL is required and has a maximum length of 200 characters"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Splash screen configuration</h3><p>Enter the URLs of the GIFs or JPGs that you would like to display when you start the application.</p>"
+    },
+    {
+      "key": "formItems",
+      "add": "Add URL",
+      "style": {
+        "add": "btn-success"
+      },
+      "items": [
+        "formItems[].url"
+      ]
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

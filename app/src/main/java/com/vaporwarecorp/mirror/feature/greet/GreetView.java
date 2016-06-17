@@ -22,5 +22,5 @@ import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
 public interface GreetView extends MirrorView {
 // -------------------------- OTHER METHODS --------------------------
 
-    void displayGreet(String greetName, boolean isWelcome);
+    void displayGreet(String greetName);
 }

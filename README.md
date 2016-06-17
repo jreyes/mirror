@@ -16,16 +16,27 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 
 ## Todo
 
-- [X] Draggable panels
-- [X] Main container in middle that gets replaced by current action
-- [X] Dismiss panels by dragging to the left or right borders
 - [X] New grid layout, tentative 15/15/40/15/15 layout
-- [ ] On minimized panels, mute audio for videos? but no for audio play?
+- [ ] Draggable panels
+    - [X] Main container in middle that gets replaced by current action
+    - [X] Dismiss panels by dragging to the left or right borders
+    - [ ] On minimized panels, mute audio for videos? but no for audio play?
 - [ ] New logo
 - [ ] Multiple user support
 - [ ] Integration with Alexa
-- [ ] Integration with Leap Motion
+- [ ] Improve Gesture control module
+    - [ ] Integration with Leap Motion
+    - [ ] Improve OpenCV module
+- [ ] Find alternative for low energy bluetooth beacons
 - [ ] Configurable commands
+    - [X] Use NanoHttp
+    - [X] Use Angular
+    - [X] Use Bootstrap
+    - [X] Store and load configuration from preferences
+    - [X] Add voice command for the configuration screen
+    - [ ] Use secure preferences
+    - [ ] Run once on installation and on voice command after that
+- [ ] WebView using custom tabs (Chrome)
 
 ## Hardware
 

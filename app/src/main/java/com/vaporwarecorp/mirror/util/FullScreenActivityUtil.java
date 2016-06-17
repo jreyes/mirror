@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.util;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.view.View;
 
 public class FullScreenActivityUtil {
@@ -32,6 +33,16 @@ public class FullScreenActivityUtil {
 
     public static void onResume(Activity activity) {
         View decorView = activity.getWindow().getDecorView();
+        hideSystemUI(decorView);
+        decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+            if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                hideSystemUI(decorView);
+            }
+        });
+    }
+
+    public static void onResume(Dialog dialog) {
+        View decorView = dialog.getWindow().getDecorView();
         hideSystemUI(decorView);
         decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
             if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {

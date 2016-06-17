@@ -27,6 +27,7 @@ import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
+import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 import com.vaporwarecorp.mirror.feature.google.GooglePresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.internet.InternetPresenter;
@@ -52,6 +53,8 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     AppManager mAppManager;
     @Plug
     CommandManager mCommandManager;
+    @Plug
+    ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
     @Plug
@@ -162,6 +165,9 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         if (TYPE_WELCOME.equals(event.getType())) {
             mFeature.displayView();
             mHotWordManager.startListening();
+            if (mConfigurationManager.needsInitialSetup()) {
+                mFeature.showPresenter(ConfigurationPresenter.class);
+            }
         } else {
             mHotWordManager.stopListening();
             mFeature.hideCurrentPresenter();

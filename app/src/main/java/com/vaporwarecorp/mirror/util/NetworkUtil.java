@@ -20,15 +20,60 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.WIFI_SERVICE;
-import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkInfo.State.CONNECTED;
 import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
 
 public class NetworkUtil {
 // -------------------------- STATIC METHODS --------------------------
+
+    private static String getIpAddressFromMobile() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                NetworkInterface networkinterface = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddress = networkinterface.getInetAddresses(); enumIpAddress.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddress.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private static String getIpAddressFromWifi(final Context context) {
+        final WifiManager manager = (WifiManager) context.getSystemService(WIFI_SERVICE);
+        return Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
+    }
+
+    public static String ipAddress(final Context context) {
+        final ConnectivityManager manager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+        if (manager != null) {
+            final Network[] networks = manager.getAllNetworks();
+            if (networks != null) {
+                for (final Network network : networks) {
+                    final NetworkInfo info = manager.getNetworkInfo(network);
+                    if (info.isConnected()) {
+                        if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                            return getIpAddressFromWifi(context);
+                        } else if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
+                            return getIpAddressFromMobile();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     @SuppressWarnings("ResourceType")
     public static boolean isNetworkAvailable(final Context context) {

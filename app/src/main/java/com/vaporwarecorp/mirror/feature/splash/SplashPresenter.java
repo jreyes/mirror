@@ -16,8 +16,9 @@
 package com.vaporwarecorp.mirror.feature.splash;
 
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.feature.common.presenter.FullscreenPresenter;
 
 @PlugInterface
-public interface SplashPresenter extends FullscreenPresenter {
+public interface SplashPresenter extends FullscreenPresenter, Configuration {
 }

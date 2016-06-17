@@ -1,0 +1,57 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.greet.GreetPresenter",
+  "schema": {
+    "type": "object",
+    "title": "Greet Screen",
+    "required": [
+      "formItems"
+    ],
+    "properties": {
+      "formItems": {
+        "title": " ",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "welcome": {
+              "title": "Welcome message",
+              "type": "string",
+              "maxLength": 200
+            },
+            "goodbye": {
+              "title": "Goodbye message",
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "welcome",
+            "goodbye"
+          ]
+        }
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Greet screen configuration</h3><p>Enter the greetings that get picked randomly when you turn on or off the mirror.</p>"
+    },
+    {
+      "key": "formItems",
+      "add": "Add Greeting",
+      "style": {
+        "add": "btn-success"
+      },
+      "items": [
+        "formItems[].welcome",
+        "formItems[].goodbye"
+      ]
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

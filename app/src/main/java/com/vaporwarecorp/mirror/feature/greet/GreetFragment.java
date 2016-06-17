@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.feature.greet;
 
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     GreetPresenter mPresenter;
 
     private View mGreetContainer;
-    private TextView mGreetNameText;
     private TextView mGreetTypeText;
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -48,9 +48,8 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
 // --------------------- Interface GreetView ---------------------
 
     @Override
-    public void displayGreet(String greetName, boolean isWelcome) {
-        mGreetTypeText.setText(getString(isWelcome ? R.string.greet_welcome : R.string.greet_goodbye));
-        mGreetNameText.setText(greetName);
+    public void displayGreet(String greeting) {
+        mGreetTypeText.setText(Html.fromHtml(greeting));
         YoYo
                 .with(FadeIn)
                 .duration(1000)
@@ -102,7 +101,6 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
         View view = inflater.inflate(R.layout.fragment_greet, container, false);
         mGreetContainer = view.findViewById(R.id.greet_container);
         mGreetTypeText = (TextView) view.findViewById(R.id.greet_type_text);
-        mGreetNameText = (TextView) view.findViewById(R.id.greet_name_text);
         return view;
     }
 }

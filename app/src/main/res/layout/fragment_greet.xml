@@ -33,12 +33,6 @@
             android:id="@+id/greet_type_text"
             style="@style/GreetTypeTextStyle" />
 
-        <TextView
-            android:id="@+id/greet_name_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/GreetNameTextStyle" />
-
     </LinearLayout>
 
 </RelativeLayout>

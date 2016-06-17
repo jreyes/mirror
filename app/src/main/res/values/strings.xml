@@ -37,4 +37,9 @@
     <string name="day_hail" translatable="false">&#xf015;</string>
     <string name="strong_wind" translatable="false">&#xf050;</string>
     <string name="umbrella" translatable="false">&#xf084;</string>
+
+    <string name="configuration_no_ip_address">No IP address found</string>
+    <string name="configuration_ip_address">http://%1$s:8080</string>
+    <string name="configuration_view_description">You can now access the configuration menu from the above address.</string>
+    <string name="configuration_exit">Exit configuration</string>
 </resources>

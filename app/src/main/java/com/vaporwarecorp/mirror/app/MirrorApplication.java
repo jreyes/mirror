@@ -70,6 +70,7 @@ public class MirrorApplication extends MultiDexApplication {
 
         PluginBus.plug(AppManager.class);
         PluginBus.plug(CommandManager.class);
+        PluginBus.plug(ConfigurationManager.class);
         PluginBus.plug(EventManager.class);
         PluginBus.plug(ForecastManager.class);
         PluginBus.plug(HotWordManager.class);
