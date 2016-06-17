@@ -1,5 +1,7 @@
 Another Smart Mirror
 ====================
+
+[![Join the chat at https://gitter.im/jreyes/mirror](https://badges.gitter.im/jreyes/mirror.svg)](https://gitter.im/jreyes/mirror?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/jreyes/mirror.png?branch=master)](https://travis-ci.org/jreyes/mirror)
 ![](https://img.shields.io/badge/Licence-Apache%20v2-green.svg)
 ![](https://img.shields.io/badge/platform-android-green.svg)
