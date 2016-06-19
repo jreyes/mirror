@@ -35,7 +35,7 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
     - [X] Store and load configuration from preferences
     - [X] Add voice command for the configuration screen
     - [ ] Use secure preferences
-    - [ ] Run once on installation and on voice command after that
+    - [X] Run once on installation and on voice command after that
 - [ ] WebView using custom tabs (Chrome)
 
 ## Hardware

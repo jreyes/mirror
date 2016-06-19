@@ -128,6 +128,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     public void hideView() {
+        mContentContainer.clear();
         mHeaderContainer.setVisibility(View.INVISIBLE);
         mContentContainer.setVisibility(View.INVISIBLE);
     }

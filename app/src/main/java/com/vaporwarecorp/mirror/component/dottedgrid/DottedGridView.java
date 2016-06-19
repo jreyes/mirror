@@ -166,6 +166,16 @@ public class DottedGridView extends FrameLayout {
     }
 
     /**
+     * Clear the DottedGridView from any view.
+     */
+    public void clear() {
+        final BorderView[] views = mViews.values().toArray(new BorderView[mViews.size()]);
+        for (BorderView borderView : views) {
+            notifyUpdateCloseOnLeft(borderView);
+        }
+    }
+
+    /**
      * To ensure the animation is going to work this method has been override to call
      * postInvalidateOnAnimation if the view is not settled yet.
      */
