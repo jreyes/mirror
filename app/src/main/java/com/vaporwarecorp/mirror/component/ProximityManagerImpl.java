@@ -64,16 +64,10 @@ public class ProximityManagerImpl extends AbstractManager implements ProximityMa
         mManager.setProximityKitRangeNotifier(this);
     }
 
-    private boolean mTest;
-
 // --------------------- Interface ProximityKitRangeNotifier ---------------------
 
     @Override
     public void didRangeBeaconsInRegion(Collection<ProximityKitBeacon> beacons, ProximityKitBeaconRegion region) {
-        if(!mTest) {
-            mEventManager.post(new UserInRangeEvent());
-            mTest = true;
-        }
         if (beacons.size() == 0) {
             mBeaconRetries++;
             if (mInRange && mBeaconRetries > BEACON_MAX_RETRIES) {

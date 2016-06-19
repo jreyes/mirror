@@ -162,12 +162,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(GreetEvent event) {
+        if (mConfigurationManager.needsInitialSetup()) {
+            mFeature.showPresenter(ConfigurationPresenter.class);
+        }
         if (TYPE_WELCOME.equals(event.getType())) {
             mFeature.displayView();
             mHotWordManager.startListening();
-            if (mConfigurationManager.needsInitialSetup()) {
-                mFeature.showPresenter(ConfigurationPresenter.class);
-            }
         } else {
             mHotWordManager.stopListening();
             mFeature.hideCurrentPresenter();
