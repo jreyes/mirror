@@ -343,13 +343,13 @@ public class SpeechRecognizer {
                 if (nread == -1) {
                     throw new RuntimeException("error reading audio buffer");
                 } else if (nread > 0) {
+                    decoder.processRaw(buffer, nread, false, false);
+
                     int max = 0;
                     for (int i = 0; i < nread; i++) {
                         max = Math.max(max, Math.abs(buffer[i]));
                     }
                     Log.e("!!!!!!!!", "Level is: " + max);
-
-                    decoder.processRaw(buffer, nread, false, false);
 
                     if (decoder.getInSpeech() != inSpeech) {
                         inSpeech = decoder.getInSpeech();

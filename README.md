@@ -37,6 +37,14 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
     - [ ] Use secure preferences
     - [X] Run once on installation and on voice command after that
 - [ ] WebView using custom tabs (Chrome)
+- [ ] Add new commands
+    - [ ] Add selfie command
+    - [ ] Add video chat command
+    - [ ] Livecoding command?
+    - [ ] Reddit news
+    - [ ] NPR news
+- [ ] Update commands
+    - [ ] Spotify command
 
 ## Hardware
 

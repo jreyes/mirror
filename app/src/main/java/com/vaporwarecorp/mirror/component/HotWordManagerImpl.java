@@ -35,6 +35,8 @@ import static com.vaporwarecorp.mirror.component.hotword.SpeechRecognizerSetup.d
 
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(HotWordManager.class)
 public class HotWordManagerImpl extends AbstractManager implements HotWordManager, RecognitionListener {
 // ------------------------------ FIELDS ------------------------------
 
@@ -48,13 +50,6 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
     private String mKeyphrase;
     private SpeechRecognizer mRecognizer;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(HotWordManager.class)
-    public HotWordManagerImpl() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -75,7 +70,7 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
             mRecognizer = defaultSetup()
                     .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                     .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-                    .setKeywordThreshold(1e-10f)
+                    .setKeywordThreshold(1e-20f)
                     .setBoolean("-allphone_ci", true)
                     .getRecognizer();
 
