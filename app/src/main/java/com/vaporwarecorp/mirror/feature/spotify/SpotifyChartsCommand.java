@@ -30,18 +30,13 @@ import java.util.List;
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(Command.class)
 public class SpotifyChartsCommand extends AbstractSpotifyCommand implements Command {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
     MainFeature mFeature;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(Command.class)
-    public SpotifyChartsCommand() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 

@@ -1,6 +1,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppTheme" parent="@style/Theme.Leanback"/>
+    <style name="AppTheme" parent="@style/Theme.AppCompat.DayNight"/>
 
     <style name="BaseBody1TextStyle" parent="Base.TextAppearance.AppCompat.Body1">
         <item name="android:textColor">#ffffffff</item>
@@ -40,11 +40,6 @@
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
-    </style>
-
-    <style name="Widget.Leanback.PlaybackControlsButtonStyle">
-        <item name="android:focusable">false</item>
-        <item name="android:focusableInTouchMode">false</item>
     </style>
 
     <style name="GreetTypeTextStyle" parent="BaseBody1TextStyle">

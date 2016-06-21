@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.feature.main;
 
 import android.content.Intent;
+import android.text.TextUtils;
 import com.hound.android.fd.Houndify;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
@@ -31,6 +32,7 @@ import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 import com.vaporwarecorp.mirror.feature.google.GooglePresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.internet.InternetPresenter;
+import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
 import org.greenrobot.eventbus.Subscribe;
@@ -43,6 +45,8 @@ import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 import static com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.YOUTUBE_VIDEO_ID;
 import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
+import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
+import static java.util.Collections.singletonList;
 
 @Plugin
 @Provides(MainPresenter.class)
@@ -97,7 +101,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void test1() {
-        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, "vbKPSskIhmQ"));
+        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, singletonList("6NmXV4o6bmp704aPGyTVVG")));
     }
 
     @Override
@@ -205,7 +209,9 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(SpeechEvent event) {
-        mFeature.speak(event.getMessage());
+        if (!TextUtils.isEmpty(event.getMessage())) {
+            mFeature.speak(event.getMessage());
+        }
         startListening();
     }
 

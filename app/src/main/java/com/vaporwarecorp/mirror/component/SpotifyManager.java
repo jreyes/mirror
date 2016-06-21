@@ -42,6 +42,8 @@ public interface SpotifyManager extends Manager {
     void stop();
 
     interface Listener {
-        void onTracksLoaded(List<Track> tracks);
+        void onTrackUpdate(Track track);
+
+        void onPlaylistEnd();
     }
 }

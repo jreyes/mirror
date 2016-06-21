@@ -16,8 +16,12 @@
 package com.vaporwarecorp.mirror.feature.spotify;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.feature.common.view.PlaybackOverlayView;
+import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
+import kaaes.spotify.webapi.android.models.Track;
 
 @PlugInterface
-public interface SpotifyView extends PlaybackOverlayView {
+public interface SpotifyView extends MirrorView {
+// -------------------------- OTHER METHODS --------------------------
+
+    void updateTrack(Track track);
 }

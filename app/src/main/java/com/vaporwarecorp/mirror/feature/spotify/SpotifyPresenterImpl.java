@@ -22,26 +22,26 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.component.AppManager;
+import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.SpotifyManager;
+import com.vaporwarecorp.mirror.event.ResetEvent;
+import kaaes.spotify.webapi.android.models.Track;
 
 import java.util.List;
 
 @Plugin
+@Provides(SpotifyPresenter.class)
 public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> implements SpotifyPresenter {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
     AppManager mAppManager;
     @Plug
+    EventManager mEventManager;
+    @Plug
     SpotifyManager mSpotifyManger;
     @Plug
     SpotifyView mView;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(SpotifyPresenter.class)
-    public SpotifyPresenterImpl() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -62,17 +62,25 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
         super.onViewResume(view);
 
         List<String> trackIds = (List<String>) getParams().get(TRACK_IDS);
-        mSpotifyManger.play(trackIds, tracks -> mView.updateQueue(tracks));
+        mSpotifyManger.play(trackIds, new SpotifyManager.Listener() {
+            @Override
+            public void onTrackUpdate(Track track) {
+                mView.updateTrack(track);
+            }
+
+            @Override
+            public void onPlaylistEnd() {
+                mEventManager.post(new ResetEvent(SpotifyPresenter.class));
+            }
+        });
     }
 
     @Override
-    public void onViewStop(View view) {
+    public void onViewPause(View view) {
         mSpotifyManger.stop();
-        super.onViewStop(view);
+        super.onViewPause(view);
     }
 
-    //mView.updateMetadata(event.getTrack());
-    //mView.updateProgress(event.getEventType(), event.getLastPosition());
     @Override
     protected SpotifyView getViewPlug() {
         return mView;

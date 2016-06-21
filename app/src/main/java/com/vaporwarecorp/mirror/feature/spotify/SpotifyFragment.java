@@ -15,16 +15,19 @@
  */
 package com.vaporwarecorp.mirror.feature.spotify;
 
-import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter.ViewHolder;
-import android.support.v17.leanback.widget.ImageCardView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import co.mobiwise.library.MusicPlayerView;
 import com.robopupu.api.dependency.Provides;
+import com.robopupu.api.feature.FeatureFragment;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.ViewCompatActivity;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.vaporwarecorp.mirror.feature.common.view.PlaybackOverlayFragment;
+import com.vaporwarecorp.mirror.R;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -33,13 +36,27 @@ import java.util.List;
 import static solid.stream.Stream.stream;
 
 @Plugin
+@Provides(SpotifyView.class)
 public class SpotifyFragment
-        extends PlaybackOverlayFragment<SpotifyPresenter, Track>
+        extends FeatureFragment<SpotifyPresenter>
         implements SpotifyView {
 // ------------------------------ FIELDS ------------------------------
 
+    /*
+Glide
+        .with(getActivity())
+        .load(track.album.images.get(0).url)
+        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+        .centerCrop()
+        .into(cardView.getMainImageView());
+        */
     @Plug
     SpotifyPresenter mPresenter;
+
+    private Track mCurrentTrack;
+    private MusicPlayerView mMusicPlayerView;
+    private TextView mSingerTextView;
+    private TextView mSongTextView;
 
 // -------------------------- STATIC METHODS --------------------------
 
@@ -47,14 +64,20 @@ public class SpotifyFragment
         return stream(artists).map(a -> a.name).reduce((u, t) -> u + ", " + t).get();
     }
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(SpotifyView.class)
-    public SpotifyFragment() {
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
+
+// --------------------- Interface MirrorView ---------------------
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public Class presenterClass() {
+        return SpotifyPresenter.class;
+    }
 
 // --------------------- Interface PresentedView ---------------------
 
@@ -71,8 +94,33 @@ public class SpotifyFragment
 // --------------------- Interface SpotifyView ---------------------
 
     @Override
-    public void updateMetadata(Object item) {
+    public void updateTrack(Track track) {
+        if (mCurrentTrack == null || !mCurrentTrack.id.equals(track.id)) {
+            mCurrentTrack = track;
 
+            mSongTextView.setText(track.name);
+            mSingerTextView.setText(artistNames(track.artists));
+            mMusicPlayerView.setCoverURL(track.album.images.get(0).url);
+            mMusicPlayerView.setProgress(0);
+            mMusicPlayerView.setMax((int) (track.duration_ms / 1000));
+            mMusicPlayerView.start();
+        }
+    }
+
+// -------------------------- OTHER METHODS --------------------------
+
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle inState) {
+        return inflater.inflate(R.layout.fragment_spotify, container, false);
+    }
+
+    @Override
+    public void onPause() {
+        mCurrentTrack = null;
+        mSongTextView.setText(null);
+        mSingerTextView.setText(null);
+        mMusicPlayerView.stop();
+        super.onPause();
     }
 
 /*
@@ -103,32 +151,10 @@ public class SpotifyFragment
     }*/
 
     @Override
-    protected void bindCardPresenter(ImageCardView cardView, Track track) {
-        cardView.setTitleText(track.name);
-        cardView.setContentText(artistNames(track.artists));
-
-        Glide
-                .with(getActivity())
-                .load(track.album.images.get(0).url)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .centerCrop()
-                .into(cardView.getMainImageView());
-    }
-
-    @Override
-    protected void bindDescriptionPresenter(ViewHolder viewHolder, MutableDataHolder holder) {
-        Track track = (Track) holder.data;
-        viewHolder.getTitle().setText(track.name);
-        viewHolder.getSubtitle().setText(artistNames(track.artists));
-    }
-
-    @Override
-    public boolean isFullscreen() {
-        return false;
-    }
-
-    @Override
-    public Class presenterClass() {
-        return SpotifyPresenter.class;
+    protected void onCreateBindings() {
+        super.onCreateBindings();
+        mMusicPlayerView = getView(R.id.music_player_view);
+        mSongTextView = getView(R.id.song_text_view);
+        mSingerTextView = getView(R.id.singer_text_view);
     }
 }

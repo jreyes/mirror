@@ -31,10 +31,6 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Player.InitializationObserver;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
-import com.vaporwarecorp.mirror.event.ResetEvent;
-import com.vaporwarecorp.mirror.event.SpotifyPlaybackEvent;
-import com.vaporwarecorp.mirror.event.SpotifyTrackEvent;
-import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -56,6 +52,8 @@ import static solid.collectors.ToList.toList;
 import static solid.stream.Stream.stream;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(SpotifyManager.class)
 public class SpotifyManagerImpl
         extends AbstractManager
         implements SpotifyManager, PlayerNotificationCallback, Callback<Track>, PlayerStateCallback {
@@ -63,25 +61,17 @@ public class SpotifyManagerImpl
 
     @Plug
     AppManager mAppManager;
-    @Plug
-    EventManager mEventManager;
 
     private String mClientId;
     private String mClientRedirectUri;
     private Context mContext;
     private PlayerState mCurrentPlayerState;
     private List<Track> mCurrentTracks;
+    private Listener mListener;
     private Player mPlayer;
     private Config mPlayerConfig;
     private SpotifyService mService;
     private MediaSession mSession;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(SpotifyManager.class)
-    public SpotifyManagerImpl() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -90,9 +80,8 @@ public class SpotifyManagerImpl
 
     @Override
     public void success(Track track, Response response) {
-        if (track != null) {
-            mPlayer.getPlayerState(this);
-            mEventManager.post(new SpotifyTrackEvent(track));
+        if (mListener != null && track != null) {
+            mListener.onTrackUpdate(track);
         }
     }
 
@@ -106,13 +95,19 @@ public class SpotifyManagerImpl
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
         mCurrentPlayerState = playerState;
 
-        int lastPosition = playerState.positionInMs;
-        if (eventType == EventType.TRACK_CHANGED) {
-            //String trackId = playerState.trackUri.replaceAll("spotify:track:", "");
-            //mService.getTrack(trackId, this);
+        Timber.d("onPlaybackEvent %s", eventType.toString());
+        if (eventType == EventType.END_OF_CONTEXT) {
+            if (mListener != null) {
+                mListener.onPlaylistEnd();
+            }
+            return;
         }
 
-        mEventManager.post(new SpotifyPlaybackEvent(lastPosition, eventType));
+        if (eventType == EventType.TRACK_CHANGED) {
+            String trackId = playerState.trackUri.replaceAll("spotify:track:", "");
+            mService.getTrack(trackId, this);
+        }
+
         if (eventType == EventType.END_OF_CONTEXT) {
             stop();
         }
@@ -156,6 +151,8 @@ public class SpotifyManagerImpl
             return;
         }
 
+        mListener = listener;
+
         String trackIds = stream(trackUris)
                 .map(t -> t.replaceAll("spotify:track:", ""))
                 .reduce((t, u) -> t + "," + u)
@@ -164,9 +161,6 @@ public class SpotifyManagerImpl
             @Override
             public void success(Tracks tracks, Response response) {
                 play(tracks);
-                if (listener != null) {
-                    listener.onTracksLoaded(tracks.tracks);
-                }
             }
 
             @Override
@@ -206,17 +200,6 @@ public class SpotifyManagerImpl
             mSession.setActive(false);
         }
         Spotify.destroyPlayer(this);
-        mEventManager.post(new ResetEvent(SpotifyPresenter.class));
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    public void togglePlay() {
-        if (mCurrentPlayerState.playing) {
-            mPlayer.pause();
-        } else {
-            mPlayer.resume();
-        }
     }
 
     private void play(Tracks tracks) {
@@ -228,9 +211,7 @@ public class SpotifyManagerImpl
             public void onInitialized(Player player) {
                 // create a session so that a now playing card is active on the homescreen
                 mSession = new MediaSession(mContext, "SpotifySession");
-                //mSession.setCallback(new SpotifyMediaSessionCallback(player));
                 mSession.setFlags(FLAG_HANDLES_TRANSPORT_CONTROLS | FLAG_HANDLES_MEDIA_BUTTONS);
-                //mSession.setSessionActivity(getSessionActivity());
 
                 mPlayer = player;
                 mPlayer.addPlayerNotificationCallback(SpotifyManagerImpl.this);

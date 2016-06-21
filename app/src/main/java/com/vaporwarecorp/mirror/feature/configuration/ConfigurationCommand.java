@@ -33,7 +33,7 @@ import com.vaporwarecorp.mirror.feature.MainFeature;
 public class ConfigurationCommand extends AbstractHoundifyCommand implements HoundifyCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String COMMAND_EXPRESSION = "configuration mode";
+    private static final String COMMAND_EXPRESSION = "display help";
     private static final String COMMAND_INTENT = "ConfigurationMode";
     private static final String COMMAND_RESPONSE = "OK, displaying the configuration screen";
 

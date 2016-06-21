@@ -22,6 +22,8 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.EventManager;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 
@@ -30,18 +32,15 @@ import java.util.List;
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(Command.class)
 public class SpotifySearchCommand extends AbstractSpotifyCommand implements Command {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
+    EventManager mEventManager;
+    @Plug
     MainFeature mFeature;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(Command.class)
-    public SpotifySearchCommand() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -55,12 +54,14 @@ public class SpotifySearchCommand extends AbstractSpotifyCommand implements Comm
 
     @Override
     protected void onExecuteCommandSuccess(CommandResult result, List<String> trackIds) {
-        Params params = new Params();
-        params.put(TRACK_IDS, trackIds);
-        mFeature.showPresenter(SpotifyPresenter.class, params);
+        if (!trackIds.isEmpty()) {
+            Params params = new Params();
+            params.put(TRACK_IDS, trackIds);
+            mFeature.showPresenter(SpotifyPresenter.class, params);
+        }
 
-        String spokenResponseLong = textValue(
+        final String spokenResponseLong = textValue(
                 result.getJsonNode().findValue("AutoPlayPreviewResult"), "SpokenResponseLong");
-        mFeature.speak(spokenResponseLong);
+        mEventManager.post(new SpeechEvent(spokenResponseLong));
     }
 }
