@@ -39,6 +39,14 @@ public class WatchCBSFragment extends VideoPlayerFragment<WatchCBSPresenter> imp
     }
 
     @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
+    @Override
     public Class presenterClass() {
         return WatchCBSPresenter.class;
     }

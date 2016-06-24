@@ -19,7 +19,9 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
 
-public class FullScreenActivityUtil {
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+public class FullScreenUtil {
 // -------------------------- STATIC METHODS --------------------------
 
     private static void hideSystemUI(View view) {
@@ -43,6 +45,8 @@ public class FullScreenActivityUtil {
 
     public static void onResume(Dialog dialog) {
         View decorView = dialog.getWindow().getDecorView();
+        dialog.getWindow().setFlags(FLAG_NOT_FOCUSABLE, FLAG_NOT_FOCUSABLE);
+        dialog.setOnShowListener(d -> dialog.getWindow().clearFlags(FLAG_NOT_FOCUSABLE));
         hideSystemUI(decorView);
         decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
             if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {

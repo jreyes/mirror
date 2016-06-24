@@ -42,14 +42,6 @@ public class SpotifyFragment
         implements SpotifyView {
 // ------------------------------ FIELDS ------------------------------
 
-    /*
-Glide
-        .with(getActivity())
-        .load(track.album.images.get(0).url)
-        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-        .centerCrop()
-        .into(cardView.getMainImageView());
-        */
     @Plug
     SpotifyPresenter mPresenter;
 
@@ -72,6 +64,14 @@ Glide
     @Override
     public boolean isFullscreen() {
         return false;
+    }
+
+    @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
     }
 
     @Override
@@ -122,33 +122,6 @@ Glide
         mMusicPlayerView.stop();
         super.onPause();
     }
-
-/*
-    @Override
-    public void updateMetadata(Track track) {
-        if (mPlaybackControlsRow == null) {
-            initializePlaybackControls(track);
-        }
-        mDuration = (int) track.duration_ms;
-        mPlaybackControlsRow.setTotalTime(mDuration);
-        ((MutableTrackHolder) mPlaybackControlsRow.getItem()).track = track;
-        mRowsAdapter.notifyArrayItemRangeChanged(mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
-        if (!track.album.images.isEmpty()) {
-            Glide
-                    .with(getActivity())
-                    .load(track.album.images.get(0).url)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                            Drawable artDrawable = new BitmapDrawable(SpotifyFragment.this.getResources(), bitmap);
-                            mPlaybackControlsRow.setImageDrawable(artDrawable);
-                            mRowsAdapter.notifyArrayItemRangeChanged(mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
-                        }
-                    });
-        }
-    }*/
 
     @Override
     protected void onCreateBindings() {

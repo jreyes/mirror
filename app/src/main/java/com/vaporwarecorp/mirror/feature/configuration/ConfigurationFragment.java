@@ -25,7 +25,7 @@ import com.robopupu.api.feature.FeatureDialogFragment;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
-import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
+import com.vaporwarecorp.mirror.util.FullScreenUtil;
 import com.vaporwarecorp.mirror.util.NetworkUtil;
 
 @Plugin
@@ -62,6 +62,14 @@ public class ConfigurationFragment extends FeatureDialogFragment<ConfigurationPr
     }
 
     @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
+    @Override
     public Class presenterClass() {
         return ConfigurationPresenter.class;
     }
@@ -83,7 +91,7 @@ public class ConfigurationFragment extends FeatureDialogFragment<ConfigurationPr
     @Override
     public void onResume() {
         super.onResume();
-        FullScreenActivityUtil.onResume(getDialog());
+        FullScreenUtil.onResume(getDialog());
     }
 
     @Override

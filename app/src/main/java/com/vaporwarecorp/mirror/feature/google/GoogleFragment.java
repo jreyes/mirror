@@ -15,6 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.google;
 
+import android.annotation.SuppressLint;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.robopupu.api.dependency.Provides;
@@ -30,6 +31,8 @@ public class GoogleFragment extends BrowserFragment<GooglePresenter> implements 
 
     @Plug
     GooglePresenter mPresenter;
+
+
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -50,6 +53,7 @@ public class GoogleFragment extends BrowserFragment<GooglePresenter> implements 
 
 // -------------------------- OTHER METHODS --------------------------
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onResume() {
         super.onResume();
@@ -57,7 +61,7 @@ public class GoogleFragment extends BrowserFragment<GooglePresenter> implements 
         WebView webView = getWebView();
         if (webView != null && webView.getOriginalUrl() == null) {
             Timber.d("Loading google");
-            //webView.getSettings().setJavaScriptEnabled(true);
+            webView.getSettings().setJavaScriptEnabled(true);
             webView.loadUrl("http://google.com");
             webView.setWebViewClient(new WebViewClient() {
                 @Override

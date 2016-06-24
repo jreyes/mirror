@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import com.hound.android.fd.Houndify;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
@@ -31,8 +32,8 @@ import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 import com.vaporwarecorp.mirror.feature.google.GooglePresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
-import com.vaporwarecorp.mirror.feature.internet.InternetPresenter;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
+import com.vaporwarecorp.mirror.feature.twilio.TwilioPresenter;
 import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
 import org.greenrobot.eventbus.Subscribe;
@@ -46,6 +47,7 @@ import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 import static com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.YOUTUBE_VIDEO_ID;
 import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
+import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 import static java.util.Collections.singletonList;
 
 @Plugin
@@ -68,6 +70,8 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Plug
     SpotifyManager mSpotifyManager;
     @Plug
+    TwilioManager mTwilioManager;
+    @Plug
     MainView mView;
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -87,6 +91,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void processCommand(int resultCode, Intent data) {
         mCommandManager.processCommand(resultCode, data);
+    }
+
+    @Override
+    public void removeView(Class<? extends Presenter> presenterClass) {
+        mFeature.hidePresenter(presenterClass);
+        delay(l -> startListening(), 10);
     }
 
     @Override
@@ -121,7 +131,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void test5() {
-        mFeature.showPresenter(InternetPresenter.class);
+        mFeature.showPresenter(TwilioPresenter.class);
+    }
+
+    @Override
+    public void test6() {
+        mFeature.showPresenter(ConfigurationPresenter.class);
     }
 
     @Override
@@ -143,6 +158,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void onViewStop(View view) {
+        mTwilioManager.stop();
         mSpotifyManager.stop();
         mHotWordManager.destroy();
         mCommandManager.stop();
@@ -170,11 +186,9 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
             mFeature.showPresenter(ConfigurationPresenter.class);
         }
         if (TYPE_WELCOME.equals(event.getType())) {
-            mFeature.displayView();
-            mHotWordManager.startListening();
+            wakeUp();
         } else {
-            mHotWordManager.stopListening();
-            mFeature.hideCurrentPresenter();
+            sleep();
         }
     }
 
@@ -188,8 +202,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(ResetEvent event) {
-        mFeature.hidePresenter(event.getPresenterClass());
-        startListening();
+        removeView(event.getPresenterClass());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -215,6 +228,12 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         startListening();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void onEvent(TwilioEvent event) {
+        mFeature.showPresenter(TwilioPresenter.class);
+    }
+
     private void checkPermissions() {
         final List<String> neededPermissions = PermissionUtil.checkPermissions(mView.activity());
         if (neededPermissions.isEmpty()) {
@@ -224,10 +243,22 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         }
     }
 
+    private void sleep() {
+        mTwilioManager.stop();
+        mHotWordManager.stopListening();
+        mFeature.hideCurrentPresenter();
+    }
+
     private void startManagers() {
         mSpotifyManager.authenticate(mView.activity());
         mEventManager.register(this);
         mCommandManager.start();
         mHotWordManager.start();
+    }
+
+    private void wakeUp() {
+        mFeature.displayView();
+        mHotWordManager.startListening();
+        mTwilioManager.start();
     }
 }

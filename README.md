@@ -24,6 +24,7 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 - [ ] New logo
 - [ ] Multiple user support
 - [ ] Integration with Alexa
+    -   [ ] Smarthings support
 - [ ] Improve Gesture control module
     - [ ] Integration with Leap Motion
     - [ ] Improve OpenCV module
@@ -40,11 +41,13 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 - [ ] Add new commands
     - [ ] Add selfie command
     - [ ] Add video chat command
+        -   [ ] Pause / Mute when is on the sidelines
+        -   [ ] Add end call button
     - [ ] Livecoding command?
     - [ ] Reddit news
     - [ ] NPR news
-- [ ] Update commands
-    - [ ] Spotify command
+- [X] Update commands
+    - [X] Spotify command
 
 ## Hardware
 

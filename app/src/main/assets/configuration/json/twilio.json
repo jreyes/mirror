@@ -1,0 +1,64 @@
+{
+  "component": "com.vaporwarecorp.mirror.component.TwilioManager",
+  "schema": {
+    "type": "object",
+    "title": "Twilio Configuration",
+    "required": [
+      "profileSID",
+      "accountSID",
+      "apiKeySID",
+      "apiKeySecret",
+      "identity"
+    ],
+    "properties": {
+      "profileSID": {
+        "title": "Configuration Profile SID",
+        "type": "string"
+      },
+      "accountSID": {
+        "title": "Account SID",
+        "type": "string"
+      },
+      "apiKeySID": {
+        "title": "API key SID",
+        "type": "string"
+      },
+      "apiKeySecret": {
+        "title": "API Key Secret",
+        "type": "string"
+      },
+      "identity": {
+        "title": "Identity",
+        "type": "string"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Twilio Configuration</h3><p>Enter here your credentials that can be obtained from <a href=\"http://www.twilio.com\">http://www.twilio.com</a>.</p>"
+    },
+    {
+      "key": "profileSID",
+      "type": "password"
+    },
+    {
+      "key": "accountSID",
+      "type": "password"
+    },
+    {
+      "key": "apiKeySID",
+      "type": "password"
+    },
+    {
+      "key": "apiKeySecret",
+      "type": "password"
+    },
+    "identity",
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

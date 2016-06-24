@@ -92,6 +92,14 @@ public class YoutubeFragment
     }
 
     @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
+    @Override
     public Class presenterClass() {
         return YoutubePresenter.class;
     }

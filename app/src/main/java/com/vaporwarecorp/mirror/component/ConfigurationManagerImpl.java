@@ -34,6 +34,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+import static solid.stream.Stream.stream;
+
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(ConfigurationManager.class)
@@ -53,6 +57,11 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
 
 // --------------------- Interface ConfigurationManager ---------------------
+
+    @Override
+    public String getString(String preferenceKey, String defaultValue) {
+        return Prefs.getString(preferenceKey, defaultValue);
+    }
 
     @Override
     public ArrayList<String> getStringList(String preferenceKey, List<String> defaultValue) {
@@ -81,6 +90,13 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
         if (mServer.isAlive()) {
             mServer.stop();
         }
+    }
+
+    @Override
+    public void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
+        stream(jsonNode.findValues(jsonNodeKey))
+                .filter(j -> isNotEmpty(j.textValue()))
+                .forEach((JsonNode j) -> Prefs.putString(preferenceKey, trimToEmpty(j.textValue())));
     }
 
     @SuppressWarnings("Convert2streamapi")

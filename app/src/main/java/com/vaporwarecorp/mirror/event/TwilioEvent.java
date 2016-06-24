@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.common.view;
+package com.vaporwarecorp.mirror.event;
 
-import com.robopupu.api.mvp.View;
+import com.twilio.conversations.IncomingInvite;
 
-public interface MirrorView extends View {
-// -------------------------- OTHER METHODS --------------------------
+public class TwilioEvent implements Event {
+// ------------------------------ FIELDS ------------------------------
 
-    boolean isFullscreen();
+    private final IncomingInvite incomingInvite;
 
-    void onCenterDisplay();
+// --------------------------- CONSTRUCTORS ---------------------------
 
-    void onSideDisplay();
+    public TwilioEvent(IncomingInvite incomingInvite) {
+        this.incomingInvite = incomingInvite;
+    }
 
-    Class presenterClass();
+// --------------------- GETTER / SETTER METHODS ---------------------
+
+    public IncomingInvite getIncomingInvite() {
+        return incomingInvite;
+    }
 }

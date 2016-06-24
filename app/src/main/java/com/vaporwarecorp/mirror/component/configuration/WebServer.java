@@ -17,7 +17,6 @@ package com.vaporwarecorp.mirror.component.configuration;
 
 import android.content.Context;
 import android.text.TextUtils;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaporwarecorp.mirror.component.ConfigurationManager.Listener;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.io.IOUtils;
@@ -141,8 +140,7 @@ public class WebServer extends NanoHTTPD {
 
     private Response updateConfiguration(IHTTPSession session, Configuration configuration) {
         final String json = getPostData(session);
-        final JsonNode jsonNode = toJsonNode(json).findValue("formItems");
-        configuration.updateConfiguration(jsonNode);
+        configuration.updateConfiguration(toJsonNode(json));
         return newFixedLengthResponse(null);
     }
 }

@@ -15,10 +15,12 @@
  */
 package com.vaporwarecorp.mirror.app;
 
-import android.support.multidex.MultiDexApplication;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.integration.okhttp.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.robopupu.api.app.BaseApplication;
 import com.robopupu.api.app.Robopupu;
 import com.robopupu.api.dependency.AppDependencyScope;
 import com.robopupu.api.plugin.PluginBus;
@@ -33,29 +35,24 @@ import java.io.InputStream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class MirrorApplication extends MultiDexApplication {
-// ------------------------------ FIELDS ------------------------------
-
-    private static MirrorApplication mInstance;
-
-// -------------------------- STATIC METHODS --------------------------
-
-    public static MirrorApplication getInstance() {
-        return mInstance;
-    }
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    public MirrorApplication() {
-        mInstance = this;
-    }
-
+public class MirrorApplication extends BaseApplication {
 // -------------------------- OTHER METHODS --------------------------
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
+        if (!"com.twilio.conversations".equals(callback.getClass().getPackage().getName())) {
+            super.registerActivityLifecycleCallbacks(callback);
+        }
+    }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
+    @Override
+    protected void configureApplication() {
         initializeApplication();
         initializeTimber();
         initializeGlide();
@@ -78,6 +75,7 @@ public class MirrorApplication extends MultiDexApplication {
         PluginBus.plug(ProximityManager.class);
         PluginBus.plug(SpotifyManager.class);
         PluginBus.plug(TextToSpeechManager.class);
+        PluginBus.plug(TwilioManager.class);
 
         final PluginFeatureManager featureManager = PluginBus.plug(PluginFeatureManager.class);
         registerActivityLifecycleCallbacks(featureManager.getActivityLifecycleCallback());

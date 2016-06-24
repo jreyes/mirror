@@ -83,6 +83,14 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     }
 
     @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
+    @Override
     public Class presenterClass() {
         return GreetPresenter.class;
     }

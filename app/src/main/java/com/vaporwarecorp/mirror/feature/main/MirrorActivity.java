@@ -37,7 +37,7 @@ import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
 import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
-import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
+import com.vaporwarecorp.mirror.util.FullScreenUtil;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -172,6 +172,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         findViewById(R.id.test3).setOnClickListener(v -> mPresenter.test3());
         findViewById(R.id.test4).setOnClickListener(v -> mPresenter.test4());
         findViewById(R.id.test5).setOnClickListener(v -> mPresenter.test5());
+        findViewById(R.id.test6).setOnClickListener(v -> mPresenter.test6());
     }
 
     @Override
@@ -207,36 +208,23 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mContentContainer.setListener(new DottedGridView.Listener() {
             @Override
             public void onClosedToRight(int containerId) {
-                final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
-                if (mirrorView != null) {
-                    if (mCurrentPresenterClass != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
-                        mCurrentPresenterClass = null;
-                        mCurrentContainerId = null;
-                    }
-                    mFeature.hidePresenter(mirrorView.presenterClass());
-                }
+                removeMirrorView(containerId);
             }
 
             @Override
             public void onClosedToLeft(int containerId) {
-                final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
-                if (mirrorView != null) {
-                    if (mCurrentPresenterClass != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
-                        mCurrentPresenterClass = null;
-                        mCurrentContainerId = null;
-                    }
-                    mFeature.hidePresenter(mirrorView.presenterClass());
-                }
+                removeMirrorView(containerId);
             }
 
             @Override
             public void onViewOnCenter(int containerId) {
                 MirrorView mirrorView = getMirrorViewByContainerId(containerId);
                 if (mirrorView != null) {
+                    mirrorView.onCenterDisplay();
                     if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
                         MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
                         if (currentMirrorView != null) {
-                            mFeature.hidePresenter(currentMirrorView.presenterClass());
+                            mPresenter.removeView(currentMirrorView.presenterClass());
                         }
                     }
                     mCurrentPresenterClass = mirrorView.presenterClass();
@@ -246,24 +234,12 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
             @Override
             public void onViewOnLeft(int containerId) {
-                if (mCurrentPresenterClass != null) {
-                    final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
-                    if (mirrorView != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
-                        mCurrentPresenterClass = null;
-                        mCurrentContainerId = null;
-                    }
-                }
+                updateMirrorView(containerId);
             }
 
             @Override
             public void onViewOnRight(int containerId) {
-                if (mCurrentPresenterClass != null) {
-                    final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
-                    if (mirrorView != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
-                        mCurrentPresenterClass = null;
-                        mCurrentContainerId = null;
-                    }
-                }
+                updateMirrorView(containerId);
             }
         });
     }
@@ -313,11 +289,22 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     private void onResumeFullScreen() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        FullScreenActivityUtil.onResume(this);
+        FullScreenUtil.onResume(this);
     }
 
     private void removeDottedGridListener() {
         mContentContainer.setListener(null);
+    }
+
+    private void removeMirrorView(final int containerId) {
+        final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+        if (mirrorView != null) {
+            if (mCurrentPresenterClass != null && mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                mCurrentPresenterClass = null;
+                mCurrentContainerId = null;
+            }
+            mPresenter.removeView(mirrorView.presenterClass());
+        }
     }
 
     private void showDialogFragment(final FragmentManager fragmentManager,
@@ -378,7 +365,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @SuppressWarnings("unchecked")
     private void updateCurrentPresenterClass(Fragment fragment, int containerId) {
         if (mCurrentPresenterClass != null) {
-            mFeature.hidePresenter(mCurrentPresenterClass);
+            mPresenter.removeView(mCurrentPresenterClass);
             mCurrentPresenterClass = null;
         }
 
@@ -388,6 +375,19 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             }
             mCurrentPresenterClass = ((MirrorView) fragment).presenterClass();
             mCurrentContainerId = containerId;
+        }
+    }
+
+    private void updateMirrorView(final int containerId) {
+        if (mCurrentPresenterClass != null) {
+            final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+            if (mirrorView != null) {
+                mirrorView.onSideDisplay();
+                if (mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                    mCurrentPresenterClass = null;
+                    mCurrentContainerId = null;
+                }
+            }
         }
     }
 }

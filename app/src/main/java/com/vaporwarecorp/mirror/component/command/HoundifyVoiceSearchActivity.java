@@ -18,7 +18,7 @@ package com.vaporwarecorp.mirror.component.command;
 import android.app.Activity;
 import android.content.Intent;
 import com.hound.android.fd.Houndify;
-import com.vaporwarecorp.mirror.util.FullScreenActivityUtil;
+import com.vaporwarecorp.mirror.util.FullScreenUtil;
 
 public class HoundifyVoiceSearchActivity
         extends com.hound.android.fd.HoundifyVoiceSearchActivity {
@@ -38,6 +38,6 @@ public class HoundifyVoiceSearchActivity
     @Override
     protected void onResume() {
         super.onResume();
-        FullScreenActivityUtil.onResume(this);
+        FullScreenUtil.onResume(this);
     }
 }

@@ -8,4 +8,10 @@
     <dimen name="lb_playback_controls_padding_bottom">480dp</dimen>
     <dimen name="lb_playback_controls_margin_start">20dp</dimen>
     <dimen name="lb_playback_controls_margin_end">20dp</dimen>
+
+    <dimen name="local_video_size">90dp</dimen>
+    <dimen name="local_video_margin">16dp</dimen>
+
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_margin_bottom">40dp</dimen>
 </resources>

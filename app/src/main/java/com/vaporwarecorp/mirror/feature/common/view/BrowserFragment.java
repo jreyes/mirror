@@ -73,6 +73,14 @@ public abstract class BrowserFragment<T_Presenter extends BrowserPresenter>
         return false;
     }
 
+    @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
 // --------------------- Interface PresentedView ---------------------
 
     /**

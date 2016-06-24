@@ -39,6 +39,14 @@ public class InternetFragment extends VideoPlayerFragment<InternetPresenter> imp
     }
 
     @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
+    @Override
     public Class presenterClass() {
         return InternetPresenter.class;
     }

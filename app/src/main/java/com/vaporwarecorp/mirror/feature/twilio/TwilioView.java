@@ -13,36 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.component;
+package com.vaporwarecorp.mirror.feature.twilio;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.twilio.conversations.IncomingInvite;
+import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
 
 @PlugInterface
-public interface ConfigurationManager extends Manager {
+public interface TwilioView extends MirrorView {
 // -------------------------- OTHER METHODS --------------------------
 
-    String getString(String preferenceKey, String defaultValue);
-
-    ArrayList<String> getStringList(String preferenceKey, List<String> defaultValue);
-
-    void hasBeenSetup();
-
-    boolean needsInitialSetup();
-
-    void start();
-
-    void stop();
-
-    void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
-
-    void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
-
-    interface Listener {
-        void onExit();
-    }
+    void displayInvite(IncomingInvite incomingInvite);
 }

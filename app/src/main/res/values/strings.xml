@@ -42,4 +42,9 @@
     <string name="configuration_ip_address">http://%1$s:8080</string>
     <string name="configuration_view_description">You can now access the configuration menu from the above address.</string>
     <string name="configuration_exit">Exit configuration</string>
+
+    <string name="conversation_title">Conversation invite received</string>
+    <string name="conversation_message">%1$s invited you to conversation</string>
+    <string name="conversation_accept">Accept</string>
+    <string name="conversation_reject">Reject</string>
 </resources>

@@ -100,8 +100,8 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
 // --------------------- Interface ViewObserver ---------------------
 
     @Override
-    public void onViewResume(final View view) {
-        super.onViewResume(view);
+    public void onViewStart(final View view) {
+        super.onViewStart(view);
 
         final String pictureUrl = mUrls.get(new Random().nextInt(mUrls.size()));
         Timber.d("Displaying %s", pictureUrl);
@@ -117,6 +117,9 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
 
     private void isApplicationReady() {
         delay(l -> {
+            Timber.d("mAppManager.isBluetoothAvailable() %s", mAppManager.isBluetoothAvailable());
+            Timber.d("mAppManager.isNetworkAvailable() %s", mAppManager.isNetworkAvailable());
+            Timber.d("mAppManager.isLocationAvailable() %s", mAppManager.isLocationAvailable());
             if (mAppManager.isBluetoothAvailable() && mAppManager.isNetworkAvailable() &&
                     mAppManager.isLocationAvailable()) {
                 mMainFeature.onApplicationReady();

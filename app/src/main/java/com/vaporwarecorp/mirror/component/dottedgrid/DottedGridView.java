@@ -219,9 +219,12 @@ public class DottedGridView extends FrameLayout {
             default:
                 break;
         }
+        /*
         boolean interceptTap = mDraggedView == null ||
                 mViewDragHelper.isViewUnder(mDraggedView, (int) ev.getX(), (int) ev.getY());
         return mViewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap;
+        */
+        return mViewDragHelper.shouldInterceptTouchEvent(ev);
     }
 
     @Override

@@ -54,6 +54,14 @@ public abstract class FullscreenFragment<T extends FeaturePresenter>
         return true;
     }
 
+    @Override
+    public void onCenterDisplay() {
+    }
+
+    @Override
+    public void onSideDisplay() {
+    }
+
 // -------------------------- OTHER METHODS --------------------------
 
     @Override

@@ -23,7 +23,6 @@ import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
-import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PreferenceManager;
@@ -57,8 +56,6 @@ public class GreetPresenterImpl extends AbstractFeaturePresenter<GreetView> impl
     );
     private static final String TEMPLATE_USER = "{{user}}";
 
-    @Plug
-    AppManager mAppManager;
     @Plug
     ConfigurationManager mConfigurationManager;
     @Plug
