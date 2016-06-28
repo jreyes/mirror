@@ -125,7 +125,6 @@ public class DottedGridView extends FrameLayout {
         }
     };
 
-    private int activePointerId = INVALID_POINTER;
     private FrameLayout mBackground;
     private int mColumnSizeCenter;
     private int mColumnSizeSide;
@@ -204,49 +203,40 @@ public class DottedGridView extends FrameLayout {
                 .filter(v -> isViewHit(v, (int) ev.getX(), (int) ev.getY()))
                 .forEach((BorderView v) -> mDraggedView = v);
 
-        switch (MotionEventCompat.getActionMasked(ev) & MotionEventCompat.ACTION_MASK) {
+        final int actionMasked = MotionEventCompat.getActionMasked(ev);
+        switch (actionMasked & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                hideDraggedViewBorder();
                 mViewDragHelper.cancel();
                 return false;
             case MotionEvent.ACTION_DOWN:
-                int index = MotionEventCompat.getActionIndex(ev);
-                activePointerId = MotionEventCompat.getPointerId(ev, index);
-                if (activePointerId == INVALID_POINTER) {
-                    return false;
-                }
-                break;
+                showDraggedViewBorder();
+                mViewDragHelper.processTouchEvent(ev);
+                return false;
             default:
                 break;
         }
-        /*
-        boolean interceptTap = mDraggedView == null ||
+        return mViewDragHelper.shouldInterceptTouchEvent(ev) ||
                 mViewDragHelper.isViewUnder(mDraggedView, (int) ev.getX(), (int) ev.getY());
-        return mViewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap;
-        */
-        return mViewDragHelper.shouldInterceptTouchEvent(ev);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int actionMasked = MotionEventCompat.getActionMasked(event);
+    public boolean onTouchEvent(MotionEvent ev) {
+        final int actionMasked = MotionEventCompat.getActionMasked(ev);
         switch (actionMasked & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_CANCEL:
-                return false;
             case MotionEvent.ACTION_UP:
                 hideDraggedViewBorder();
-                mBackground.setVisibility(INVISIBLE);
                 break;
             case MotionEvent.ACTION_DOWN:
                 showDraggedViewBorder();
-                activePointerId = MotionEventCompat.getPointerId(event, actionMasked);
-                mBackground.setVisibility(VISIBLE);
+                if (MotionEventCompat.getPointerId(ev, actionMasked) == INVALID_POINTER) {
+                    return false;
+                }
                 break;
         }
-        if (activePointerId == INVALID_POINTER) {
-            return false;
-        }
-        mViewDragHelper.processTouchEvent(event);
+        mViewDragHelper.processTouchEvent(ev);
         return true;
     }
 
@@ -275,6 +265,7 @@ public class DottedGridView extends FrameLayout {
         if (mDraggedView != null) {
             mDraggedView.hideBorder();
         }
+        mBackground.setVisibility(INVISIBLE);
     }
 
     private void initializeLayout(Context context) {
@@ -494,6 +485,7 @@ public class DottedGridView extends FrameLayout {
             mDraggedView.bringToFront();
             mDraggedView.showBorder();
         }
+        mBackground.setVisibility(VISIBLE);
     }
 
 // -------------------------- INNER CLASSES --------------------------

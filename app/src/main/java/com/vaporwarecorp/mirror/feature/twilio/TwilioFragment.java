@@ -46,11 +46,9 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
 
     private CameraCapturer mCameraCapturer;
     private Conversation mConversation;
-
     private SweetAlertDialog mIncomingInviteDialog;
     private ViewGroup mLocalContainer;
     private VideoViewRenderer mLocalVideoRenderer;
-    private boolean mMuteMicrophone;
     private OutgoingInvite mOutgoingInvite;
     private ViewGroup mParticipantContainer;
     private VideoViewRenderer mParticipantVideoRenderer;
@@ -139,10 +137,6 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
 
         FloatingActionButton actionFab = getView(R.id.call_action_fab);
         actionFab.setOnClickListener(hangUpClickListener());
-        actionFab.setOnTouchListener((v, e) -> {
-            v.getParent().requestDisallowInterceptTouchEvent(true);
-            return false;
-        });
     }
 
     private OnSweetClickListener acceptCallClickListener(final IncomingInvite invite) {
@@ -344,6 +338,7 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
             if (videoTrack != null) {
                 return videoTrack.enable(!pauseVideo);
             }
+            mConversation.getLocalMedia().mute(pauseVideo);
         }
         return false;
     }
@@ -361,14 +356,7 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
 
         LocalMedia localMedia = new LocalMedia(localMediaListener());
         LocalVideoTrack localVideoTrack = new LocalVideoTrack(mCameraCapturer);
-        if (mPauseVideo) {
-            localVideoTrack.enable(false);
-        }
         localMedia.addLocalVideoTrack(localVideoTrack);
-        if (mMuteMicrophone) {
-            localMedia.mute(true);
-        }
-        localMedia.mute(true);
         return localMedia;
     }
 }
