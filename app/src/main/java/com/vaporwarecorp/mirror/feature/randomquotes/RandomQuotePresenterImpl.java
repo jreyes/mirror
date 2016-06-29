@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.google;
+package com.vaporwarecorp.mirror.feature.randomquotes;
 
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
-import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 
 @Plugin
-@Provides(GooglePresenter.class)
-public class GooglePresenterImpl extends AbstractFeaturePresenter<GoogleView> implements GooglePresenter {
+@Provides(RandomQuotePresenter.class)
+public class RandomQuotePresenterImpl extends AbstractFeaturePresenter<RandomQuoteView> implements RandomQuotePresenter {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
-    GoogleView mView;
+    RandomQuoteView mView;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -38,18 +37,11 @@ public class GooglePresenterImpl extends AbstractFeaturePresenter<GoogleView> im
     @Override
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
-        plug(GoogleView.class);
-    }
-
-// --------------------- Interface ViewObserver ---------------------
-
-    @Override
-    public void onViewResume(final View view) {
-        super.onViewResume(view);
+        plug(RandomQuoteView.class);
     }
 
     @Override
-    protected GoogleView getViewPlug() {
+    protected RandomQuoteView getViewPlug() {
         return mView;
     }
 }

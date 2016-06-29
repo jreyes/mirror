@@ -289,6 +289,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     private void onResumeFullScreen() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         FullScreenUtil.onResume(this);
     }
 

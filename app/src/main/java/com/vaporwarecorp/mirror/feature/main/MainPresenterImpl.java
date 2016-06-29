@@ -30,8 +30,8 @@ import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
-import com.vaporwarecorp.mirror.feature.google.GooglePresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
+import com.vaporwarecorp.mirror.feature.randomquotes.RandomQuotePresenter;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import com.vaporwarecorp.mirror.feature.twilio.TwilioPresenter;
 import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
@@ -121,7 +121,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void test3() {
-        mFeature.showPresenter(GooglePresenter.class);
+        mFeature.showPresenter(RandomQuotePresenter.class);
     }
 
     @Override

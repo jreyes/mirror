@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.google;
+package com.vaporwarecorp.mirror.feature.randomquotes;
 
-import android.annotation.SuppressLint;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.feature.common.view.BrowserFragment;
-import timber.log.Timber;
 
 @Plugin
-@Provides(GoogleView.class)
-public class GoogleFragment extends BrowserFragment<GooglePresenter> implements GoogleView {
+@Provides(RandomQuoteView.class)
+public class RandomQuoteFragment extends BrowserFragment<RandomQuotePresenter> implements RandomQuoteView {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
-    GooglePresenter mPresenter;
-
-
+    RandomQuotePresenter mPresenter;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -41,35 +35,21 @@ public class GoogleFragment extends BrowserFragment<GooglePresenter> implements 
 
     @Override
     public Class presenterClass() {
-        return GooglePresenter.class;
+        return RandomQuotePresenter.class;
     }
 
 // --------------------- Interface PresentedView ---------------------
 
     @Override
-    public GooglePresenter getPresenter() {
+    public RandomQuotePresenter getPresenter() {
         return mPresenter;
     }
 
 // -------------------------- OTHER METHODS --------------------------
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onResume() {
         super.onResume();
-
-        WebView webView = getWebView();
-        if (webView != null && webView.getOriginalUrl() == null) {
-            Timber.d("Loading google");
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.loadUrl("http://google.com");
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    view.loadUrl(url);
-                    return true;
-                }
-            });
-        }
+        getWebView().loadUrl("file:///android_asset/webview/randomquotes/random_quotes.html");
     }
 }

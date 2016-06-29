@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.google;
+package com.vaporwarecorp.mirror.feature.randomquotes;
 
 import com.hound.core.model.sdk.CommandResult;
 import com.robopupu.api.dependency.Provides;
@@ -27,11 +27,11 @@ import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 
 @Plugin
-public class GoogleCommand extends AbstractHoundifyCommand implements HoundifyCommand {
+public class RandomQuoteCommand extends AbstractHoundifyCommand implements HoundifyCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String COMMAND_EXPRESSION = "Do a search";
-    private static final String COMMAND_INTENT = "GoogleSearch";
+    private static final String COMMAND_EXPRESSION = "((\"show\"|\"display\").(\"a random quote\"))";
+    private static final String COMMAND_INTENT = "RandomQuote";
     private static final String COMMAND_RESPONSE = "Ok";
 
     @Plug
@@ -41,7 +41,7 @@ public class GoogleCommand extends AbstractHoundifyCommand implements HoundifyCo
 
     @Scope(MirrorAppScope.class)
     @Provides(Command.class)
-    public GoogleCommand() {
+    public RandomQuoteCommand() {
         super(COMMAND_INTENT, COMMAND_EXPRESSION, COMMAND_RESPONSE);
     }
 
@@ -52,7 +52,7 @@ public class GoogleCommand extends AbstractHoundifyCommand implements HoundifyCo
 
     @Override
     public void executeCommand(CommandResult result) {
-        mFeature.showPresenter(GooglePresenter.class);
+        mFeature.showPresenter(RandomQuotePresenter.class);
     }
 
     @Override

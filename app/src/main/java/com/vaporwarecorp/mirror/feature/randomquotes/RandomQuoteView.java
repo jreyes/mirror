@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.google;
+package com.vaporwarecorp.mirror.feature.randomquotes;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.feature.common.presenter.BrowserPresenter;
+import com.vaporwarecorp.mirror.feature.common.view.BrowserView;
 
 @PlugInterface
-public interface GooglePresenter extends BrowserPresenter {
+public interface RandomQuoteView extends BrowserView {
 }
