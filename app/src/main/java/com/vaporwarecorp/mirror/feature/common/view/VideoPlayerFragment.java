@@ -41,13 +41,19 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
 // --------------------- Interface VideoPlayerView ---------------------
 
     @Override
+    public void mute() {
+        mVideoView.setVolume(0, 0);
+    }
+
+    @Override
     public void setVideo(@NonNull String videoPath, @Nullable Listener listener) {
         AVOptions options = new AVOptions();
+        options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 10 * 1000);
+        options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 10 * 1000);
         if (isLiveStreaming(videoPath)) {
-            options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 10 * 1000);
             options.setInteger(AVOptions.KEY_LIVE_STREAMING, 1);
         }
-        options.setInteger(AVOptions.KEY_MEDIACODEC, 1);
+        options.setInteger(AVOptions.KEY_MEDIACODEC, 0);
 
         mVideoView.setAVOptions(options);
         mVideoView.setOnCompletionListener(mp -> {
@@ -57,6 +63,11 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
         });
         // After setVideoPath, the play will start automatically
         mVideoView.setVideoPath(videoPath);
+    }
+
+    @Override
+    public void unmute() {
+        mVideoView.setVolume(1f, 1f);
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -88,6 +99,7 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
     public void onViewCreated(View view, Bundle inState) {
         super.onViewCreated(view, inState);
         mVideoView = (PLVideoTextureView) view.findViewById(R.id.video_view);
+        mVideoView.setBufferingIndicator(getView(R.id.loading_view));
     }
 
     private boolean isLiveStreaming(String url) {

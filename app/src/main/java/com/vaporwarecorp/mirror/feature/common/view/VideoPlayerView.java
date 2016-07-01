@@ -20,5 +20,9 @@ import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
 public interface VideoPlayerView extends MirrorView {
 // -------------------------- OTHER METHODS --------------------------
 
+    void mute();
+
     void setVideo(String videoPath, VideoPlayerPresenter.Listener listener);
+
+    void unmute();
 }
