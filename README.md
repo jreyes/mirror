@@ -40,9 +40,9 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 - [ ] WebView using custom tabs (Chrome)
 - [ ] Add new commands
     - [ ] Add selfie command
-    - [ ] Add video chat command
-        -   [ ] Pause / Mute when is on the sidelines
-        -   [ ] Add end call button
+    - [X] Add video chat command
+        -   [X] Pause / Mute when is on the sidelines
+        -   [X] Add end call button
     - [ ] Livecoding command?
     - [ ] Reddit news
     - [ ] NPR news
