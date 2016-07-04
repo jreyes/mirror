@@ -26,11 +26,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.vaporwarecorp.mirror.R;
-import timber.log.Timber;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static android.support.v4.widget.ViewDragHelper.STATE_IDLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static solid.stream.Stream.stream;
 
@@ -45,12 +45,18 @@ public class DottedGridView extends FrameLayout {
     @SuppressWarnings("WeakerAccess")
     ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
         @Override
+        public void onViewDragStateChanged(int state) {
+            if (state == STATE_IDLE && mDraggedView != null) {
+                mDraggedView.hideBorder();
+            }
+        }
+
+        @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             if (changedView != mDraggedView) {
                 return;
             }
 
-            Timber.d("onViewPositionChanged %s %s", changedView.getLeft(), changedView.getRight());
             BorderView borderView = (BorderView) changedView;
 
             // let's scale on drag
@@ -74,14 +80,12 @@ public class DottedGridView extends FrameLayout {
             final int left = borderView.getLeft() + mColumnLeftPadding;
             final int right = getWidth() - borderView.getRight() + mColumnLeftPadding;
             if (right < mColumnSizeSide) {
-                Timber.d("right column");
                 if (right < MIN_OVERFLOW) {
                     notifyUpdateCloseOnRight(borderView);
                 } else {
                     rearrangeRightContainer(borderView);
                 }
             } else if (left < mColumnSizeSide) {
-                Timber.d("left column");
                 if (left < MIN_OVERFLOW) {
                     notifyUpdateCloseOnLeft(borderView);
                 } else {
@@ -135,7 +139,6 @@ public class DottedGridView extends FrameLayout {
          */
         @Override
         public boolean tryCaptureView(View view, int pointerId) {
-            Timber.d("tryCaptureView(View view, int pointerId)");
             return mDraggedView != null;
         }
     };
@@ -413,7 +416,6 @@ public class DottedGridView extends FrameLayout {
             }
         }
         newTop = newTop - Math.round(borderView.getHeight() / 4);
-        Timber.d("rearrangeContainer %d %d", newLeft, newTop);
         borderView.minimize(isLeftAligned, newLeft, newTop);
 
         if (isLeftAligned) {
