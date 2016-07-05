@@ -93,10 +93,15 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     }
 
     @Override
+    public void updateString(String preferenceKey, String preferenceValue) {
+        Prefs.putString(preferenceKey, trimToEmpty(preferenceValue));
+    }
+
+    @Override
     public void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
         stream(jsonNode.findValues(jsonNodeKey))
                 .filter(j -> isNotEmpty(j.textValue()))
-                .forEach((JsonNode j) -> Prefs.putString(preferenceKey, trimToEmpty(j.textValue())));
+                .forEach((JsonNode j) -> updateString(preferenceKey, j.textValue()));
     }
 
     @SuppressWarnings("Convert2streamapi")

@@ -20,7 +20,7 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 - [ ] Draggable panels
     - [X] Main container in middle that gets replaced by current action
     - [X] Dismiss panels by dragging to the left or right borders
-    - [ ] On minimized panels, mute audio for videos? but no for audio play?
+    - [X] On minimized panels, mute audio for videos? but no for audio play?
 - [ ] New logo
 - [ ] Multiple user support
 - [ ] Integration with Alexa
@@ -48,6 +48,7 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
     - [ ] NPR news
 - [X] Update commands
     - [X] Spotify command
+        - [ ] Add pause/play button
 
 ## Hardware
 

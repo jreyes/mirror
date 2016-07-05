@@ -66,12 +66,12 @@ public class MirrorApplication extends BaseApplication {
         new Robopupu(appScope);
 
         PluginBus.plug(AppManager.class);
+        PluginBus.plug(PreferenceManager.class);
         PluginBus.plug(CommandManager.class);
         PluginBus.plug(ConfigurationManager.class);
         PluginBus.plug(EventManager.class);
         PluginBus.plug(ForecastManager.class);
         PluginBus.plug(HotWordManager.class);
-        PluginBus.plug(PreferenceManager.class);
         PluginBus.plug(ProximityManager.class);
         PluginBus.plug(SpotifyManager.class);
         PluginBus.plug(TextToSpeechManager.class);

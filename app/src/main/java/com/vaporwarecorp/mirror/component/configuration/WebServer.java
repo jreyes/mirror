@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.vaporwarecorp.mirror.util.JsonUtil.toJsonNode;
-import static fi.iki.elonen.NanoHTTPD.Response.Status.NOT_FOUND;
-import static fi.iki.elonen.NanoHTTPD.Response.Status.OK;
+import static fi.iki.elonen.NanoHTTPD.Response.Status.*;
 
 public class WebServer extends NanoHTTPD {
 // ------------------------------ FIELDS ------------------------------
@@ -107,7 +106,7 @@ public class WebServer extends NanoHTTPD {
     }
 
     private Response getNotFoundResponse() {
-        return newFixedLengthResponse(NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Error 404, file not found.");
+        return newFixedLengthResponse(NOT_FOUND, MIME_PLAINTEXT, "Error 404, file not found.");
     }
 
     private String getPostData(IHTTPSession session) {
@@ -139,8 +138,13 @@ public class WebServer extends NanoHTTPD {
     }
 
     private Response updateConfiguration(IHTTPSession session, Configuration configuration) {
-        final String json = getPostData(session);
-        configuration.updateConfiguration(toJsonNode(json));
-        return newFixedLengthResponse(null);
+        try {
+            final String json = getPostData(session);
+            configuration.updateConfiguration(toJsonNode(json));
+            return newFixedLengthResponse(null);
+        } catch (RuntimeException e) {
+            Timber.e(e, e.getMessage());
+            return newFixedLengthResponse(INTERNAL_ERROR, MIME_PLAINTEXT, e.getMessage());
+        }
     }
 }

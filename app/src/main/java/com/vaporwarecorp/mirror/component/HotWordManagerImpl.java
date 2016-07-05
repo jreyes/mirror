@@ -15,11 +15,13 @@
  */
 package com.vaporwarecorp.mirror.component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.hotword.SpeechRecognizer;
 import com.vaporwarecorp.mirror.event.HotWordEvent;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.vaporwarecorp.mirror.component.hotword.SpeechRecognizerSetup.defaultSetup;
+import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
 
 
 @Plugin
@@ -40,28 +43,45 @@ import static com.vaporwarecorp.mirror.component.hotword.SpeechRecognizerSetup.d
 public class HotWordManagerImpl extends AbstractManager implements HotWordManager, RecognitionListener {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String KEYPHRASE = "HotWordKeyphrase";
     private static final String KWS_SEARCH = "COMMAND";
+    private static final String PREF = HotWordManager.class.getName();
+    private static final String PREF_HOT_WORD = PREF + ".PREF_HOT_WORD";
+    private static final String PREF_HOT_WORD_DEFAULT = "computer";
 
     @Plug
     AppManager mAppManager;
     @Plug
+    ConfigurationManager mConfigurationManager;
+    @Plug
     EventManager mEventManager;
 
-    private String mKeyphrase;
+    private String mHotWord;
     private SpeechRecognizer mRecognizer;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface HotWordManager ---------------------
+// --------------------- Interface Configuration ---------------------
 
     @Override
-    public void destroy() {
-        mRecognizer.cancel();
-        mRecognizer.shutdown();
-        mRecognizer = null;
+    public String getJsonConfiguration() {
+        return "configuration/json/hotword.json";
     }
+
+    @Override
+    public String getJsonValues() {
+        return createTextNode("hotWord", mHotWord).toString();
+    }
+
+    @Override
+    public void updateConfiguration(JsonNode jsonNode) {
+        stop();
+        mConfigurationManager.updateString(PREF_HOT_WORD, jsonNode, "hotWord");
+        loadConfiguration();
+        start();
+    }
+
+// --------------------- Interface HotWordManager ---------------------
 
     @Override
     public void start() {
@@ -73,13 +93,18 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
                     .setKeywordThreshold(1e-20f)
                     .setBoolean("-allphone_ci", true)
                     .getRecognizer();
-
-            mKeyphrase = mAppManager.getApplicationProperties().getProperty(KEYPHRASE);
             mRecognizer.addListener(this);
-            mRecognizer.addKeyphraseSearch(KWS_SEARCH, mKeyphrase);
+            mRecognizer.addKeyphraseSearch(KWS_SEARCH, mHotWord);
         } catch (IOException e) {
             Timber.e(e, e.getMessage());
-            mAppManager.exitApplication();
+            mConfigurationManager.updateString(PREF_HOT_WORD, PREF_HOT_WORD_DEFAULT);
+            throw new RuntimeException(e);
+            //mAppManager.exitApplication();
+        } catch (RuntimeException e) {
+            Timber.e(e, e.getMessage());
+            mConfigurationManager.updateString(PREF_HOT_WORD, PREF_HOT_WORD_DEFAULT);
+            throw e;
+            //mAppManager.exitApplication();
         }
     }
 
@@ -90,8 +115,23 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
     }
 
     @Override
+    public void stop() {
+        mRecognizer.cancel();
+        mRecognizer.shutdown();
+        mRecognizer = null;
+    }
+
+    @Override
     public void stopListening() {
         mRecognizer.stop();
+    }
+
+// --------------------- Interface PluginComponent ---------------------
+
+    @Override
+    public void onPlugged(PluginBus bus) {
+        super.onPlugged(bus);
+        loadConfiguration();
     }
 
 // --------------------- Interface RecognitionListener ---------------------
@@ -110,7 +150,7 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
         String text = hypothesis.getHypstr().trim().toLowerCase();
         Timber.d("onPartialResult %s", text);
-        if (text.equals(mKeyphrase)) {
+        if (text.equals(mHotWord)) {
             mRecognizer.stop();
             mEventManager.post(new HotWordEvent());
         }
@@ -130,5 +170,12 @@ public class HotWordManagerImpl extends AbstractManager implements HotWordManage
 
     @Override
     public void onTimeout() {
+    }
+
+    /**
+     * Load the configuration of the component.
+     */
+    private void loadConfiguration() {
+        mHotWord = mConfigurationManager.getString(PREF_HOT_WORD, PREF_HOT_WORD_DEFAULT);
     }
 }

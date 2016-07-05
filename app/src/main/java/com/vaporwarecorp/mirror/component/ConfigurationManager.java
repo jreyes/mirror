@@ -38,6 +38,8 @@ public interface ConfigurationManager extends Manager {
 
     void stop();
 
+    void updateString(String preferenceKey, String preferenceValue);
+
     void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
 
     void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);

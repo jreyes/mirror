@@ -96,7 +96,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void removeView(Class<? extends Presenter> presenterClass) {
         mFeature.hidePresenter(presenterClass);
-        delay(l -> startListening(), 10);
+        delay(l -> startListening(), 5);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     public void onViewStop(View view) {
         mTwilioManager.stop();
         mSpotifyManager.stop();
-        mHotWordManager.destroy();
+        mHotWordManager.stop();
         mCommandManager.stop();
         mEventManager.unregister(this);
         super.onViewStop(view);

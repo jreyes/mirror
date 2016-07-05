@@ -1,0 +1,54 @@
+/* showMessage styles */
+#showMessage {
+	display: none;
+	left: 0;
+	width: 100%;
+	margin: 0;
+}
+
+span.messageNav {
+	float: right;
+	padding-right: 1em;
+	font-weight: bold;
+	font-size: small;
+}
+
+.stateHolder {
+	width: 90%;
+	margin: 1em auto;
+	padding: 0.5em;
+}
+
+#showMessage ul {
+	font-size: large;
+	font-weight: bold;
+	margin-left: 0;
+	padding-left: 0;
+}
+
+#showMessage li {
+	list-style-image: none;
+	list-style-position: outside;
+	list-style-type: none;
+}
+
+.notification,.success,.fail {
+	font-family: Arial, Helvetica, clean, sans-serif;
+	font-size: large;
+	font-weight: bold;
+}
+
+.notification {
+	background-color: #efefef;
+	color: green;
+}
+
+.success {
+	background-color: #acfa58;
+	color: black;
+}
+
+.fail {
+	background-color: #fe2e2e;
+	color: white;
+}

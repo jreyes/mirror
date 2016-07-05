@@ -65,6 +65,10 @@ angular
                             $scope.modelData = {};
                             $scope.done = true;
                         }
+                    }, function (response) {
+                        jQuery('body').showMessage({
+                            thisMessage: [response.data], className: 'fail', autoClose: true, delayTime: 3000
+                        });
                     });
             }
         };

@@ -76,7 +76,6 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     @Override
     public void hideCurrentPresenter() {
         hidePresenter(mCurrentPresenterClass);
-        mCurrentPresenterClass = null;
     }
 
     @Override
@@ -85,6 +84,9 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
             return;
         }
         hideView(presenterClass, false, null);
+        if (mCurrentPresenterClass != null && mCurrentPresenterClass.equals(presenterClass)) {
+            mCurrentPresenterClass = null;
+        }
     }
 
     @Override
@@ -102,6 +104,9 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void showPresenter(Class<? extends Presenter> presenterClass, Params... params) {
+        if (mCurrentPresenterClass != null) {
+            hideCurrentPresenter();
+        }
         mCurrentPresenterClass = presenterClass;
         showView(mCurrentPresenterClass, false, params);
     }
