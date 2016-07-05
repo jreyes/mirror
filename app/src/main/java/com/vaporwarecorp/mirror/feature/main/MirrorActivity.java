@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
@@ -124,6 +125,18 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Override
     public FeatureContainer getMainFeatureContainer() {
         return this;
+    }
+
+    @Override
+    public Class<? extends Presenter> getMainPresenterClass() {
+        final int containerId = mContentContainer.getMaximizedContainerId();
+        if (containerId != -1) {
+            final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+            if (mirrorView != null) {
+                return mirrorView.presenterClass();
+            }
+        }
+        return null;
     }
 
     @Override

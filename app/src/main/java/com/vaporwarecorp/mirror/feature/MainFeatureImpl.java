@@ -52,8 +52,6 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     @Plug
     MainView mView;
 
-    private Class<? extends Presenter> mCurrentPresenterClass;
-
 // --------------------------- CONSTRUCTORS ---------------------------
 
     @Scope(MirrorAppScope.class)
@@ -75,7 +73,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void hideCurrentPresenter() {
-        hidePresenter(mCurrentPresenterClass);
+        hidePresenter(mView.getMainPresenterClass());
     }
 
     @Override
@@ -84,9 +82,6 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
             return;
         }
         hideView(presenterClass, false, null);
-        if (mCurrentPresenterClass != null && mCurrentPresenterClass.equals(presenterClass)) {
-            mCurrentPresenterClass = null;
-        }
     }
 
     @Override
@@ -104,11 +99,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void showPresenter(Class<? extends Presenter> presenterClass, Params... params) {
-        if (mCurrentPresenterClass != null) {
-            hideCurrentPresenter();
-        }
-        mCurrentPresenterClass = presenterClass;
-        showView(mCurrentPresenterClass, false, params);
+        showView(presenterClass, false, params);
     }
 
     @Override

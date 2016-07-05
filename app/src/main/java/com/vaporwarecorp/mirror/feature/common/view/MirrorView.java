@@ -15,6 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.common.view;
 
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
 
 public interface MirrorView extends View {
@@ -26,5 +27,5 @@ public interface MirrorView extends View {
 
     void onSideDisplay();
 
-    Class presenterClass();
+    Class<? extends Presenter> presenterClass();
 }

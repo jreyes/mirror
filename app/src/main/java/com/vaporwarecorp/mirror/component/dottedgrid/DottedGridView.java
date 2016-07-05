@@ -200,6 +200,18 @@ public class DottedGridView extends FrameLayout {
     }
 
     /**
+     * Returns the ID of the view that is maximized of -1.
+     */
+    public int getMaximizedContainerId() {
+        for (BorderView borderView : mViews) {
+            if (borderView.isMaximized()) {
+                return borderView.getId();
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Override method to intercept only touch events over the drag view and to cancel the drag when
      * the action associated to the MotionEvent is equals to ACTION_CANCEL or ACTION_UP.
      *
