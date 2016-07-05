@@ -1,0 +1,31 @@
+{
+  "component": "com.vaporwarecorp.mirror.component.ForecastManager",
+  "schema": {
+    "type": "object",
+    "title": "Forecast IO Configuration",
+    "required": [
+      "apiKey"
+    ],
+    "properties": {
+      "apiKey": {
+        "title": "API key",
+        "type": "string"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Forecast IO Configuration</h3><p>Enter here your API key from <a href=\"http://www.forecast.io\">http://www.forecast.io</a>.</p>"
+    },
+    {
+      "key": "apiKey",
+      "type": "password"
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

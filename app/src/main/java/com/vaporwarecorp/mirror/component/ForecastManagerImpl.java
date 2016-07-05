@@ -17,6 +17,7 @@ package com.vaporwarecorp.mirror.component;
 
 import android.content.Intent;
 import android.location.Location;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
@@ -28,6 +29,7 @@ import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.event.ForecastEvent;
 import com.vaporwarecorp.mirror.receiver.ForecastReceiver;
 import com.vaporwarecorp.mirror.util.LocationUtil;
+import org.apache.commons.lang3.StringUtils;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -42,35 +44,59 @@ import timber.log.Timber;
 
 import java.util.Locale;
 
+import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
+
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(ForecastManager.class)
 public class ForecastManagerImpl extends AbstractManager implements ForecastManager {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String CLIENT_KEY = "ForecastIoKey";
+    private static final String PREF = ForecastManager.class.getName();
+    private static final String PREF_API_KEY = PREF + ".PREF_API_KEY";
 
     @Plug
     AppManager mAppManager;
+    @Plug
+    ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
 
     private Api mApi;
     private String mApiKey;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(ForecastManager.class)
-    public ForecastManagerImpl() {
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
+
+// --------------------- Interface Configuration ---------------------
+
+    @Override
+    public String getJsonConfiguration() {
+        return "configuration/json/forecastio.json";
+    }
+
+    @Override
+    public String getJsonValues() {
+        return createTextNode("apiKey", mApiKey).toString();
+    }
+
+    @Override
+    public void updateConfiguration(JsonNode jsonNode) {
+        mConfigurationManager.updateString(PREF_API_KEY, jsonNode, "apiKey");
+        loadConfiguration();
+        initializeRetrofit();
+    }
 
 // --------------------- Interface ForecastManager ---------------------
 
     @SuppressWarnings("ResourceType")
     @Override
     public void retrieveForecast() {
+        if (StringUtils.trimToNull(mApiKey) == null) {
+            Timber.e("ForecastManager - No API key found");
+            return;
+        }
+
         Location location = LocationUtil.getLastKnownLocation(mAppManager.getAppContext());
         if (location == null) {
             Timber.e("ForecastManager - No last location found");
@@ -110,17 +136,24 @@ public class ForecastManagerImpl extends AbstractManager implements ForecastMana
     @Override
     public void onPlugged(PluginBus bus) {
         super.onPlugged(bus);
-        initializeRetrofit();
+        loadConfiguration();
     }
 
     private void initializeRetrofit() {
-        mApiKey = mAppManager.getApplicationProperties().getProperty(CLIENT_KEY);
         mApi = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io()))
                 .baseUrl("https://api.forecast.io/")
                 .build()
                 .create(Api.class);
+        retrieveForecast();
+    }
+
+    /**
+     * Load the configuration of the component.
+     */
+    private void loadConfiguration() {
+        mApiKey = mConfigurationManager.getString(PREF_API_KEY, "");
     }
 
     private interface Api {

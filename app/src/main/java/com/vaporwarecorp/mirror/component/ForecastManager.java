@@ -17,9 +17,10 @@ package com.vaporwarecorp.mirror.component;
 
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
 
 @PlugInterface
-public interface ForecastManager extends Manager {
+public interface ForecastManager extends Manager, Configuration {
 // -------------------------- OTHER METHODS --------------------------
 
     void retrieveForecast();
