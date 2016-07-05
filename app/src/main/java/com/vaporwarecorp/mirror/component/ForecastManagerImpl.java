@@ -84,7 +84,6 @@ public class ForecastManagerImpl extends AbstractManager implements ForecastMana
     public void updateConfiguration(JsonNode jsonNode) {
         mConfigurationManager.updateString(PREF_API_KEY, jsonNode, "apiKey");
         loadConfiguration();
-        initializeRetrofit();
     }
 
 // --------------------- Interface ForecastManager ---------------------
@@ -139,7 +138,11 @@ public class ForecastManagerImpl extends AbstractManager implements ForecastMana
         loadConfiguration();
     }
 
-    private void initializeRetrofit() {
+    /**
+     * Load the configuration of the component.
+     */
+    private void loadConfiguration() {
+        mApiKey = mConfigurationManager.getString(PREF_API_KEY, "");
         mApi = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io()))
@@ -147,13 +150,6 @@ public class ForecastManagerImpl extends AbstractManager implements ForecastMana
                 .build()
                 .create(Api.class);
         retrieveForecast();
-    }
-
-    /**
-     * Load the configuration of the component.
-     */
-    private void loadConfiguration() {
-        mApiKey = mConfigurationManager.getString(PREF_API_KEY, "");
     }
 
     private interface Api {
