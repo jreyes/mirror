@@ -37,6 +37,7 @@ import com.vaporwarecorp.mirror.component.command.HoundifyVoiceSearchActivity;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import timber.log.Timber;
@@ -45,22 +46,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
 import static solid.stream.Stream.stream;
 
 @Plugin
 public class CommandManagerImpl extends AbstractManager implements CommandManager {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String CLIENT_ID = "HoundClientId";
-    private static final String CLIENT_KEY = "HoundClientKey";
+    private static final String PREF = TwilioManager.class.getName();
+    private static final String PREF_CLIENT_ID = PREF + ".PREF_CLIENT_ID";
+    private static final String PREF_CLIENT_KEY = PREF + ".PREF_CLIENT_KEY";
 
     @Plug
     AppManager mAppManager;
+    @Plug
+    ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
     @Plug
     PluginFeatureManager mFeatureManager;
 
+    private String mClientId;
+    private String mClientKey;
     private List<ClientMatch> mClientMatches;
     private Collection<Command> mCommands;
     private JsonNode mConversationState;
@@ -112,6 +119,10 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     @Override
     public void start() {
+        if (StringUtils.trimToNull(mClientId) == null || StringUtils.trimToNull(mClientKey) == null) {
+            return;
+        }
+
         initializeHoundify();
         initializeCommands();
     }
@@ -122,8 +133,11 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
         mClientMatches.clear();
         mCommands.clear();
-        mHoundify.setRequestInfoFactory(null);
-        mHoundify = null;
+
+        if (mHoundify != null) {
+            mHoundify.setRequestInfoFactory(null);
+            mHoundify = null;
+        }
     }
 
     @Override
@@ -131,7 +145,34 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
         HoundifyVoiceSearchActivity.newInstance(mFeatureManager.getForegroundActivity());
     }
 
+// --------------------- Interface Configuration ---------------------
+
+    @Override
+    public String getJsonConfiguration() {
+        return "configuration/json/houndify.json";
+    }
+
+    @Override
+    public String getJsonValues() {
+        return createTextNode("clientId", mClientId).put("clientKey", mClientKey).toString();
+    }
+
+    @Override
+    public void updateConfiguration(JsonNode jsonNode) {
+        stop();
+        mConfigurationManager.updateString(PREF_CLIENT_ID, jsonNode, "clientId");
+        mConfigurationManager.updateString(PREF_CLIENT_KEY, jsonNode, "clientKey");
+        loadConfiguration();
+        start();
+    }
+
 // --------------------- Interface PluginComponent ---------------------
+
+    @Override
+    public void onPlugged(PluginBus bus) {
+        super.onPlugged(bus);
+        loadConfiguration();
+    }
 
     @Override
     public void onUnplugged(PluginBus bus) {
@@ -148,24 +189,22 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
                 }
                 Timber.i("loaded %s command", command.getClass().getCanonicalName());
             }
-            /*
-            stream(D.getAll(Command.class)).filter(c -> !mCommands.contains(c)).forEach((Command command) -> {
-                PluginBus.plug(command);
-                mCommands.add(command);
-                if (command instanceof HoundifyCommand) {
-                    mClientMatches.add(((HoundifyCommand) command).getClientMatch());
-                }
-                Timber.i("loaded %s command", command.getClass().getCanonicalName());
-            });
-            */
         }
     }
 
     private void initializeHoundify() {
         mHoundify = Houndify.get(mAppManager.getAppContext());
-        mHoundify.setClientId(mAppManager.getApplicationProperties().getProperty(CLIENT_ID));
-        mHoundify.setClientKey(mAppManager.getApplicationProperties().getProperty(CLIENT_KEY));
+        mHoundify.setClientId(mClientId);
+        mHoundify.setClientKey(mClientKey);
         mHoundify.setRequestInfoFactory(new RequestInfoFactory());
+    }
+
+    /**
+     * Load the configuration of the component.
+     */
+    private void loadConfiguration() {
+        mClientId = mConfigurationManager.getString(PREF_CLIENT_ID, "");
+        mClientKey = mConfigurationManager.getString(PREF_CLIENT_KEY, "");
     }
 
     private void onError(String message) {

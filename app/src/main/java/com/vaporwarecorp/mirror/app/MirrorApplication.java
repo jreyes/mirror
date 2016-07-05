@@ -67,8 +67,8 @@ public class MirrorApplication extends BaseApplication {
 
         PluginBus.plug(AppManager.class);
         PluginBus.plug(PreferenceManager.class);
-        PluginBus.plug(CommandManager.class);
         PluginBus.plug(ConfigurationManager.class);
+        PluginBus.plug(CommandManager.class);
         PluginBus.plug(EventManager.class);
         PluginBus.plug(ForecastManager.class);
         PluginBus.plug(HotWordManager.class);
