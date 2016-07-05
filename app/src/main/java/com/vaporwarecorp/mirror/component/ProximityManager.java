@@ -17,12 +17,13 @@ package com.vaporwarecorp.mirror.component;
 
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
 
 @PlugInterface
-public interface ProximityManager extends Manager {
+public interface ProximityManager extends Manager, Configuration {
 // -------------------------- OTHER METHODS --------------------------
 
-    void startProximityDetection();
+    void start();
 
-    void stopProximityDetection();
+    void stop();
 }

@@ -119,7 +119,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     public void displayView() {
         mHeaderContainer.setVisibility(View.VISIBLE);
         mContentContainer.setVisibility(View.VISIBLE);
-        mFullscreenContainer.setVisibility(View.GONE);
+        hideFullScreenView();
     }
 
     @Override
@@ -159,6 +159,17 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
 // -------------------------- OTHER METHODS --------------------------
+
+    public void hideFullScreenView() {
+        // hide the full screen container
+        mFullscreenContainer.setVisibility(View.GONE);
+
+        // remove any full screen fragment before proceeding
+        MirrorView fullScreenMirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
+        if (fullScreenMirrorView != null) {
+            mPresenter.removeView(fullScreenMirrorView.presenterClass());
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -337,7 +348,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                               final Fragment fragment,
                               final boolean addToBackStack,
                               final String tag) {
-        mFullscreenContainer.setVisibility(View.GONE);
+        // hide the full screen container
+        hideFullScreenView();
 
         if (fragmentManager.findFragmentByTag(tag) == null) {
             final int viewId = mContentContainer.addBorderView(this);

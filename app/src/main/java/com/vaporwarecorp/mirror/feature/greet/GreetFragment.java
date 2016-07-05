@@ -25,9 +25,11 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.nineoldandroids.animation.Animator;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.FeatureFragment;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.R;
+import timber.log.Timber;
 
 import static com.daimajia.androidanimations.library.Techniques.FadeIn;
 
@@ -49,6 +51,7 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
 
     @Override
     public void displayGreet(String greeting) {
+        Timber.d("displayGreet");
         mGreetTypeText.setText(Html.fromHtml(greeting));
         YoYo
                 .with(FadeIn)
@@ -91,7 +94,7 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     }
 
     @Override
-    public Class presenterClass() {
+    public Class<? extends Presenter> presenterClass() {
         return GreetPresenter.class;
     }
 

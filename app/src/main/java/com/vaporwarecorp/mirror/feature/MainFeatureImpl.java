@@ -92,7 +92,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     @Override
     public void onApplicationReady() {
         hideCurrentPresenter();
-        mProximityManager.startProximityDetection();
+        mProximityManager.start();
         mForecastManager.startReceiver();
         mEventManager.post(new ApplicationEvent(READY));
     }
@@ -130,7 +130,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     @Override
     protected void onStop() {
         mTextToSpeechManager.stop();
-        mProximityManager.stopProximityDetection();
+        mProximityManager.stop();
         mEventManager.unregister(this);
         super.onStop();
     }
