@@ -108,6 +108,10 @@ public class DottedGridView extends FrameLayout {
          */
         @Override
         public int clampViewPositionHorizontal(View child, int left, int dx) {
+            if (mDraggedView == null) {
+                return 0;
+            }
+
             final int leftBound = -MAX_OVERFLOW - (mColumnSizeCenter / 2);
             final int rightBound = getWidth() + MAX_OVERFLOW;
             return Math.min(Math.max(left, leftBound), rightBound);
@@ -124,6 +128,10 @@ public class DottedGridView extends FrameLayout {
          */
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
+            if (mDraggedView == null) {
+                return 0;
+            }
+
             final int viewMargin = Math.round(mDraggedView.getHeight() / 4);
             final int topBound = getPaddingTop() - viewMargin;
             final int bottomBound = getHeight() - mDraggedView.getHeight() + viewMargin;

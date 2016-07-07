@@ -22,6 +22,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -57,7 +58,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     private Integer mCurrentContainerId;
     private Class mCurrentPresenterClass;
     private ForecastView mForecastView;
-    private View mFullscreenContainer;
+    private FrameLayout mFullscreenContainer;
     private View mHeaderContainer;
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -129,6 +130,15 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     public Class<? extends Presenter> getMainPresenterClass() {
+        // check if there is a view being displayed in fullscreen
+        if (mFullscreenContainer.getChildCount() > 0) {
+            final MirrorView mirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
+            if (mirrorView != null) {
+                return mirrorView.presenterClass();
+            }
+        }
+
+        // check for a maximized view
         final int containerId = mContentContainer.getMaximizedContainerId();
         if (containerId != -1) {
             final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
@@ -136,6 +146,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                 return mirrorView.presenterClass();
             }
         }
+
+        // didn't found anything, return null
         return null;
     }
 
@@ -189,7 +201,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
         mHeaderContainer = findViewById(R.id.header_container);
         mContentContainer = (DottedGridView) findViewById(R.id.content_container);
-        mFullscreenContainer = findViewById(R.id.fullscreen_container);
+        mFullscreenContainer = (FrameLayout) findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
         findViewById(R.id.test1).setOnClickListener(v -> mPresenter.test1());
         findViewById(R.id.test2).setOnClickListener(v -> mPresenter.test2());
