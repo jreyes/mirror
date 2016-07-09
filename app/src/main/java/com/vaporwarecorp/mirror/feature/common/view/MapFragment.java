@@ -117,11 +117,11 @@ public class MapFragment
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
     }
 
     @Override

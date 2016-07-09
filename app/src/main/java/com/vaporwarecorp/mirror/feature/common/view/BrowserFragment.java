@@ -46,11 +46,11 @@ public abstract class BrowserFragment<T_Presenter extends BrowserPresenter>
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
     }
 
 // -------------------------- OTHER METHODS --------------------------

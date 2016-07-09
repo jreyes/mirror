@@ -66,7 +66,7 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
         if (mPauseVideo) {
             mPauseVideo = false;
             pauseVideo(false);
@@ -74,7 +74,7 @@ public class TwilioFragment extends FeatureFragment<TwilioPresenter> implements 
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
         if (!mPauseVideo) {
             mPauseVideo = true;
             pauseVideo(true);

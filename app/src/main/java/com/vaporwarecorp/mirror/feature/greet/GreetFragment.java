@@ -86,11 +86,11 @@ public class GreetFragment extends FeatureFragment<GreetPresenter> implements Gr
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
     }
 
     @Override

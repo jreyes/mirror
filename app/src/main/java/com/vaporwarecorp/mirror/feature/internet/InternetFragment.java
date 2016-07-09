@@ -39,11 +39,11 @@ public class InternetFragment extends VideoPlayerFragment<InternetPresenter> imp
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
     }
 
     @Override

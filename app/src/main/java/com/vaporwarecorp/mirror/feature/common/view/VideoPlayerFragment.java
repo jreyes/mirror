@@ -33,6 +33,7 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
         implements VideoPlayerView {
 // ------------------------------ FIELDS ------------------------------
 
+    private boolean mMuted;
     private PLVideoTextureView mVideoView;
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -42,7 +43,9 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
 
     @Override
     public void mute() {
-        mVideoView.setVolume(0, 0);
+        if (!mMuted) {
+            mVideoView.setVolume(0, 0);
+        }
     }
 
     @Override
@@ -67,7 +70,10 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
 
     @Override
     public void unmute() {
-        mVideoView.setVolume(1f, 1f);
+        if (mMuted) {
+            mMuted = false;
+            mVideoView.setVolume(1f, 1f);
+        }
     }
 
 // -------------------------- OTHER METHODS --------------------------

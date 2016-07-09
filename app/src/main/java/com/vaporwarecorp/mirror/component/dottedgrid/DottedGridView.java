@@ -62,6 +62,7 @@ public class DottedGridView extends FrameLayout {
             // let's scale on drag
             if (borderView.isMaximized()) {
                 borderView.scale(left, top);
+                notifyUpdateDrag(borderView);
             }
 
             final int newLeft = left + mColumnLeftPadding;
@@ -81,13 +82,13 @@ public class DottedGridView extends FrameLayout {
             final int right = getWidth() - borderView.getRight() + mColumnLeftPadding;
             if (right < mColumnSizeSide) {
                 if (right < MIN_OVERFLOW) {
-                    notifyUpdateCloseOnRight(borderView);
+                    notifyUpdateClose(borderView);
                 } else {
                     rearrangeRightContainer(borderView);
                 }
             } else if (left < mColumnSizeSide) {
                 if (left < MIN_OVERFLOW) {
-                    notifyUpdateCloseOnLeft(borderView);
+                    notifyUpdateClose(borderView);
                 } else {
                     rearrangeLeftContainer(borderView);
                 }
@@ -191,9 +192,7 @@ public class DottedGridView extends FrameLayout {
      */
     public void clear() {
         final BorderView[] views = mViews.toArray(new BorderView[mViews.size()]);
-        for (BorderView borderView : views) {
-            notifyUpdateCloseOnLeft(borderView);
-        }
+        stream(views).forEach(this::notifyUpdateClose);
     }
 
     /**
@@ -355,39 +354,33 @@ public class DottedGridView extends FrameLayout {
                 && view.getBottom() - heightPadding > y;
     }
 
-    private void notifyUpdateCloseOnLeft(BorderView borderView) {
+    private void notifyUpdateClose(BorderView borderView) {
         if (mListener != null) {
-            mListener.onClosedToLeft(borderView.getId());
+            mListener.onClose(borderView.getId());
         }
     }
 
-    private void notifyUpdateCloseOnRight(BorderView borderView) {
+    private void notifyUpdateDrag(BorderView borderView) {
         if (mListener != null) {
-            mListener.onClosedToRight(borderView.getId());
+            mListener.onDrag(borderView.getId());
         }
     }
 
-    private void notifyUpdateViewOnCenter(BorderView borderView) {
+    private void notifyUpdateMaximize(BorderView borderView) {
         if (mListener != null) {
-            mListener.onViewOnCenter(borderView.getId());
+            mListener.onMaximize(borderView.getId());
         }
     }
 
-    private void notifyUpdateViewOnLeft(BorderView borderView) {
+    private void notifyUpdateMinimize(BorderView borderView) {
         if (mListener != null) {
-            mListener.onViewOnLeft(borderView.getId());
-        }
-    }
-
-    private void notifyUpdateViewOnRight(BorderView borderView) {
-        if (mListener != null) {
-            mListener.onViewOnRight(borderView.getId());
+            mListener.onMinimize(borderView.getId());
         }
     }
 
     private void rearrangeCenterContainer(BorderView borderView) {
         borderView.maximize();
-        notifyUpdateViewOnCenter(borderView);
+        notifyUpdateMaximize(borderView);
 
         rearrangeLeftContainer();
         rearrangeRightContainer();
@@ -438,14 +431,12 @@ public class DottedGridView extends FrameLayout {
         newTop = newTop - Math.round(borderView.getHeight() / 4);
         borderView.minimize(isLeftAligned, newLeft, newTop);
 
+        // notify listener of minimize
+        notifyUpdateMinimize(borderView);
         if (isLeftAligned) {
-            // set BorderView to left aligned
-            notifyUpdateViewOnLeft(borderView);
             // and rearrange the right side in case this view came from it
             rearrangeRightContainer();
         } else {
-            // set BorderView to right aligned
-            notifyUpdateViewOnRight(borderView);
             // and rearrange the left side in case this view came from it
             rearrangeLeftContainer();
         }
@@ -481,31 +472,25 @@ public class DottedGridView extends FrameLayout {
 
 // -------------------------- INNER CLASSES --------------------------
 
-    @SuppressWarnings("unused")
     public interface Listener {
         /**
-         * Called when the view is closed to the right.
+         * Called when the view is closed.
          */
-        void onClosedToRight(int containerId);
+        void onClose(int containerId);
 
         /**
-         * Called when the view is closed to the left.
+         * Called when the view is maximized.
          */
-        void onClosedToLeft(int containerId);
+        void onMaximize(int containerId);
 
         /**
-         * Called when the view is set in the center
+         * Called when the view is minimized.
          */
-        void onViewOnCenter(int containerId);
+        void onMinimize(int containerId);
 
         /**
-         * Called when the view is set on the left
+         * Called when the view is being dragged.
          */
-        void onViewOnLeft(int containerId);
-
-        /**
-         * Called when the view is set on the right
-         */
-        void onViewOnRight(int containerId);
+        void onDrag(int containerId);
     }
 }

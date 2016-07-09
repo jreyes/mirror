@@ -16,73 +16,50 @@
 package com.vaporwarecorp.mirror.feature.common.view;
 
 import android.os.Bundle;
-import android.support.annotation.CallSuper;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.AdapterView;
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
+import com.google.android.youtube.player.*;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
-import com.google.android.youtube.player.YouTubePlayerFragment;
-import com.robopupu.api.binding.AdapterViewBinding;
-import com.robopupu.api.binding.ViewBinder;
-import com.robopupu.api.binding.ViewBinding;
-import com.robopupu.api.dependency.*;
-import com.robopupu.api.feature.Feature;
-import com.robopupu.api.feature.FeatureView;
-import com.robopupu.api.mvp.*;
+import com.robopupu.api.dependency.Provides;
+import com.robopupu.api.feature.FeatureFragment;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.robopupu.api.plugin.PluginBus;
-import com.robopupu.api.util.Converter;
 import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.Listener;
 import timber.log.Timber;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT;
 
 @Plugin
+@Provides(YoutubeView.class)
 public class YoutubeFragment
-        extends YouTubePlayerFragment
-        implements PresentedView<YoutubePresenter>, FeatureView, YoutubeView, OnInitializedListener {
+        extends FeatureFragment<YoutubePresenter>
+        implements YoutubeView {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
     YoutubePresenter mPresenter;
 
-    private final ViewBinder mBinder;
-    private Feature mFeature;
+    private boolean mFragmentResumed;
     private Listener mListener;
     private YouTubePlayer mPlayer;
-    private DependencyScope mScope;
-    private final ViewState mState;
+    private FrameLayout mPlayerView;
+    private YouTubeThumbnailLoader mThumbnailLoader;
+    private boolean mThumbnailLoading;
+    private YouTubeThumbnailView mThumbnailView;
     private String mYoutubeVideoId;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Provides(YoutubeView.class)
-    public YoutubeFragment() {
-        mBinder = new ViewBinder(this);
-        mState = new ViewState(this);
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
-
-// --------------------- Interface FeatureView ---------------------
-
-    @Override
-    public void setFeature(final Feature feature) {
-        mFeature = feature;
-    }
-
-    @Override
-    public boolean isDialog() {
-        return false;
-    }
 
 // --------------------- Interface MirrorView ---------------------
 
@@ -92,96 +69,31 @@ public class YoutubeFragment
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
+        if (mPlayer != null && !mPlayer.isPlaying()) {
+            mPlayer.play();
+        }
+        mThumbnailView.setVisibility(View.GONE);
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
+        mThumbnailView.setVisibility(View.VISIBLE);
+        if (mPlayer != null && mPlayer.isPlaying()) {
+            mPlayer.pause();
+        }
     }
 
     @Override
-    public Class presenterClass() {
+    public Class<? extends Presenter> presenterClass() {
         return YoutubePresenter.class;
-    }
-
-// --------------------- Interface OnInitializedListener ---------------------
-
-    @Override
-    public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        mPlayer = player;
-        mPlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
-        mPlayer.addFullscreenControlFlag(FULLSCREEN_FLAG_CUSTOM_LAYOUT);
-        mPlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
-            @Override
-            public void onLoading() {
-            }
-
-            @Override
-            public void onLoaded(String s) {
-                mPlayer.play();
-            }
-
-            @Override
-            public void onAdStarted() {
-            }
-
-            @Override
-            public void onVideoStarted() {
-            }
-
-            @Override
-            public void onVideoEnded() {
-                if (mListener != null) {
-                    mListener.onCompleted();
-                }
-            }
-
-            @Override
-            public void onError(YouTubePlayer.ErrorReason errorReason) {
-            }
-        });
-        mPlayer.loadVideo(mYoutubeVideoId, 0);
-    }
-
-    @Override
-    public void onInitializationFailure(Provider provider, YouTubeInitializationResult error) {
     }
 
 // --------------------- Interface PresentedView ---------------------
 
-    /**
-     * Gets the {@link Presenter} assigned for this {@link ViewCompatActivity}.
-     *
-     * @return A {@link Presenter}.
-     */
     @Override
     public YoutubePresenter getPresenter() {
         return mPresenter;
-    }
-
-// --------------------- Interface Scopeable ---------------------
-
-    @Override
-    public DependencyScope getScope() {
-        return mScope;
-    }
-
-    @Override
-    public void setScope(final DependencyScope scope) {
-        mScope = scope;
-    }
-
-// --------------------- Interface View ---------------------
-
-    @NonNull
-    @Override
-    public ViewState getState() {
-        return mState;
-    }
-
-    @Override
-    public String getViewTag() {
-        return getClass().getName();
     }
 
 // --------------------- Interface YoutubeView ---------------------
@@ -189,272 +101,137 @@ public class YoutubeFragment
     @Override
     public void setYoutubeVideo(@NonNull String youtubeVideoId, @Nullable Listener listener) {
         mYoutubeVideoId = youtubeVideoId;
+        mThumbnailLoading = false;
         mListener = listener;
-        initialize(getString(R.string.google_maps_key), this);
+        maybeStartVideo();
     }
 
 // -------------------------- OTHER METHODS --------------------------
 
-    /**
-     * Creates and binds a {@link ViewBinding} to a {@link android.view.View} specified by the given view id.
-     *
-     * @param viewId A view id used in a layout XML resource.
-     * @param <T>    The parametrised type of the ViewDelagate.
-     * @return The created {@link ViewBinding}.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends ViewBinding<?>> T bind(@IdRes final int viewId) {
-        return mBinder.bind(viewId);
-    }
-
-    /**
-     * Binds the given {@link ViewBinding} to the specified {@link android.view.View}.
-     *
-     * @param viewId  A view id in a layout XML specifying the target {@link android.view.View}.
-     * @param binding An {@link ViewBinding}.
-     * @return The found and bound {@link android.view.View}.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends android.view.View> T bind(@IdRes final int viewId, final ViewBinding<T> binding) {
-        return mBinder.bind(viewId, binding);
-    }
-
-    /**
-     * Binds the given {@link AdapterViewBinding} to the specified {@link AdapterView}.
-     *
-     * @param viewId  A view id in a layout XML specifying the target {@link AdapterView}.
-     * @param binding An {@link AdapterViewBinding}.
-     * @param adapter An {@link AdapterViewBinding.Adapter} that is assigned to {@link AdapterViewBinding}.
-     * @return The found and bound {@link AdapterView}.
-     */
-    @SuppressWarnings("unchecked")
-    public AdapterView bind(@IdRes final int viewId, final AdapterViewBinding<?> binding, final AdapterViewBinding.Adapter<?> adapter) {
-        return mBinder.bind(viewId, binding, adapter);
-    }
-
-    /**
-     * Looks up and returns a {@link android.view.View} with the given layout id.
-     *
-     * @param viewId A view id used in a layout XML resource.
-     * @return The found {@link android.view.View}.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends android.view.View> T getView(@IdRes final int viewId) {
-        return (T) getActivity().findViewById(viewId);
-    }
-
     @Override
-    public void onActivityCreated(final Bundle inState) {
-        super.onActivityCreated(inState);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        initializePlayerView();
+        initializeThumbnailView();
 
-        mBinder.setActivity(getActivity());
-        onCreateBindings();
-
-        if (inState != null) {
-            onRestoreState(inState);
-
-            final DependenciesCache cache = D.get(DependenciesCache.class);
-            final DependencyMap dependencies = cache.getDependencies(this);
-
-            if (dependencies != null) {
-                final DependencyScope scope = dependencies.getDependency(KEY_DEPENDENCY_SCOPE);
-
-                if (scope != null) {
-                    mScope = scope;
-                }
-                onRestoreDependencies(dependencies);
-            }
-        }
+        FrameLayout viewFrame = new FrameLayout(getActivity());
+        viewFrame.addView(mPlayerView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        viewFrame.addView(mThumbnailView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        return viewFrame;
     }
 
     @Override
     public void onDestroy() {
-        Timber.d("onDestroy()");
+        if (mThumbnailLoader != null) {
+            mThumbnailLoader.release();
+        }
         super.onDestroy();
-        mState.onDestroy();
-
-        mBinder.dispose();
-
-        if (this instanceof DependencyScopeOwner) {
-            // Cached DependencyScope is automatically disposed to avoid memory leaks
-
-            final DependenciesCache cache = D.get(DependenciesCache.class);
-            final DependencyScopeOwner owner = (DependencyScopeOwner) this;
-            cache.removeDependencyScope(owner);
-        }
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewDestroy(this);
-        }
-
-        if (PluginBus.isPlugged(this)) {
-            Timber.d("onDestroy() : Unplugged from PluginBus");
-            PluginBus.unplug(this);
-        }
     }
 
     @Override
     public void onPause() {
-        Timber.d("onPause()");
+        mFragmentResumed = false;
         super.onPause();
-        mState.onPause();
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewPause(this);
-        }
-
-        if (mFeature != null) {
-            mFeature.removeActiveView(this);
-        }
     }
 
     @Override
     public void onResume() {
-        Timber.d("onResume()");
         super.onResume();
-        mState.onResume();
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewResume(this);
-        }
-
-        final DependenciesCache cache = D.get(DependenciesCache.class);
-        cache.removeDependencies(this);
-
-        if (mFeature != null) {
-            mFeature.addActiveView(this);
-        }
+        mFragmentResumed = true;
     }
 
-    @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        super.onSaveInstanceState(outState);
-        onSaveState(outState);
+    private void initializePlayerView() {
+        mPlayerView = new FrameLayout(getActivity());
+        mPlayerView.setId(R.id.youtube_player_view);
 
-        final DependenciesCache cache = D.get(DependenciesCache.class);
+        YouTubePlayerFragment playerFragment = YouTubePlayerFragment.newInstance();
+        getChildFragmentManager().beginTransaction().replace(R.id.youtube_player_view, playerFragment).commit();
+        playerFragment.initialize(getString(R.string.google_maps_key), new YouTubePlayer.OnInitializedListener() {
+            @Override
+            public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
+                mPlayer = player;
+                mPlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
+                mPlayer.addFullscreenControlFlag(FULLSCREEN_FLAG_CUSTOM_LAYOUT);
+                mPlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+                    @Override
+                    public void onLoading() {
+                        mThumbnailView.setVisibility(View.VISIBLE);
+                    }
 
-        // Save a reference to the Presenter
+                    @Override
+                    public void onLoaded(String s) {
+                        if (isMaximized()) {
+                            mPlayer.play();
+                            mThumbnailView.setVisibility(View.GONE);
+                        }
+                    }
 
-        final DependencyMap dependencies = cache.getDependencies(this, true);
-        dependencies.addDependency(KEY_DEPENDENCY_SCOPE, mScope);
+                    @Override
+                    public void onAdStarted() {
+                    }
 
-        onSaveDependencies(dependencies);
+                    @Override
+                    public void onVideoStarted() {
+                    }
 
-        if (this instanceof DependencyScopeOwner) {
-            // DependencyScope is automatically cached so that it can be restored when
-            // and if the View resumes
+                    @Override
+                    public void onVideoEnded() {
+                        if (mListener != null) {
+                            mListener.onCompleted();
+                        }
+                    }
 
-            final DependencyScopeOwner owner = (DependencyScopeOwner) this;
-            cache.saveDependencyScope(owner, owner.getOwnedScope());
-        }
-    }
-
-    @Override
-    public void onStart() {
-        Timber.d("onStart()");
-        super.onStart();
-        mState.onStart();
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewStart(this);
-            mBinder.initialise();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        Timber.d("onStop()");
-        super.onStop();
-        mState.onStop();
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewStop(this);
-        }
-    }
-
-    @Override
-    public void onViewCreated(final android.view.View view, final Bundle inState) {
-        Timber.d("onViewCreated(...)");
-        super.onViewCreated(view, inState);
-
-        mState.onCreate();
-
-        final YoutubePresenter presenter = resolvePresenter();
-        if (presenter != null) {
-            presenter.onViewCreated(this, Converter.fromBundleToParams(inState));
-        } else {
-            Timber.d("onViewCreated(...) : Presenter == null");
-        }
-    }
-
-    /**
-     * Invoked to bind {@link ViewBinding}s to {@link View}s. This method has to be overridden in
-     * classes extended from {@link ViewFragment}.
-     */
-    @CallSuper
-    protected void onCreateBindings() {
-        // Do nothing by default
-    }
-
-    /**
-     * This method can be overridden to restore dependencies after the {@link ViewFragment} is
-     * restored, for instance, after recreating it.
-     *
-     * @param dependencies A {@link DependencyMap} for restoring the dependencies.
-     */
-    protected void onRestoreDependencies(final DependencyMap dependencies) {
-        // By default do nothing
-    }
-
-    /**
-     * This method can be overridden to restore state of this {@link ViewFragment} from the given
-     * {@link Bundle}.
-     *
-     * @param inState A {@link Bundle}.
-     */
-    protected void onRestoreState(final Bundle inState) {
-        // By default do nothing
-    }
-
-    /**
-     * This method can be overridden to save dependencies after the {@link ViewFragment} is
-     * restored, for instance, after recreating it.
-     *
-     * @param dependencies A {@link DependencyMap} for saving the dependencies.
-     */
-    protected void onSaveDependencies(final DependencyMap dependencies) {
-        // By default do nothing
-    }
-
-    /**
-     * This method can be overridden to save state of this {@link ViewFragment} to the given
-     * {@link Bundle}.
-     *
-     * @param outState A {@link Bundle}.
-     */
-    protected void onSaveState(final Bundle outState) {
-        // By default do nothing
-    }
-
-    /**
-     * Resolves the {@link Presenter} assigned for this {@link ViewCompatActivity}.
-     *
-     * @return A {@link Presenter}.
-     */
-    protected YoutubePresenter resolvePresenter() {
-        YoutubePresenter presenter = getPresenter();
-
-        if (presenter == null) {
-            if (PluginBus.isPlugin(getClass())) {
-                PluginBus.plug(this);
-                presenter = getPresenter();
+                    @Override
+                    public void onError(YouTubePlayer.ErrorReason errorReason) {
+                        Timber.e(errorReason.toString());
+                    }
+                });
+                maybeStartVideo();
             }
+
+            @Override
+            public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
+                Timber.e(errorReason.toString());
+            }
+        });
+    }
+
+    private void initializeThumbnailView() {
+        mThumbnailView = new YouTubeThumbnailView(getActivity());
+        mThumbnailView.initialize(getString(R.string.google_maps_key), new YouTubeThumbnailView.OnInitializedListener() {
+            @Override
+            public void onInitializationSuccess(YouTubeThumbnailView thumbnailView, YouTubeThumbnailLoader thumbnailLoader) {
+                mThumbnailLoader = thumbnailLoader;
+                mThumbnailLoader.setOnThumbnailLoadedListener(new YouTubeThumbnailLoader.OnThumbnailLoadedListener() {
+                    @Override
+                    public void onThumbnailLoaded(YouTubeThumbnailView thumbnailView, String videoId) {
+                        if (mFragmentResumed) {
+                            mPlayer.cueVideo(videoId);
+                        }
+                    }
+
+                    @Override
+                    public void onThumbnailError(YouTubeThumbnailView thumbnailView, YouTubeThumbnailLoader.ErrorReason errorReason) {
+                        Timber.e(errorReason.toString());
+                    }
+                });
+                maybeStartVideo();
+            }
+
+            @Override
+            public void onInitializationFailure(YouTubeThumbnailView thumbnailView, YouTubeInitializationResult errorReason) {
+                Timber.e(errorReason.toString());
+            }
+        });
+    }
+
+    private boolean isMaximized() {
+        return getView() != null && ((View) getView().getParent()).getScaleX() == 1f;
+    }
+
+    private void maybeStartVideo() {
+        if (mFragmentResumed && mPlayer != null && mThumbnailLoader != null && !mThumbnailLoading) {
+            mThumbnailLoading = true;
+            mThumbnailLoader.setVideo(mYoutubeVideoId);
         }
-        return presenter;
     }
 }

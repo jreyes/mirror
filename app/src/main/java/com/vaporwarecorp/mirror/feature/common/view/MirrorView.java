@@ -23,9 +23,15 @@ public interface MirrorView extends View {
 
     boolean isFullscreen();
 
-    void onCenterDisplay();
+    /**
+     * Method called when the view is maximized.
+     */
+    void onMaximize();
 
-    void onSideDisplay();
+    /**
+     * Method called when the view is minimized.
+     */
+    void onMinimize();
 
     Class<? extends Presenter> presenterClass();
 }

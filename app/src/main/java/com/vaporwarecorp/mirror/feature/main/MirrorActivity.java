@@ -243,20 +243,15 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     private void addDottedGridListener() {
         mContentContainer.setListener(new DottedGridView.Listener() {
             @Override
-            public void onClosedToRight(int containerId) {
+            public void onClose(int containerId) {
                 removeMirrorView(containerId);
             }
 
             @Override
-            public void onClosedToLeft(int containerId) {
-                removeMirrorView(containerId);
-            }
-
-            @Override
-            public void onViewOnCenter(int containerId) {
+            public void onMaximize(int containerId) {
                 MirrorView mirrorView = getMirrorViewByContainerId(containerId);
                 if (mirrorView != null) {
-                    mirrorView.onCenterDisplay();
+                    mirrorView.onMaximize();
                     if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
                         MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
                         if (currentMirrorView != null) {
@@ -269,13 +264,13 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             }
 
             @Override
-            public void onViewOnLeft(int containerId) {
+            public void onMinimize(int containerId) {
                 updateMirrorView(containerId);
             }
 
             @Override
-            public void onViewOnRight(int containerId) {
-                updateMirrorView(containerId);
+            public void onDrag(int containerId) {
+                minimizeMirrorView(containerId);
             }
         });
     }
@@ -321,6 +316,13 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     private void hideMirrorView(final MirrorView mirrorView, final boolean addedToBackStack, final String tag) {
         hideFragment((Fragment) mirrorView, !mirrorView.isFullscreen(), addedToBackStack, tag);
+    }
+
+    private void minimizeMirrorView(final int containerId) {
+        final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+        if (mirrorView != null) {
+            mirrorView.onMinimize();
+        }
     }
 
     private void onResumeFullScreen() {
@@ -420,7 +422,6 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         if (mCurrentPresenterClass != null) {
             final MirrorView mirrorView = getMirrorViewByContainerId(containerId);
             if (mirrorView != null) {
-                mirrorView.onSideDisplay();
                 if (mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
                     mCurrentPresenterClass = null;
                     mCurrentContainerId = null;

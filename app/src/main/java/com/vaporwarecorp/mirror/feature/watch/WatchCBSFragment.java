@@ -39,12 +39,12 @@ public class WatchCBSFragment extends VideoPlayerFragment<WatchCBSPresenter> imp
     }
 
     @Override
-    public void onCenterDisplay() {
+    public void onMaximize() {
         unmute();
     }
 
     @Override
-    public void onSideDisplay() {
+    public void onMinimize() {
         mute();
     }
 
