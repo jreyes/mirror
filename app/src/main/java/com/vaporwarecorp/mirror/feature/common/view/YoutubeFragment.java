@@ -37,7 +37,9 @@ import timber.log.Timber;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static com.google.android.youtube.player.YouTubePlayer.ErrorReason.UNAUTHORIZED_OVERLAY;
 import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT;
+import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 
 @Plugin
 @Provides(YoutubeView.class)
@@ -184,7 +186,14 @@ public class YoutubeFragment
 
                     @Override
                     public void onError(YouTubePlayer.ErrorReason errorReason) {
-                        Timber.e(errorReason.toString());
+                        Timber.e("PlayerStateChangeListener.onError %s", errorReason.toString());
+                        if (errorReason == UNAUTHORIZED_OVERLAY) {
+                            delay(l -> {
+                                if (isMaximized() && !mPlayer.isPlaying()) {
+                                    mPlayer.play();
+                                }
+                            }, 30);
+                        }
                     }
                 });
                 maybeStartVideo();
@@ -192,7 +201,7 @@ public class YoutubeFragment
 
             @Override
             public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
-                Timber.e(errorReason.toString());
+                Timber.e("YouTubePlayer.OnInitializedListener.onInitializationFailure %s", errorReason.toString());
             }
         });
     }
@@ -213,7 +222,7 @@ public class YoutubeFragment
 
                     @Override
                     public void onThumbnailError(YouTubeThumbnailView thumbnailView, YouTubeThumbnailLoader.ErrorReason errorReason) {
-                        Timber.e(errorReason.toString());
+                        Timber.e("OnThumbnailLoadedListener.onThumbnailError %s", errorReason.toString());
                     }
                 });
                 maybeStartVideo();
@@ -221,7 +230,7 @@ public class YoutubeFragment
 
             @Override
             public void onInitializationFailure(YouTubeThumbnailView thumbnailView, YouTubeInitializationResult errorReason) {
-                Timber.e(errorReason.toString());
+                Timber.e("YouTubeThumbnailLoader.OnInitializedListener.onInitializationFailure %s", errorReason.toString());
             }
         });
     }
