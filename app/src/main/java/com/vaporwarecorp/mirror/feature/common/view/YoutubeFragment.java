@@ -159,10 +159,6 @@ public class YoutubeFragment
 
                     @Override
                     public void onLoaded(String s) {
-                        if (isMaximized()) {
-                            mPlayer.play();
-                            mThumbnailView.setVisibility(View.GONE);
-                        }
                     }
 
                     @Override
@@ -171,6 +167,12 @@ public class YoutubeFragment
 
                     @Override
                     public void onVideoStarted() {
+                        if (!isMaximized()) {
+                            mThumbnailView.setVisibility(View.VISIBLE);
+                            mPlayer.pause();
+                        } else {
+                            mThumbnailView.setVisibility(View.GONE);
+                        }
                     }
 
                     @Override
@@ -205,7 +207,7 @@ public class YoutubeFragment
                     @Override
                     public void onThumbnailLoaded(YouTubeThumbnailView thumbnailView, String videoId) {
                         if (mFragmentResumed) {
-                            mPlayer.cueVideo(videoId);
+                            mPlayer.loadVideo(videoId, 0);
                         }
                     }
 
