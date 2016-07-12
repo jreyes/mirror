@@ -13,33 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.component;
+package com.vaporwarecorp.mirror.feature.spotify;
 
-import android.app.Activity;
-import android.content.Intent;
-import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
+import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import kaaes.spotify.webapi.android.models.Track;
 
 import java.util.List;
 
 @PlugInterface
-public interface SpotifyManager extends Manager {
+public interface SpotifyManager extends MirrorManager, Configuration {
 // ------------------------------ FIELDS ------------------------------
 
-    String CLIENT_ID = "SpotifyClientId";
-    String CLIENT_REDIRECT_URI = "SpotifyRedirectUri";
     int REQUEST_CODE = 1337;
 
 // -------------------------- OTHER METHODS --------------------------
 
-    void authenticate(Activity activity);
-
     void play(List<String> trackUris, Listener listener);
-
-    void processAuthentication(int resultCode, Intent data);
-
-    void stop();
 
     interface Listener {
         void onTrackUpdate(Track track);

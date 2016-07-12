@@ -26,14 +26,9 @@ import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(PluginFeatureManager.class)
 public class PluginFeatureManagerImpl extends AbstractFeatureManager implements PluginFeatureManager {
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(PluginFeatureManager.class)
-    public PluginFeatureManagerImpl() {
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
 

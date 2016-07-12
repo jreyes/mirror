@@ -26,6 +26,8 @@ import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(PreferenceManager.class)
 public class PreferenceManagerImpl extends AbstractManager implements PreferenceManager {
 // ------------------------------ FIELDS ------------------------------
 
@@ -33,13 +35,6 @@ public class PreferenceManagerImpl extends AbstractManager implements Preference
 
     @Plug
     AppManager mAppManager;
-
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Scope(MirrorAppScope.class)
-    @Provides(PreferenceManager.class)
-    public PreferenceManagerImpl() {
-    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 

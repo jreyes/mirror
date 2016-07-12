@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.component;
+package com.vaporwarecorp.mirror.feature.spotify;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.media.session.MediaSession;
-import com.robopupu.api.component.AbstractManager;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
@@ -31,6 +29,10 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Player.InitializationObserver;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.AppManager;
+import com.vaporwarecorp.mirror.component.ConfigurationManager;
+import com.vaporwarecorp.mirror.component.PluginFeatureManager;
+import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -38,16 +40,16 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import java.util.List;
 
 import static android.media.session.MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
 import static android.media.session.MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
+import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
+import static com.vaporwarecorp.mirror.util.RxUtil.subscribe;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static solid.collectors.ToList.toList;
 import static solid.stream.Stream.stream;
 
@@ -55,16 +57,24 @@ import static solid.stream.Stream.stream;
 @Scope(MirrorAppScope.class)
 @Provides(SpotifyManager.class)
 public class SpotifyManagerImpl
-        extends AbstractManager
+        extends AbstractMirrorManager
         implements SpotifyManager, PlayerNotificationCallback, Callback<Track>, PlayerStateCallback {
 // ------------------------------ FIELDS ------------------------------
 
+    private static final String PREF = SpotifyManager.class.getName();
+    private static final String PREF_CLIENT_ID = PREF + ".PREF_CLIENT_ID";
+    private static final String PREF_CLIENT_REDIRECT_URI = PREF + ".PREF_CLIENT_REDIRECT_URI";
+    private static final String PREF_CLIENT_REDIRECT_URI_DEFAULT = "spotify://callback";
+
     @Plug
     AppManager mAppManager;
+    @Plug
+    ConfigurationManager mConfigurationManager;
+    @Plug
+    PluginFeatureManager mPluginFeatureManager;
 
     private String mClientId;
     private String mClientRedirectUri;
-    private Context mContext;
     private PlayerState mCurrentPlayerState;
     private List<Track> mCurrentTracks;
     private Listener mListener;
@@ -89,6 +99,88 @@ public class SpotifyManagerImpl
     public void failure(RetrofitError error) {
     }
 
+// --------------------- Interface Configuration ---------------------
+
+    @Override
+    public String getJsonConfiguration() {
+        return "configuration/json/spotify.json";
+    }
+
+    @Override
+    public String getJsonValues() {
+        return createTextNode("clientId", mClientId)
+                .put("clientRedirectUri", mClientRedirectUri)
+                .toString();
+    }
+
+    @Override
+    public void updateConfiguration(JsonNode jsonNode) {
+        onViewStop();
+        mConfigurationManager.updateString(PREF_CLIENT_ID, jsonNode, "clientId");
+        mConfigurationManager.updateString(PREF_CLIENT_REDIRECT_URI, jsonNode, "clientRedirectUri");
+        loadConfiguration();
+    }
+
+// --------------------- Interface MirrorManager ---------------------
+
+    @Override
+    public void onFeatureResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != SpotifyManager.REQUEST_CODE) {
+            return;
+        }
+
+        subscribe(
+                AuthenticationClient.getResponse(resultCode, data),
+                new Subscriber<AuthenticationResponse>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.e(e, e.getMessage());
+                        disable();
+                    }
+
+                    @Override
+                    public void onNext(AuthenticationResponse response) {
+                        if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                            mConfigurationManager.enablePresenter(SpotifyPresenter.class);
+                            mPlayerConfig = new Config(mAppManager.getAppContext(), response.getAccessToken(), mClientId);
+                            mService = new SpotifyApi().getService();
+                        } else {
+                            disable();
+                        }
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onFeatureResume() {
+        if (isEmpty(mClientId) || isEmpty(mClientRedirectUri)) {
+            Timber.d("stopping because found empty client ID or redirect URI");
+            disable();
+            return;
+        }
+
+        AuthenticationRequest request = new AuthenticationRequest
+                .Builder(mClientId, AuthenticationResponse.Type.TOKEN, mClientRedirectUri)
+                .setScopes(new String[]{"user-read-private", "streaming"})
+                .build();
+        AuthenticationClient.openLoginActivity(mPluginFeatureManager.getForegroundActivity(), REQUEST_CODE, request);
+    }
+
+    @Override
+    public void onViewStop() {
+        if (mSession != null && mSession.isActive()) {
+            mSession.setActive(false);
+        }
+        Spotify.destroyPlayer(this);
+        mPlayerConfig = null;
+        mService = null;
+    }
+
 // --------------------- Interface PlayerNotificationCallback ---------------------
 
     @Override
@@ -109,7 +201,7 @@ public class SpotifyManagerImpl
         }
 
         if (eventType == EventType.END_OF_CONTEXT) {
-            stop();
+            onViewStop();
         }
     }
 
@@ -128,22 +220,11 @@ public class SpotifyManagerImpl
 
     @Override
     public void onPlugged(PluginBus bus) {
-        mContext = mAppManager.getAppContext();
-        mClientId = mAppManager.getApplicationProperties().getProperty(CLIENT_ID);
-        mClientRedirectUri = mAppManager.getApplicationProperties().getProperty(CLIENT_REDIRECT_URI);
-        mService = new SpotifyApi().getService();
+        super.onPlugged(bus);
+        loadConfiguration();
     }
 
 // --------------------- Interface SpotifyManager ---------------------
-
-    @Override
-    public void authenticate(Activity activity) {
-        AuthenticationRequest request = new AuthenticationRequest
-                .Builder(mClientId, AuthenticationResponse.Type.TOKEN, mClientRedirectUri)
-                .setScopes(new String[]{"user-read-private", "streaming"})
-                .build();
-        AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);
-    }
 
     @Override
     public void play(List<String> trackUris, Listener listener) {
@@ -170,36 +251,17 @@ public class SpotifyManagerImpl
         });
     }
 
-    @Override
-    public void processAuthentication(int resultCode, Intent data) {
-        Observable
-                .just(AuthenticationClient.getResponse(resultCode, data))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<AuthenticationResponse>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(AuthenticationResponse response) {
-                        if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                            mPlayerConfig = new Config(mContext, response.getAccessToken(), mClientId);
-                        }
-                    }
-                });
+    private void disable() {
+        mConfigurationManager.disablePresenter(SpotifyPresenter.class);
+        onViewStop();
     }
 
-    @Override
-    public void stop() {
-        if (mSession != null && mSession.isActive()) {
-            mSession.setActive(false);
-        }
-        Spotify.destroyPlayer(this);
+    /**
+     * Load the configuration of the component.
+     */
+    private void loadConfiguration() {
+        mClientId = mConfigurationManager.getString(PREF_CLIENT_ID, "");
+        mClientRedirectUri = mConfigurationManager.getString(PREF_CLIENT_REDIRECT_URI, PREF_CLIENT_REDIRECT_URI_DEFAULT);
     }
 
     private void play(Tracks tracks) {
@@ -210,7 +272,7 @@ public class SpotifyManagerImpl
             @Override
             public void onInitialized(Player player) {
                 // create a session so that a now playing card is active on the homescreen
-                mSession = new MediaSession(mContext, "SpotifySession");
+                mSession = new MediaSession(mAppManager.getAppContext(), "SpotifySession");
                 mSession.setFlags(FLAG_HANDLES_TRANSPORT_CONTROLS | FLAG_HANDLES_MEDIA_BUTTONS);
 
                 mPlayer = player;

@@ -18,7 +18,6 @@ package com.vaporwarecorp.mirror.feature.spotify;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hound.core.model.sdk.CommandResult;
 import com.vaporwarecorp.mirror.feature.AbstractCommand;
-import timber.log.Timber;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,12 +30,10 @@ abstract class AbstractSpotifyCommand extends AbstractCommand {
 
     @Override
     public void executeCommand(CommandResult result) {
-        Timber.d("executeCommand " + getClass().getName());
         List<String> trackIds = getTrackIds(result);
         if (trackIds.isEmpty()) {
             //activity.onError();
         } else {
-            //mFeature.showPresenter(SpotifyPresenter.class);
             onExecuteCommandSuccess(result, trackIds);
         }
     }

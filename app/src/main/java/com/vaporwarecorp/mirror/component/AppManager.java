@@ -69,13 +69,6 @@ public interface AppManager extends Manager {
     String getApplicationDirectoryPath();
 
     /**
-     * Returns the mirror.properties file as a java.util.Properties object.
-     *
-     * @return Application properties
-     */
-    Properties getApplicationProperties();
-
-    /**
      * Gets the specified color value.
      *
      * @param colorResId A color resource id.

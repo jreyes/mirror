@@ -15,17 +15,20 @@
  */
 package com.vaporwarecorp.mirror.feature;
 
+import com.robopupu.api.dependency.D;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.feature.AbstractFeature;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.ApplicationEvent;
 import com.vaporwarecorp.mirror.event.CommandEvent;
+import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.main.MainView;
 import com.vaporwarecorp.mirror.feature.splash.SplashPresenter;
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +37,14 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import static com.vaporwarecorp.mirror.event.ApplicationEvent.READY;
 import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
+import static solid.stream.Stream.stream;
 
 @Plugin
 public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 // ------------------------------ FIELDS ------------------------------
 
+    @Plug
+    ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
     @Plug
@@ -58,6 +64,7 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     @Provides(MainFeature.class)
     public MainFeatureImpl() {
         super(MainScope.class, true);
+        initializeManagers();
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -99,7 +106,9 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void showPresenter(Class<? extends Presenter> presenterClass, Params... params) {
-        showView(presenterClass, false, params);
+        if (mConfigurationManager.isPresenterEnabled(presenterClass)) {
+            showView(presenterClass, false, params);
+        }
     }
 
     @Override
@@ -133,5 +142,9 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
         mProximityManager.stop();
         mEventManager.unregister(this);
         super.onStop();
+    }
+
+    private void initializeManagers() {
+        stream(D.getAll(MainScope.class, MirrorManager.class, null)).forEach(PluginBus::plug);
     }
 }

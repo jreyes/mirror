@@ -16,7 +16,7 @@
 package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
 
 @PlugInterface
 public interface GreetView extends MirrorView {

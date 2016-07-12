@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.feature.greet.GreetPresenter",
+  "component": "com.vaporwarecorp.mirror.feature.greet.GreetManager",
   "schema": {
     "type": "object",
     "title": "Greet Screen",

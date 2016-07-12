@@ -16,8 +16,10 @@
 package com.vaporwarecorp.mirror.util;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +28,16 @@ public class RxUtil {
 
     public static void delay(Action1<? super Long> action, long delay) {
         Observable.timer(delay, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(action);
+    }
+
+    public static <T> void subscribe(T value, Subscriber<T> subscriber) {
+        Observable
+                .just(value)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
     }
 }

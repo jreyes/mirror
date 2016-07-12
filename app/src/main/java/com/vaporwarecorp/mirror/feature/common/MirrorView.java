@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.common.view;
+
+package com.vaporwarecorp.mirror.feature.common;
 
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;

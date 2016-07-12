@@ -17,6 +17,7 @@ package com.vaporwarecorp.mirror.component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.robopupu.api.component.Manager;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.PlugInterface;
 
 import java.util.ArrayList;
@@ -26,11 +27,17 @@ import java.util.List;
 public interface ConfigurationManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
+    void disablePresenter(Class<? extends Presenter> presenterClass);
+
+    void enablePresenter(Class<? extends Presenter> presenterClass);
+
     String getString(String preferenceKey, String defaultValue);
 
     ArrayList<String> getStringList(String preferenceKey, List<String> defaultValue);
 
     void hasBeenSetup();
+
+    boolean isPresenterEnabled(Class<? extends Presenter> presenterClass);
 
     boolean needsInitialSetup();
 

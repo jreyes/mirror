@@ -117,8 +117,8 @@ public class TwilioManagerImpl extends AbstractManager implements TwilioManager 
         return mIncomingInvite;
     }
 
+    @Override
     public void start() {
-        Timber.d("start");
         if (isEmpty(mProfileSID) || TwilioConversationsClient.isInitialized()) {
             return;
         }
@@ -130,6 +130,7 @@ public class TwilioManagerImpl extends AbstractManager implements TwilioManager 
         authorizeClient();
     }
 
+    @Override
     public void stop() {
         Timber.d("stop");
         mIncomingInvite = null;

@@ -16,7 +16,7 @@
 package com.vaporwarecorp.mirror.feature.spotify;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import kaaes.spotify.webapi.android.models.Track;
 
 @PlugInterface

@@ -1,0 +1,33 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.spotify.SpotifyManager",
+  "schema": {
+    "type": "object",
+    "title": "Spotify Client Configuration",
+    "properties": {
+      "clientId": {
+        "title": "Client ID",
+        "type": "string"
+      },
+      "clientRedirectUri": {
+        "title": "Client redirect URI",
+        "type": "string"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Spotify Client Configuration</h3><p>Enter here your client details that can be obtained from <a href=\"https://developer.spotify.com/my-applications\">https://developer.spotify.com/my-applications</a>.</p>"
+    },
+    {
+      "key": "clientId",
+      "type": "password"
+    },
+    "clientRedirectUri",
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

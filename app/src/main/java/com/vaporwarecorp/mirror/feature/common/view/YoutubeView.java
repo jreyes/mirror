@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.feature.common.view;
 
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.Listener;
 
 @PlugInterface

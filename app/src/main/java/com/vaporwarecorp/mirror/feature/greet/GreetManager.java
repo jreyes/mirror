@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.twilio;
+
+package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.twilio.conversations.IncomingInvite;
-import com.vaporwarecorp.mirror.feature.common.MirrorView;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
+import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 
 @PlugInterface
-public interface TwilioView extends MirrorView {
+public interface GreetManager extends MirrorManager, Configuration {
 // -------------------------- OTHER METHODS --------------------------
 
-    void displayInvite(IncomingInvite incomingInvite);
+    String goodbye();
+
+    String welcome();
 }

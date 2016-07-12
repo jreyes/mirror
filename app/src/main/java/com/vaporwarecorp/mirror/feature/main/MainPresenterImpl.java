@@ -24,10 +24,12 @@ import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
@@ -49,6 +51,7 @@ import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
 import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 import static java.util.Collections.singletonList;
+import static solid.stream.Stream.stream;
 
 @Plugin
 @Provides(MainPresenter.class)
@@ -68,8 +71,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Plug
     HotWordManager mHotWordManager;
     @Plug
-    SpotifyManager mSpotifyManager;
-    @Plug
     TwilioManager mTwilioManager;
     @Plug
     MainView mView;
@@ -83,8 +84,8 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     public void onViewResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Houndify.REQUEST_CODE) {
             processCommand(resultCode, data);
-        } else if (requestCode == SpotifyManager.REQUEST_CODE) {
-            mSpotifyManager.processAuthentication(resultCode, data);
+        } else {
+            stream(PluginBus.getPlugs(MirrorManager.class)).forEach(v -> v.onFeatureResult(requestCode, resultCode, data));
         }
     }
 
@@ -111,7 +112,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void test1() {
-        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, singletonList("6NmXV4o6bmp704aPGyTVVG")));
+        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, singletonList("6TJmQnO44YE5BtTxH8pop1")));
     }
 
     @Override
@@ -142,7 +143,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void verifyPermissions() {
         if (PermissionUtil.checkPermissions(mView.activity()).isEmpty()) {
-            startManagers();
+            managerStart();
         } else {
             mAppManager.exitApplication();
         }
@@ -158,11 +159,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void onViewStop(View view) {
-        mTwilioManager.stop();
-        mSpotifyManager.stop();
-        mHotWordManager.stop();
-        mCommandManager.stop();
-        mEventManager.unregister(this);
+        managerStop();
         super.onViewStop(view);
     }
 
@@ -188,9 +185,11 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
         }
         */
         if (TYPE_WELCOME.equals(event.getType())) {
-            wakeUp();
+            mFeature.displayView();
+            managerResume();
         } else {
-            sleep();
+            managerPause();
+            mFeature.hideCurrentPresenter();
         }
     }
 
@@ -239,28 +238,36 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     private void checkPermissions() {
         final List<String> neededPermissions = PermissionUtil.checkPermissions(mView.activity());
         if (neededPermissions.isEmpty()) {
-            startManagers();
+            managerStart();
         } else {
             PermissionUtil.requestPermissions(mView.activity(), neededPermissions);
         }
     }
 
-    private void sleep() {
+    private void managerPause() {
         mTwilioManager.stop();
         mHotWordManager.stopListening();
-        mFeature.hideCurrentPresenter();
+        stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeaturePause);
     }
 
-    private void startManagers() {
-        mSpotifyManager.authenticate(mView.activity());
+    private void managerResume() {
+        stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureResume);
+        mHotWordManager.startListening();
+        mTwilioManager.start();
+    }
+
+    private void managerStart() {
         mEventManager.register(this);
         mCommandManager.start();
         mHotWordManager.start();
+        stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStart);
     }
 
-    private void wakeUp() {
-        mFeature.displayView();
-        mHotWordManager.startListening();
-        mTwilioManager.start();
+    private void managerStop() {
+        stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStop);
+        mTwilioManager.stop();
+        mHotWordManager.stop();
+        mCommandManager.stop();
+        mEventManager.unregister(this);
     }
 }

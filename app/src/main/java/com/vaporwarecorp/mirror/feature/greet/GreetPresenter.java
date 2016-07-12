@@ -17,10 +17,9 @@ package com.vaporwarecorp.mirror.feature.greet;
 
 import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
 
 @PlugInterface
-public interface GreetPresenter extends FeaturePresenter, Configuration {
+public interface GreetPresenter extends FeaturePresenter {
 // ------------------------------ FIELDS ------------------------------
 
     String GREET_TYPE = "GREET_TYPE";

@@ -20,6 +20,7 @@ import com.pixplicity.easyprefs.library.Prefs;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
@@ -34,8 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static solid.stream.Stream.stream;
 
 @Plugin
@@ -51,12 +51,25 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     @Plug
     EventManager mEventManager;
 
+    private Set<Class<? extends Presenter>> mDisabledPresenters;
     private WebServer mServer;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
 
 // --------------------- Interface ConfigurationManager ---------------------
+
+    @Override
+    public void disablePresenter(Class<? extends Presenter> presenterClass) {
+        if (!mDisabledPresenters.contains(presenterClass)) {
+            mDisabledPresenters.add(presenterClass);
+        }
+    }
+
+    @Override
+    public void enablePresenter(Class<? extends Presenter> presenterClass) {
+        mDisabledPresenters.remove(presenterClass);
+    }
 
     @Override
     public String getString(String preferenceKey, String defaultValue) {
@@ -71,6 +84,11 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     @Override
     public void hasBeenSetup() {
         Prefs.putBoolean(PREFERENCE_CONFIGURED, true);
+    }
+
+    @Override
+    public boolean isPresenterEnabled(Class<? extends Presenter> presenterClass) {
+        return !mDisabledPresenters.contains(presenterClass);
     }
 
     @Override
@@ -94,23 +112,24 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
     @Override
     public void updateString(String preferenceKey, String preferenceValue) {
-        Prefs.putString(preferenceKey, trimToEmpty(preferenceValue));
+        final String value = trimToNull(preferenceValue);
+        if (value != null) {
+            Prefs.putString(preferenceKey, value);
+        } else {
+            Prefs.remove(preferenceKey);
+        }
     }
 
     @Override
     public void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
         stream(jsonNode.findValues(jsonNodeKey))
-                .filter(j -> isNotEmpty(j.textValue()))
                 .forEach((JsonNode j) -> updateString(preferenceKey, j.textValue()));
     }
 
-    @SuppressWarnings("Convert2streamapi")
     @Override
     public void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
         final Set<String> values = new HashSet<>();
-        for (JsonNode url : jsonNode.findValues(jsonNodeKey)) {
-            values.add(url.textValue());
-        }
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(u -> values.add(u.textValue()));
         Prefs.putStringSet(preferenceKey, values);
     }
 
@@ -119,12 +138,14 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     @Override
     public void onPlugged(PluginBus bus) {
         super.onPlugged(bus);
+        mDisabledPresenters = new HashSet<>();
         mServer = new WebServer(mAppManager.getAppContext());
     }
 
     @Override
     public void onUnplugged(PluginBus bus) {
         stop();
+        mDisabledPresenters = null;
         super.onUnplugged(bus);
     }
 }

@@ -18,12 +18,18 @@ package com.vaporwarecorp.mirror.util;
 import java.util.List;
 import java.util.Random;
 
+import static org.apache.commons.lang3.StringUtils.replace;
+
 public class RandomUtil {
 // ------------------------------ FIELDS ------------------------------
 
     private static final Random RANDOM_GENERATOR = new Random();
 
 // -------------------------- STATIC METHODS --------------------------
+
+    public static String randomString(List<String> values, String searchString, String replacement) {
+        return replace(randomValue(values), searchString, replacement);
+    }
 
     public static <T> T randomValue(List<T> values) {
         return values.get(RANDOM_GENERATOR.nextInt(values.size()));

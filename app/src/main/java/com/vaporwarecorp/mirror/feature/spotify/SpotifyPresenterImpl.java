@@ -21,9 +21,7 @@ import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
-import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.component.SpotifyManager;
 import com.vaporwarecorp.mirror.event.ResetEvent;
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -34,8 +32,6 @@ import java.util.List;
 public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> implements SpotifyPresenter {
 // ------------------------------ FIELDS ------------------------------
 
-    @Plug
-    AppManager mAppManager;
     @Plug
     EventManager mEventManager;
     @Plug
@@ -61,7 +57,7 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
     public void onViewResume(View view) {
         super.onViewResume(view);
 
-        List<String> trackIds = (List<String>) getParams().get(TRACK_IDS);
+        final List<String> trackIds = (List<String>) getParams().get(TRACK_IDS);
         mSpotifyManger.play(trackIds, new SpotifyManager.Listener() {
             @Override
             public void onTrackUpdate(Track track) {
@@ -76,9 +72,9 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
     }
 
     @Override
-    public void onViewPause(View view) {
-        mSpotifyManger.stop();
-        super.onViewPause(view);
+    public void onViewStop(View view) {
+        mSpotifyManger.onViewStop();
+        super.onViewStop(view);
     }
 
     @Override

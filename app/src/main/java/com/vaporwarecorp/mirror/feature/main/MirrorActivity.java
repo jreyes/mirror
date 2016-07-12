@@ -38,7 +38,7 @@ import com.vaporwarecorp.mirror.component.forecast.ForecastView;
 import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
-import com.vaporwarecorp.mirror.feature.common.view.MirrorView;
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.util.FullScreenUtil;
 
 @Plugin
@@ -172,17 +172,6 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
 // -------------------------- OTHER METHODS --------------------------
 
-    public void hideFullScreenView() {
-        // hide the full screen container
-        mFullscreenContainer.setVisibility(View.GONE);
-
-        // remove any full screen fragment before proceeding
-        MirrorView fullScreenMirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
-        if (fullScreenMirrorView != null) {
-            mPresenter.removeView(fullScreenMirrorView.presenterClass());
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -311,6 +300,17 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
             if (removeParentView && viewId != 0) {
                 mContentContainer.removeBorderView(viewId);
             }
+        }
+    }
+
+    private void hideFullScreenView() {
+        // hide the full screen container
+        mFullscreenContainer.setVisibility(View.GONE);
+
+        // remove any full screen fragment before proceeding
+        MirrorView fullScreenMirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
+        if (fullScreenMirrorView != null) {
+            mPresenter.removeView(fullScreenMirrorView.presenterClass());
         }
     }
 

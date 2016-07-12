@@ -37,12 +37,10 @@ import com.vaporwarecorp.mirror.component.app.LocalAssets;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
 import com.vaporwarecorp.mirror.util.LocationUtil;
 import com.vaporwarecorp.mirror.util.NetworkUtil;
-import com.vaporwarecorp.mirror.util.PropertiesUtil;
 import timber.log.Timber;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
 @Plugin
 public class AppManagerImpl extends AbstractManager implements AppManager {
@@ -56,7 +54,6 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     private final MirrorApplication mApplication;
 
     private LocalAssets mLocalAssets;
-    private Properties mProperties;
     private RefWatcher mRefWatcher;
 
 // --------------------------- CONSTRUCTORS ---------------------------
@@ -98,14 +95,6 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     @Override
     public String getApplicationDirectoryPath() {
         return AppToolkit.getApplicationDirectoryPath(getAppContext());
-    }
-
-    @Override
-    public Properties getApplicationProperties() {
-        if (mProperties == null) {
-            mProperties = PropertiesUtil.loadProperties(getAppContext());
-        }
-        return mProperties;
     }
 
     @Override

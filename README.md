@@ -17,7 +17,7 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 ## Todo
 
 - [X] New grid layout, tentative 15/15/40/15/15 layout
-- [ ] Draggable panels
+- [X] Draggable panels
     - [X] Main container in middle that gets replaced by current action
     - [X] Dismiss panels by dragging to the left or right borders
     - [X] On minimized panels, mute audio for videos? but no for audio play?
@@ -49,6 +49,8 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 - [X] Update commands
     - [X] Spotify command
         - [ ] Add pause/play button
+        - [ ] Make it configurable
+        - [ ] Add a spotify client check (Remove WebView login)
 
 ## Hardware
 

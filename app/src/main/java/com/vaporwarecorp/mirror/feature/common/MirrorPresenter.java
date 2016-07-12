@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.twilio;
 
-import com.robopupu.api.plugin.PlugInterface;
-import com.twilio.conversations.IncomingInvite;
-import com.vaporwarecorp.mirror.feature.common.MirrorView;
+package com.vaporwarecorp.mirror.feature.common;
 
-@PlugInterface
-public interface TwilioView extends MirrorView {
-// -------------------------- OTHER METHODS --------------------------
+import com.robopupu.api.feature.FeaturePresenter;
 
-    void displayInvite(IncomingInvite incomingInvite);
+public interface MirrorPresenter extends FeaturePresenter {
 }

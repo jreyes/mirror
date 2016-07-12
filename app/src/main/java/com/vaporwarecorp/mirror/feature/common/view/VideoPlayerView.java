@@ -15,6 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.common.view;
 
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
 
 public interface VideoPlayerView extends MirrorView {

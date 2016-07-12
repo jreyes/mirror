@@ -13,15 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.feature.twilio;
+package com.vaporwarecorp.mirror.feature.common;
 
-import com.robopupu.api.plugin.PlugInterface;
-import com.twilio.conversations.IncomingInvite;
-import com.vaporwarecorp.mirror.feature.common.MirrorView;
+import android.content.Intent;
 
-@PlugInterface
-public interface TwilioView extends MirrorView {
+public interface MirrorManager {
 // -------------------------- OTHER METHODS --------------------------
 
-    void displayInvite(IncomingInvite incomingInvite);
+    void onFeaturePause();
+
+    void onFeatureResult(int requestCode, int resultCode, Intent data);
+
+    void onFeatureResume();
+
+    void onFeatureStart();
+
+    void onFeatureStop();
+
+    void onViewStart();
+
+    void onViewStop();
 }

@@ -28,6 +28,7 @@ import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.error.MirrorAppError;
 import com.vaporwarecorp.mirror.component.*;
+import com.vaporwarecorp.mirror.feature.spotify.SpotifyManager;
 import timber.log.Timber;
 
 import java.io.File;

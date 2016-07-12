@@ -15,5 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.common.view;
 
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
+
 public interface BrowserView extends MirrorView {
 }
