@@ -75,12 +75,12 @@ public class YoutubeFragment
         if (mPlayer != null && !mPlayer.isPlaying()) {
             mPlayer.play();
         }
-        mThumbnailView.setVisibility(View.GONE);
+        mPlayerView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onMinimize() {
-        mThumbnailView.setVisibility(View.VISIBLE);
+        mPlayerView.setVisibility(View.INVISIBLE);
         if (mPlayer != null && mPlayer.isPlaying()) {
             mPlayer.pause();
         }
@@ -112,12 +112,12 @@ public class YoutubeFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        initializePlayerView();
         initializeThumbnailView();
+        initializePlayerView();
 
         FrameLayout viewFrame = new FrameLayout(getActivity());
-        viewFrame.addView(mPlayerView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         viewFrame.addView(mThumbnailView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        viewFrame.addView(mPlayerView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         return viewFrame;
     }
 
@@ -156,7 +156,7 @@ public class YoutubeFragment
                 mPlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
                     @Override
                     public void onLoading() {
-                        mThumbnailView.setVisibility(View.VISIBLE);
+                        mPlayerView.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
@@ -170,10 +170,10 @@ public class YoutubeFragment
                     @Override
                     public void onVideoStarted() {
                         if (!isMaximized()) {
-                            mThumbnailView.setVisibility(View.VISIBLE);
+                            mPlayerView.setVisibility(View.INVISIBLE);
                             mPlayer.pause();
                         } else {
-                            mThumbnailView.setVisibility(View.GONE);
+                            mPlayerView.setVisibility(View.VISIBLE);
                         }
                     }
 
