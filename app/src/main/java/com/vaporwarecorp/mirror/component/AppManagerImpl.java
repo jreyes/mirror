@@ -15,6 +15,9 @@
  */
 package com.vaporwarecorp.mirror.component;
 
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
@@ -29,11 +32,11 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.AppToolkit;
-import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.app.LocalAssets;
+import com.vaporwarecorp.mirror.feature.configurable.ConfigurableActivity;
+import com.vaporwarecorp.mirror.feature.main.MirrorActivity;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
 import com.vaporwarecorp.mirror.util.LocationUtil;
 import com.vaporwarecorp.mirror.util.NetworkUtil;
@@ -41,6 +44,8 @@ import timber.log.Timber;
 
 import java.io.File;
 import java.io.IOException;
+
+import static android.content.Context.ALARM_SERVICE;
 
 @Plugin
 public class AppManagerImpl extends AbstractManager implements AppManager {
@@ -52,9 +57,7 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     PluginFeatureManager mFeatureManager;
 
     private final MirrorApplication mApplication;
-
     private LocalAssets mLocalAssets;
-    private RefWatcher mRefWatcher;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -62,13 +65,19 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     @Provides(AppManager.class)
     public AppManagerImpl(final MirrorApplication application) {
         mApplication = application;
-        mRefWatcher = LeakCanary.install(application);
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
 
 // --------------------- Interface AppManager ---------------------
+
+    @Override
+    public void cancelPendingIntent(Intent intent) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mApplication, 0, intent, 0);
+        ((AlarmManager) mApplication.getSystemService(ALARM_SERVICE)).cancel(pendingIntent);
+        pendingIntent.cancel();
+    }
 
     @Override
     public void exitApplication() {
@@ -144,13 +153,24 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     }
 
     @Override
-    public RefWatcher refWatcher() {
-        return mRefWatcher;
+    public void startActivity(final Intent intent) {
+        Activity activity = mFeatureManager.getForegroundActivity();
+        activity.startActivity(intent);
+        activity.finish();
     }
 
     @Override
-    public void startActivity(final Intent intent) {
-        mFeatureManager.getForegroundActivity().startActivity(intent);
+    public void startConfigurableFeature() {
+        Intent i = new Intent(getAppContext(), ConfigurableActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
+    }
+
+    @Override
+    public void startMainFeature() {
+        Intent i = new Intent(getAppContext(), MirrorActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
     }
 
     private LocalAssets getLocalAssets() {

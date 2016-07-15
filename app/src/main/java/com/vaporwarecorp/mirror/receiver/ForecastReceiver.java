@@ -20,8 +20,8 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.robopupu.api.dependency.D;
-import com.vaporwarecorp.mirror.component.ForecastManager;
+import com.robopupu.api.plugin.PluginBus;
+import com.vaporwarecorp.mirror.feature.forecast.ForecastManager;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
@@ -36,7 +36,8 @@ public class ForecastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // retrieve the forecast
-        D.get(ForecastManager.class).retrieveForecast();
+        final ForecastManager manager = PluginBus.getPlug(ForecastManager.class);
+        manager.retrieveForecast();
 
         boolean alarmUp = (PendingIntent.getBroadcast(context, 0,
                 new Intent(FORECAST_UPDATE_INTENT),

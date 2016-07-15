@@ -16,8 +16,9 @@
 package com.vaporwarecorp.mirror.feature.common;
 
 import android.content.Intent;
+import com.robopupu.api.component.Manager;
 
-public interface MirrorManager {
+public interface MirrorManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
     void onFeaturePause();

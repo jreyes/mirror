@@ -23,7 +23,6 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.twilio.conversations.IncomingInvite;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.component.TwilioManager;
 import com.vaporwarecorp.mirror.event.ResetEvent;
 
 @Plugin

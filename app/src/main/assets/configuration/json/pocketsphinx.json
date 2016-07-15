@@ -1,0 +1,31 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.pocketsphinx.PocketSphinxManager",
+  "schema": {
+    "type": "object",
+    "title": "PocketSphinx Configuration",
+    "required": [
+      "hotWord"
+    ],
+    "properties": {
+      "hotword": {
+        "title": "Hot Word",
+        "type": "string"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>PocketSphinx Configuration</h3><p>Enter the hot word or phrase that you would like the mirror to listen a command.</p>"
+    },
+    {
+      "key": "hotWord",
+      "type": "string"
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

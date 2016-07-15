@@ -23,6 +23,7 @@ import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
+import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.feature.common.view.MapView;
 
@@ -68,7 +69,7 @@ public class MapPresenterImpl extends AbstractFeaturePresenter<MapView> implemen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mAppManager.refWatcher().watch(this);
+        MirrorApplication.refWatcher(this);
     }
 
     private Double getDouble(String key) {

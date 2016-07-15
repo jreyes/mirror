@@ -30,6 +30,8 @@ public interface MainPresenter extends FeaturePresenter {
 
     void removeView(Class<? extends Presenter> presenterClass);
 
+    void speak(String textToSpeak);
+
     void startListening();
 
     void stopListening();

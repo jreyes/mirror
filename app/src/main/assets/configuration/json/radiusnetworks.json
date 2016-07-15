@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.component.ProximityManager",
+  "component": "com.vaporwarecorp.mirror.feature.radiusnetworks.ProximityManager",
   "schema": {
     "type": "object",
     "title": "Radius Networks Configuration",

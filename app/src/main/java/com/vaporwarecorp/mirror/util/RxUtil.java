@@ -17,6 +17,7 @@ package com.vaporwarecorp.mirror.util;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -25,6 +26,14 @@ import java.util.concurrent.TimeUnit;
 
 public class RxUtil {
 // -------------------------- STATIC METHODS --------------------------
+
+    public static Subscription debounce(Action1<? super Long> action, long delay) {
+        return Observable.timer(delay, TimeUnit.SECONDS)
+                .debounce(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(action);
+    }
 
     public static void delay(Action1<? super Long> action, long delay) {
         Observable.timer(delay, TimeUnit.SECONDS)

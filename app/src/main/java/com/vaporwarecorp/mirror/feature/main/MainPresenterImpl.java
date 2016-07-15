@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.text.TextUtils;
 import com.hound.android.fd.Houndify;
 import com.robopupu.api.dependency.Provides;
-import com.robopupu.api.feature.AbstractFeaturePresenter;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.Plug;
@@ -30,32 +29,35 @@ import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
+import com.vaporwarecorp.mirror.feature.common.presenter.AbstractMirrorFeaturePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
-import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
+import com.vaporwarecorp.mirror.feature.pocketsphinx.PocketSphinxManager;
 import com.vaporwarecorp.mirror.feature.randomquotes.RandomQuotePresenter;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
+import com.vaporwarecorp.mirror.feature.texttospeech.TextToSpeechManager;
 import com.vaporwarecorp.mirror.feature.twilio.TwilioPresenter;
 import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
 
 import java.util.List;
 
+import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
 import static com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.YOUTUBE_VIDEO_ID;
 import static com.vaporwarecorp.mirror.feature.greet.GreetPresenter.GREET_TYPE;
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
-import static com.vaporwarecorp.mirror.util.RxUtil.delay;
 import static java.util.Collections.singletonList;
 import static solid.stream.Stream.stream;
 
 @Plugin
 @Provides(MainPresenter.class)
-public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implements MainPresenter {
+public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> implements MainPresenter {
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
@@ -69,9 +71,11 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Plug
     MainFeature mFeature;
     @Plug
-    HotWordManager mHotWordManager;
+    PluginFeatureManager mFeatureManager;
     @Plug
-    TwilioManager mTwilioManager;
+    PocketSphinxManager mPocketSphinxManager;
+    @Plug
+    TextToSpeechManager mTextToSpeechManager;
     @Plug
     MainView mView;
 
@@ -97,17 +101,24 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Override
     public void removeView(Class<? extends Presenter> presenterClass) {
         mFeature.hidePresenter(presenterClass);
-        delay(l -> startListening(), 5);
+        debounce(l -> startListening(), 5);
+    }
+
+    @Override
+    public void speak(String textToSpeak) {
+        if (StringUtils.isNoneEmpty(textToSpeak)) {
+            mTextToSpeechManager.speak(textToSpeak);
+        }
     }
 
     @Override
     public void startListening() {
-        mHotWordManager.startListening();
+        mPocketSphinxManager.onFeatureResume();
     }
 
     @Override
     public void stopListening() {
-        mHotWordManager.stopListening();
+        mPocketSphinxManager.onFeaturePause();
     }
 
     @Override
@@ -137,7 +148,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void test6() {
-        mFeature.showPresenter(ConfigurationPresenter.class);
+        mAppManager.startConfigurableFeature();
     }
 
     @Override
@@ -153,13 +164,17 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Override
     public void onViewStart(View view) {
+        Timber.d("onViewStart(View)");
         super.onViewStart(view);
         checkPermissions();
     }
 
     @Override
     public void onViewStop(View view) {
+        Timber.d("onViewStop(View)");
+        mView.hideView();
         managerStop();
+        mFeatureManager.stopFeature(mFeature);
         super.onViewStop(view);
     }
 
@@ -172,6 +187,15 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
+    public void onEvent(CommandEvent event) {
+        speak(event.getMessage());
+        if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
+            mFeature.hideCurrentPresenter();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
     public void onEvent(UserInRangeEvent event) {
         mFeature.showPresenter(GreetPresenter.class, new Params(GREET_TYPE, TYPE_WELCOME));
     }
@@ -179,11 +203,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(GreetEvent event) {
-        /*
-        if (mConfigurationManager.needsInitialSetup()) {
-            mFeature.showPresenter(ConfigurationPresenter.class);
-        }
-        */
         if (TYPE_WELCOME.equals(event.getType())) {
             mFeature.displayView();
             managerResume();
@@ -216,7 +235,6 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(ForecastEvent event) {
-        Timber.i("Got ForecastEvent");
         mView.setForecast(event.getForecast());
     }
 
@@ -224,7 +242,7 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     @SuppressWarnings("unused")
     public void onEvent(SpeechEvent event) {
         if (!TextUtils.isEmpty(event.getMessage())) {
-            mFeature.speak(event.getMessage());
+            speak(event.getMessage());
         }
         startListening();
     }
@@ -245,28 +263,25 @@ public class MainPresenterImpl extends AbstractFeaturePresenter<MainView> implem
     }
 
     private void managerPause() {
-        mTwilioManager.stop();
-        mHotWordManager.stopListening();
+        Timber.d("managerPause()");
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeaturePause);
     }
 
     private void managerResume() {
+        Timber.d("managerResume()");
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureResume);
-        mHotWordManager.startListening();
-        mTwilioManager.start();
     }
 
     private void managerStart() {
+        Timber.d("managerStart()");
         mEventManager.register(this);
         mCommandManager.start();
-        mHotWordManager.start();
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStart);
     }
 
     private void managerStop() {
+        Timber.d("managerStop()");
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStop);
-        mTwilioManager.stop();
-        mHotWordManager.stop();
         mCommandManager.stop();
         mEventManager.unregister(this);
     }

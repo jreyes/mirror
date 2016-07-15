@@ -24,6 +24,7 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import timber.log.Timber;
 
 @Plugin
 @Scope(MirrorAppScope.class)
@@ -36,7 +37,18 @@ public class PluginFeatureManagerImpl extends AbstractFeatureManager implements 
 
     @Override
     public Feature startFeature(final FeatureContainer container, final Feature feature, final Params params) {
+        Timber.d("PluginFeatureManagerImpl.startFeature");
         PluginBus.plug(feature);
         return super.startFeature(container, feature, params);
+    }
+
+// --------------------- Interface PluginFeatureManager ---------------------
+
+    @Override
+    public void stopFeature(Feature feature) {
+        Timber.d("PluginFeatureManagerImpl.stopFeature");
+        feature.stop();
+        onFeatureStopped(feature);
+        PluginBus.unplug(feature);
     }
 }

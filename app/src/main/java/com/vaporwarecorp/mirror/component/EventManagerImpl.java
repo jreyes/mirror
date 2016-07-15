@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.component;
 
 import com.robopupu.api.component.AbstractManager;
+import com.robopupu.api.component.Manager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.feature.Feature;
@@ -50,8 +51,13 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
 
     @Override
     public void post(Event event) {
-        Timber.d("posting " + event.getClass().getSimpleName());
+        Timber.d("posting %s", event.getClass().getSimpleName());
         mEventBus.post(event);
+    }
+
+    @Override
+    public void register(Manager manager) {
+        mEventBus.register(manager);
     }
 
     @Override
@@ -62,6 +68,11 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
     @Override
     public void register(Feature feature) {
         mEventBus.register(feature);
+    }
+
+    @Override
+    public void unregister(Manager manager) {
+        mEventBus.unregister(manager);
     }
 
     @Override

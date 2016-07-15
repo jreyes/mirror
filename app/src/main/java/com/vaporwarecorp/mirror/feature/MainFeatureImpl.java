@@ -25,18 +25,15 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
-import com.vaporwarecorp.mirror.component.*;
+import com.vaporwarecorp.mirror.component.ConfigurationManager;
+import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.ApplicationEvent;
-import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.main.MainView;
 import com.vaporwarecorp.mirror.feature.splash.SplashPresenter;
-import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import timber.log.Timber;
 
 import static com.vaporwarecorp.mirror.event.ApplicationEvent.READY;
-import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 import static solid.stream.Stream.stream;
 
 @Plugin
@@ -47,14 +44,6 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
-    @Plug
-    PluginFeatureManager mFeatureManager;
-    @Plug
-    ForecastManager mForecastManager;
-    @Plug
-    ProximityManager mProximityManager;
-    @Plug
-    TextToSpeechManager mTextToSpeechManager;
     @Plug
     MainView mView;
 
@@ -98,9 +87,8 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
     @Override
     public void onApplicationReady() {
+        Timber.d("MainFeatureImpl.onApplicationReady");
         hideCurrentPresenter();
-        mProximityManager.start();
-        mForecastManager.startReceiver();
         mEventManager.post(new ApplicationEvent(READY));
     }
 
@@ -112,39 +100,16 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     }
 
     @Override
-    public void speak(String textToSpeak) {
-        if (StringUtils.isNoneEmpty(textToSpeak)) {
-            mTextToSpeechManager.speak(textToSpeak);
-        }
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(CommandEvent event) {
-        speak(event.getMessage());
-        if (TYPE_COMMAND_SUCCESS.equals(event.getType())) {
-            hideCurrentPresenter();
-        }
-    }
-
-    @Override
     protected void onStart() {
+        Timber.d("MainFeatureImpl.onStart");
         super.onStart();
-        mEventManager.register(this);
         showPresenter(SplashPresenter.class);
     }
 
-    @Override
-    protected void onStop() {
-        mTextToSpeechManager.stop();
-        mProximityManager.stop();
-        mEventManager.unregister(this);
-        super.onStop();
-    }
-
     private void initializeManagers() {
-        stream(D.getAll(MainScope.class, MirrorManager.class, null)).forEach(PluginBus::plug);
+        stream(D.getAll(MirrorAppScope.class, MirrorManager.class, null)).forEach(value -> {
+            Timber.d("initializeManagers plugin %s", value.getClass().getName());
+            PluginBus.plug(value);
+        });
     }
 }

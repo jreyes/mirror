@@ -24,11 +24,12 @@ import com.robopupu.api.app.BaseApplication;
 import com.robopupu.api.app.Robopupu;
 import com.robopupu.api.dependency.AppDependencyScope;
 import com.robopupu.api.plugin.PluginBus;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.error.MirrorAppError;
 import com.vaporwarecorp.mirror.component.*;
-import com.vaporwarecorp.mirror.feature.spotify.SpotifyManager;
 import timber.log.Timber;
 
 import java.io.File;
@@ -37,6 +38,16 @@ import java.io.InputStream;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class MirrorApplication extends BaseApplication {
+// ------------------------------ FIELDS ------------------------------
+
+    private RefWatcher mRefWatcher;
+
+// -------------------------- STATIC METHODS --------------------------
+
+    public static void refWatcher(Object watchedReference) {
+        ((MirrorApplication) getInstance()).mRefWatcher.watch(watchedReference);
+    }
+
 // -------------------------- OTHER METHODS --------------------------
 
     @Override
@@ -57,6 +68,7 @@ public class MirrorApplication extends BaseApplication {
         initializeApplication();
         initializeTimber();
         initializeGlide();
+        initializeLeakCanary();
 
         MirrorAppError.setContext(getApplicationContext());
     }
@@ -71,12 +83,6 @@ public class MirrorApplication extends BaseApplication {
         PluginBus.plug(ConfigurationManager.class);
         PluginBus.plug(CommandManager.class);
         PluginBus.plug(EventManager.class);
-        PluginBus.plug(ForecastManager.class);
-        PluginBus.plug(HotWordManager.class);
-        PluginBus.plug(ProximityManager.class);
-        PluginBus.plug(SpotifyManager.class);
-        PluginBus.plug(TextToSpeechManager.class);
-        PluginBus.plug(TwilioManager.class);
 
         final PluginFeatureManager featureManager = PluginBus.plug(PluginFeatureManager.class);
         registerActivityLifecycleCallbacks(featureManager.getActivityLifecycleCallback());
@@ -94,6 +100,10 @@ public class MirrorApplication extends BaseApplication {
         Glide
                 .get(getApplicationContext())
                 .register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(mOkHttpClient));
+    }
+
+    private void initializeLeakCanary() {
+        mRefWatcher = LeakCanary.install(this);
     }
 
     private void initializeTimber() {

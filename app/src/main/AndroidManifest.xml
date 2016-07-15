@@ -76,6 +76,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".feature.configurable.ConfigurableActivity"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity
             android:name=".component.command.HoundifyVoiceSearchActivity"
             android:screenOrientation="landscape"
             android:theme="@style/houndify_Houndify"/>
@@ -88,14 +96,11 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".receiver.ForecastReceiver"
-            android:exported="false">
+        <receiver android:name=".receiver.ForecastReceiver">
             <intent-filter>
                 <action android:name="com.vaporwarecorp.mirror.FORECAST_UPDATE"/>
             </intent-filter>
         </receiver>
-
         <receiver
             android:name="com.radiusnetworks.proximity.SyncOnEventBroadcastReceiver"
             tools:node="remove"/>

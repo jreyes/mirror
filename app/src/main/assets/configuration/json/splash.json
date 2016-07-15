@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.feature.splash.SplashPresenter",
+  "component": "com.vaporwarecorp.mirror.feature.splash.SplashManager",
   "schema": {
     "type": "object",
     "title": "Splash Screen",

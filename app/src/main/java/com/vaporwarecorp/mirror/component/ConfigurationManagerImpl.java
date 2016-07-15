@@ -27,8 +27,6 @@ import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.component.configuration.WebServer;
-import com.vaporwarecorp.mirror.event.ResetEvent;
-import com.vaporwarecorp.mirror.feature.configuration.ConfigurationPresenter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -98,8 +96,7 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
     @Override
     public void start() {
-        mServer.start(PluginBus.getPlugs(Configuration.class),
-                () -> mEventManager.post(new ResetEvent(ConfigurationPresenter.class)));
+        mServer.start(PluginBus.getPlugs(Configuration.class), () -> mAppManager.startMainFeature());
     }
 
     @Override

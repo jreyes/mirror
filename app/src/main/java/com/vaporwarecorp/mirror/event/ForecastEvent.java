@@ -15,7 +15,7 @@
  */
 package com.vaporwarecorp.mirror.event;
 
-import com.vaporwarecorp.mirror.component.forecast.model.Forecast;
+import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
 
 public class ForecastEvent implements Event {
 // ------------------------------ FIELDS ------------------------------

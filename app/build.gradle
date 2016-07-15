@@ -131,7 +131,7 @@ dependencies {
 
     compile 'com.github.iammert:MusicPlayerView:e3b937c729'
 
-    compile 'com.twilio:conversations-android:0.12.1'
+    compile 'com.twilio:conversations-android:0.12.2'
     compile('com.twilio.sdk:twilio-java-sdk:5.10.1') {
         exclude group: 'org.codehaus.jackson'
         exclude group: 'io.jsonwebtoken'

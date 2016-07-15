@@ -14,6 +14,12 @@ Currently this project is being rewritten using [Robopupu](https://robopupu.com/
 
 [![Demo of Another Smart Mirror v1](http://img.youtube.com/vi/7EBSTNqeX6Q/0.jpg)](http://www.youtube.com/watch?v=7EBSTNqeX6Q)
 
+## Thanks
+
+I would like to give a big thanks to [Marko Salmela](https://github.com/Fuusio) for creating the
+[Robopupu](https://github.com/Fuusio/Robopupu) library and his constant support in supporting me. Without your great
+work, much of the configurable aspect of this project would not be possible.
+
 ## Todo
 
 - [X] New grid layout, tentative 15/15/40/15/15 layout

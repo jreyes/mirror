@@ -30,7 +30,7 @@
         android:paddingStart="@dimen/outside_padding"
         android:visibility="invisible">
 
-        <com.vaporwarecorp.mirror.component.forecast.ForecastView
+        <com.vaporwarecorp.mirror.feature.forecast.ForecastView
             android:id="@+id/forecast_view"
             android:layout_width="200dp"
             android:layout_height="wrap_content"

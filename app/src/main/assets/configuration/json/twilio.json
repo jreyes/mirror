@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.component.TwilioManager",
+  "component": "com.vaporwarecorp.mirror.feature.twilio.TwilioManager",
   "schema": {
     "type": "object",
     "title": "Twilio Configuration",

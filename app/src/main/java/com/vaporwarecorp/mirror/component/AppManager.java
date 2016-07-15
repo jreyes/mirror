@@ -23,15 +23,18 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.StringRes;
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
-import com.squareup.leakcanary.RefWatcher;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 
 import java.io.File;
-import java.util.Properties;
 
 @PlugInterface
 public interface AppManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
+
+    /**
+     * Cancel a pending intent
+     */
+    void cancelPendingIntent(Intent intent);
 
     /**
      * Exists the application.
@@ -123,16 +126,13 @@ public interface AppManager extends Manager {
     boolean isNetworkAvailable();
 
     /**
-     * Returns a LeakCanary RefWatcher instance.
-     *
-     * @return RefWatcher
-     */
-    RefWatcher refWatcher();
-
-    /**
      * Starts the specified {@link Activity}.
      *
      * @param intent An {@link Intent} specifying the {@link Activity} to be started.
      */
     void startActivity(Intent intent);
+
+    void startConfigurableFeature();
+
+    void startMainFeature();
 }

@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.component.ForecastManager",
+  "component": "com.vaporwarecorp.mirror.feature.forecast.ForecastManager",
   "schema": {
     "type": "object",
     "title": "Forecast IO Configuration",

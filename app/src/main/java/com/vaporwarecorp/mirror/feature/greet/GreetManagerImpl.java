@@ -18,9 +18,11 @@ package com.vaporwarecorp.mirror.feature.greet;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.robopupu.api.dependency.Provides;
+import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
+import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.PreferenceManager;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
@@ -33,6 +35,7 @@ import static com.vaporwarecorp.mirror.util.JsonUtil.*;
 import static com.vaporwarecorp.mirror.util.RandomUtil.randomString;
 
 @Plugin
+@Scope(MirrorAppScope.class)
 @Provides(GreetManager.class)
 public class GreetManagerImpl extends AbstractMirrorManager implements GreetManager {
 // ------------------------------ FIELDS ------------------------------

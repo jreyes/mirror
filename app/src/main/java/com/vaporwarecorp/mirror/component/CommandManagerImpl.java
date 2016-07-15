@@ -37,7 +37,7 @@ import com.vaporwarecorp.mirror.component.command.HoundifyVoiceSearchActivity;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
-import org.apache.commons.lang3.StringUtils;
+import com.vaporwarecorp.mirror.feature.twilio.TwilioManager;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import timber.log.Timber;
@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static solid.stream.Stream.stream;
 
 @Plugin
@@ -119,7 +120,7 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     @Override
     public void start() {
-        if (StringUtils.trimToNull(mClientId) == null || StringUtils.trimToNull(mClientKey) == null) {
+        if (isEmpty(mClientId) || isEmpty(mClientKey)) {
             return;
         }
 
@@ -159,11 +160,9 @@ public class CommandManagerImpl extends AbstractManager implements CommandManage
 
     @Override
     public void updateConfiguration(JsonNode jsonNode) {
-        stop();
         mConfigurationManager.updateString(PREF_CLIENT_ID, jsonNode, "clientId");
         mConfigurationManager.updateString(PREF_CLIENT_KEY, jsonNode, "clientKey");
         loadConfiguration();
-        start();
     }
 
 // --------------------- Interface PluginComponent ---------------------
