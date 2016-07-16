@@ -17,6 +17,7 @@ package com.vaporwarecorp.mirror.feature.spotify;
 
 import android.content.Intent;
 import android.media.session.MediaSession;
+import android.support.annotation.NonNull;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
@@ -76,7 +77,6 @@ public class SpotifyManagerImpl
     private String mClientId;
     private String mClientRedirectUri;
     private PlayerState mCurrentPlayerState;
-    private List<Track> mCurrentTracks;
     private Listener mListener;
     private Player mPlayer;
     private Config mPlayerConfig;
@@ -115,7 +115,6 @@ public class SpotifyManagerImpl
 
     @Override
     public void updateConfiguration(JsonNode jsonNode) {
-        onViewStop();
         mConfigurationManager.updateString(PREF_CLIENT_ID, jsonNode, "clientId");
         mConfigurationManager.updateString(PREF_CLIENT_REDIRECT_URI, jsonNode, "clientRedirectUri");
         loadConfiguration();
@@ -124,7 +123,18 @@ public class SpotifyManagerImpl
 // --------------------- Interface MirrorManager ---------------------
 
     @Override
+    public void onFeaturePause() {
+        Timber.d("onFeaturePause()");
+        if (mSession != null && mSession.isActive()) {
+            mSession.setActive(false);
+        }
+        Spotify.destroyPlayer(this);
+    }
+
+    @Override
     public void onFeatureResult(int requestCode, int resultCode, Intent data) {
+        Timber.d("onFeatureResult(int,int,Intent)");
+
         if (requestCode != SpotifyManager.REQUEST_CODE) {
             return;
         }
@@ -158,9 +168,16 @@ public class SpotifyManagerImpl
 
     @Override
     public void onFeatureResume() {
+        Timber.d("onFeatureResume()");
+
         if (isEmpty(mClientId) || isEmpty(mClientRedirectUri)) {
             Timber.d("stopping because found empty client ID or redirect URI");
             disable();
+            return;
+        }
+
+        if (mService != null) {
+            Timber.d("Service already running");
             return;
         }
 
@@ -172,13 +189,16 @@ public class SpotifyManagerImpl
     }
 
     @Override
-    public void onViewStop() {
-        if (mSession != null && mSession.isActive()) {
-            mSession.setActive(false);
-        }
-        Spotify.destroyPlayer(this);
+    public void onFeatureStop() {
+        Timber.d("onFeatureStop()");
         mPlayerConfig = null;
         mService = null;
+    }
+
+    @Override
+    public void onViewStop() {
+        Timber.d("onViewStop()");
+        onFeaturePause();
     }
 
 // --------------------- Interface PlayerNotificationCallback ---------------------
@@ -201,7 +221,7 @@ public class SpotifyManagerImpl
         }
 
         if (eventType == EventType.END_OF_CONTEXT) {
-            onViewStop();
+            onFeaturePause();
         }
     }
 
@@ -227,14 +247,22 @@ public class SpotifyManagerImpl
 // --------------------- Interface SpotifyManager ---------------------
 
     @Override
-    public void play(List<String> trackUris, Listener listener) {
-        if (trackUris == null || trackUris.isEmpty()) {
+    public void pausePlaying() {
+        if (mPlayer != null) {
+            mPlayer.pause();
+        }
+    }
+
+    @Override
+    public void play(@NonNull List<String> trackUris, @NonNull Listener listener) {
+        mListener = listener;
+
+        if (mService == null || trackUris.isEmpty()) {
+            mListener.onPlaylistEnd();
             return;
         }
 
-        mListener = listener;
-
-        String trackIds = stream(trackUris)
+        final String trackIds = stream(trackUris)
                 .map(t -> t.replaceAll("spotify:track:", ""))
                 .reduce((t, u) -> t + "," + u)
                 .get();
@@ -251,9 +279,16 @@ public class SpotifyManagerImpl
         });
     }
 
+    @Override
+    public void resumePlaying() {
+        if (mPlayer != null) {
+            mPlayer.resume();
+        }
+    }
+
     private void disable() {
         mConfigurationManager.disablePresenter(SpotifyPresenter.class);
-        onViewStop();
+        onFeaturePause();
     }
 
     /**
@@ -264,9 +299,17 @@ public class SpotifyManagerImpl
         mClientRedirectUri = mConfigurationManager.getString(PREF_CLIENT_REDIRECT_URI, PREF_CLIENT_REDIRECT_URI_DEFAULT);
     }
 
-    private void play(Tracks tracks) {
+    private void play(final Tracks tracks) {
+        final List<String> trackUris = stream(tracks.tracks)
+                .filter(track -> track != null && track.uri != null)
+                .map(track -> track.uri)
+                .collect(toList());
+        if (trackUris.isEmpty()) {
+            mListener.onPlaylistEnd();
+            return;
+        }
+
         mCurrentPlayerState = new PlayerState();
-        mCurrentTracks = tracks.tracks;
 
         Spotify.getPlayer(mPlayerConfig, this, new InitializationObserver() {
             @Override
@@ -277,7 +320,7 @@ public class SpotifyManagerImpl
 
                 mPlayer = player;
                 mPlayer.addPlayerNotificationCallback(SpotifyManagerImpl.this);
-                mPlayer.play(stream(mCurrentTracks).map(t -> t.uri).collect(toList()));
+                mPlayer.play(trackUris);
             }
 
             @Override

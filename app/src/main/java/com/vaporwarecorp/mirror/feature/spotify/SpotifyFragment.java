@@ -75,7 +75,7 @@ public class SpotifyFragment
     }
 
     @Override
-    public Class presenterClass() {
+    public Class<? extends Presenter> presenterClass() {
         return SpotifyPresenter.class;
     }
 
@@ -127,6 +127,15 @@ public class SpotifyFragment
     protected void onCreateBindings() {
         super.onCreateBindings();
         mMusicPlayerView = getView(R.id.music_player_view);
+        mMusicPlayerView.setOnClickListener(v -> {
+            if (mMusicPlayerView.isRotating()) {
+                mMusicPlayerView.stop();
+                mPresenter.pausePlaying();
+            } else {
+                mMusicPlayerView.start();
+                mPresenter.resumePlaying();
+            }
+        });
         mSongTextView = getView(R.id.song_text_view);
         mSingerTextView = getView(R.id.singer_text_view);
     }

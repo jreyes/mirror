@@ -50,6 +50,18 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
         plug(SpotifyView.class);
     }
 
+// --------------------- Interface SpotifyPresenter ---------------------
+
+    @Override
+    public void pausePlaying() {
+        mSpotifyManger.pausePlaying();
+    }
+
+    @Override
+    public void resumePlaying() {
+        mSpotifyManger.resumePlaying();
+    }
+
 // --------------------- Interface ViewObserver ---------------------
 
     @SuppressWarnings("unchecked")

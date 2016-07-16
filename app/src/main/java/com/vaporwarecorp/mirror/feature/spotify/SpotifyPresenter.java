@@ -23,4 +23,10 @@ public interface SpotifyPresenter extends FeaturePresenter {
 // ------------------------------ FIELDS ------------------------------
 
     String TRACK_IDS = "TRACK_IDS";
+
+// -------------------------- OTHER METHODS --------------------------
+
+    void pausePlaying();
+
+    void resumePlaying();
 }

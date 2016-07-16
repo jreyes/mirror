@@ -123,7 +123,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
 
     @Override
     public void test1() {
-        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, singletonList("6TJmQnO44YE5BtTxH8pop1")));
+        mFeature.showPresenter(SpotifyPresenter.class, new Params(TRACK_IDS, singletonList("6NmXV4o6bmp704aPGyTVVG")));
     }
 
     @Override

@@ -37,6 +37,10 @@ public class ForecastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // retrieve the forecast
         final ForecastManager manager = PluginBus.getPlug(ForecastManager.class);
+        if (manager == null) {
+            return;
+        }
+
         manager.retrieveForecast();
 
         boolean alarmUp = (PendingIntent.getBroadcast(context, 0,

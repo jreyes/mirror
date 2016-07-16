@@ -30,7 +30,11 @@ public interface SpotifyManager extends MirrorManager, Configuration {
 
 // -------------------------- OTHER METHODS --------------------------
 
+    void pausePlaying();
+
     void play(List<String> trackUris, Listener listener);
+
+    void resumePlaying();
 
     interface Listener {
         void onTrackUpdate(Track track);

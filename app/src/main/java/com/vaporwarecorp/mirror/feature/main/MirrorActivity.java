@@ -35,13 +35,12 @@ import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
 import com.vaporwarecorp.mirror.component.dottedgrid.DottedGridView;
-import com.vaporwarecorp.mirror.feature.forecast.ForecastView;
-import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
 import com.vaporwarecorp.mirror.feature.common.MirrorView;
+import com.vaporwarecorp.mirror.feature.forecast.ForecastView;
+import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.util.FullScreenUtil;
-import timber.log.Timber;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -225,7 +224,6 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     protected void onStart() {
         super.onStart();
         if (!mFeature.isStarted()) {
-            Timber.d("MirrorActivity.onStart");
             mFeatureManager.startFeature(this, mFeature);
         }
     }
