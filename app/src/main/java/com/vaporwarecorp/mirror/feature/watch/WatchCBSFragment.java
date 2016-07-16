@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.feature.watch;
 
 import com.robopupu.api.dependency.Provides;
+import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.feature.common.view.VideoPlayerFragment;
@@ -49,7 +50,7 @@ public class WatchCBSFragment extends VideoPlayerFragment<WatchCBSPresenter> imp
     }
 
     @Override
-    public Class presenterClass() {
+    public Class<? extends Presenter> presenterClass() {
         return WatchCBSPresenter.class;
     }
 

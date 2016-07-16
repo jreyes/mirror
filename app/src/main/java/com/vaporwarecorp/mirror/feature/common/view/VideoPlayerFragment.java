@@ -44,6 +44,7 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
     @Override
     public void mute() {
         if (!mMuted) {
+            mMuted = true;
             mVideoView.setVolume(0, 0);
         }
     }
