@@ -75,6 +75,8 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     @Plug
     PocketSphinxManager mPocketSphinxManager;
     @Plug
+    SoundManager mSoundManager;
+    @Plug
     TextToSpeechManager mTextToSpeechManager;
     @Plug
     MainView mView;
@@ -216,6 +218,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     @SuppressWarnings("unused")
     public void onEvent(HotWordEvent event) {
         stopListening();
+        mSoundManager.acknowledge();
         mCommandManager.voiceSearch();
     }
 

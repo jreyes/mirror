@@ -83,6 +83,7 @@ public class MirrorApplication extends BaseApplication {
         PluginBus.plug(ConfigurationManager.class);
         PluginBus.plug(CommandManager.class);
         PluginBus.plug(EventManager.class);
+        PluginBus.plug(SoundManager.class);
 
         final PluginFeatureManager featureManager = PluginBus.plug(PluginFeatureManager.class);
         registerActivityLifecycleCallbacks(featureManager.getActivityLifecycleCallback());

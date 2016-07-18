@@ -23,6 +23,7 @@ import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PreferenceManager;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 
 @Plugin
@@ -48,7 +49,7 @@ public class RememberUserNameCommand extends AbstractUserMemoryCommand implement
 
     @Override
     public void executeCommand(CommandResult result) {
-        onSuccess(mEventManager, result.getSpokenResponseLong());
+        mEventManager.post(new SpeechEvent(result.getSpokenResponseLong()));
         mPreferenceManager.setUserName(getUserName(result));
     }
 
