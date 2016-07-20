@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.component.dottedgrid;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
@@ -35,15 +36,20 @@ class BorderView extends FrameLayout {
     @ColorInt
     private int mColorWhite;
     private boolean mLeftAligned;
+    private int mLeftRightMargin;
     private boolean mMaximized;
+    private int mMaximizedHeight;
     private int mMaximizedWidth;
+    private int mMinimizedHeight;
     private boolean mRightAligned;
+    private float mScaleFactor;
+    private int mTopBottomMargin;
 
 // -------------------------- STATIC METHODS --------------------------
 
-    static BorderView newInstance(Context context, int maximizedWidth) {
+    static BorderView newInstance(Context context, int maximizedWidth, float scaleFactor) {
         BorderView borderView = new BorderView(context);
-        borderView.initializeLayout(context, maximizedWidth);
+        borderView.initializeLayout(context, maximizedWidth, scaleFactor);
         return borderView;
     }
 
@@ -51,6 +57,31 @@ class BorderView extends FrameLayout {
 
     private BorderView(Context context) {
         super(context, null, 0);
+    }
+
+// -------------------------- OTHER METHODS --------------------------
+
+    public int getLeftRightMargin() {
+        return mLeftRightMargin;
+    }
+
+    public int getMinimizedHeight() {
+        return mMinimizedHeight;
+    }
+
+    public int getTopBottomMargin() {
+        return mTopBottomMargin;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (mMaximizedHeight != getHeight()) {
+            mMaximizedHeight = getHeight();
+            mMinimizedHeight = Math.round(mMaximizedHeight * mScaleFactor);
+            mTopBottomMargin = Math.round((mMaximizedHeight - mMinimizedHeight) / 2);
+            mLeftRightMargin = Math.round((mMaximizedWidth - (mMaximizedWidth * mScaleFactor)) / 2);
+        }
     }
 
     void hideBorder() {
@@ -111,8 +142,8 @@ class BorderView extends FrameLayout {
         setPadding(borderPadding, borderPadding, borderPadding, borderPadding);
 
         // scale
-        ViewHelper.setScaleX(this, 0.5f);
-        ViewHelper.setScaleY(this, 0.5f);
+        ViewHelper.setScaleX(this, mScaleFactor);
+        ViewHelper.setScaleY(this, mScaleFactor);
     }
 
     void showBorder() {
@@ -123,8 +154,9 @@ class BorderView extends FrameLayout {
         setBackgroundColor(mColorRed);
     }
 
-    private void initializeLayout(Context context, int maximizedWidth) {
+    private void initializeLayout(Context context, int maximizedWidth, float scaleFactor) {
         mMaximizedWidth = maximizedWidth;
+        mScaleFactor = scaleFactor;
 
         mColorTransparent = ContextCompat.getColor(context, android.R.color.transparent);
         mColorWhite = ContextCompat.getColor(context, android.R.color.white);

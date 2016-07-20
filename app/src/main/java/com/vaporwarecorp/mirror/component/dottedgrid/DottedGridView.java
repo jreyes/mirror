@@ -65,8 +65,8 @@ public class DottedGridView extends FrameLayout {
                 notifyUpdateDrag(borderView);
             }
 
-            final int newLeft = left + mColumnLeftPadding;
-            final int newRight = getWidth() - left - mColumnRightPadding;
+            final int newLeft = left + borderView.getLeftRightMargin();
+            final int newRight = getWidth() - left - mColumnSizeSide - borderView.getLeftRightMargin();
             if (newLeft < MIN_OVERFLOW || newRight < MIN_OVERFLOW) {
                 borderView.showBorderWarning();
             } else {
@@ -78,8 +78,8 @@ public class DottedGridView extends FrameLayout {
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             BorderView borderView = (BorderView) releasedChild;
 
-            final int left = borderView.getLeft() + mColumnLeftPadding;
-            final int right = getWidth() - borderView.getRight() + mColumnLeftPadding;
+            final int left = borderView.getLeft() + borderView.getLeftRightMargin();
+            final int right = getWidth() - borderView.getRight() + borderView.getLeftRightMargin();
             if (right < mColumnSizeSide) {
                 if (right < MIN_OVERFLOW) {
                     notifyUpdateClose(borderView);
@@ -113,8 +113,8 @@ public class DottedGridView extends FrameLayout {
                 return 0;
             }
 
-            final int leftBound = -MAX_OVERFLOW - (mColumnSizeCenter / 2);
-            final int rightBound = getWidth() + MAX_OVERFLOW;
+            final int leftBound = 0 - MAX_OVERFLOW - (mColumnSizeSide / 2);
+            final int rightBound = getWidth() + MAX_OVERFLOW + (mColumnSizeSide / 2);
             return Math.min(Math.max(left, leftBound), rightBound);
         }
 
@@ -133,7 +133,7 @@ public class DottedGridView extends FrameLayout {
                 return 0;
             }
 
-            final int viewMargin = Math.round(mDraggedView.getHeight() / 4);
+            final int viewMargin = mDraggedView.getTopBottomMargin();
             final int topBound = getPaddingTop() - viewMargin;
             final int bottomBound = getHeight() - mDraggedView.getHeight() + viewMargin;
             return Math.min(Math.max(top, topBound), bottomBound);
@@ -153,12 +153,11 @@ public class DottedGridView extends FrameLayout {
     };
 
     private FrameLayout mBackground;
-    private int mColumnLeftPadding;
-    private int mColumnRightPadding;
     private int mColumnSizeCenter;
     private int mColumnSizeSide;
     private BorderView mDraggedView;
     private Listener mListener;
+    private float mScaleFactor;
     private ViewDragHelper mViewDragHelper;
     private Set<BorderView> mViews;
 
@@ -173,15 +172,7 @@ public class DottedGridView extends FrameLayout {
 // -------------------------- OTHER METHODS --------------------------
 
     public int addBorderView(final Context context) {
-        // TODO find better place for this
-        // column in center is 40% while side columns is 15% of layout
-        // so distribution would be 17/17/32/17/17
-        mColumnSizeCenter = Math.round(getWidth() / 2);
-        mColumnSizeSide = Math.round(mColumnSizeCenter / 2);
-        mColumnLeftPadding = Math.round(mColumnSizeCenter / 4);
-        mColumnRightPadding = Math.round((mColumnSizeCenter / 4) * 3);
-
-        BorderView borderView = BorderView.newInstance(context, mColumnSizeCenter);
+        BorderView borderView = BorderView.newInstance(context, mColumnSizeCenter, mScaleFactor);
         mViews.add(borderView);
         addView(borderView);
         return borderView.getId();
@@ -289,16 +280,25 @@ public class DottedGridView extends FrameLayout {
 
             // now rearrange the layout that this view was removed from
             if (borderView.isLeftAligned()) {
-                rearrangeLeftContainer();
+                rearrangeLeftContainer(0 - borderView.getLeftRightMargin());
             }
             if (borderView.isRightAligned()) {
-                rearrangeRightContainer();
+                rearrangeRightContainer(getWidth() - mColumnSizeSide - borderView.getLeftRightMargin());
             }
         }
     }
 
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        mColumnSizeSide = 250;
+        mColumnSizeCenter = getWidth() - (mColumnSizeSide * 2);
+        mScaleFactor = (float) mColumnSizeSide / mColumnSizeCenter;
     }
 
     private void hideDraggedViewBorder() {
@@ -345,8 +345,8 @@ public class DottedGridView extends FrameLayout {
         int widthPadding = 0;
         int heightPadding = 0;
         if (!view.isMaximized()) {
-            widthPadding = Math.round(view.getWidth() / 4);
-            heightPadding = Math.round(view.getHeight() / 4);
+            widthPadding = view.getLeftRightMargin();
+            heightPadding = view.getTopBottomMargin();
         }
         return view.getLeft() + widthPadding < x
                 && view.getRight() - widthPadding > x
@@ -382,8 +382,8 @@ public class DottedGridView extends FrameLayout {
         borderView.maximize();
         notifyUpdateMaximize(borderView);
 
-        rearrangeLeftContainer();
-        rearrangeRightContainer();
+        rearrangeLeftContainer(0 - borderView.getLeftRightMargin());
+        rearrangeRightContainer(getWidth() - mColumnSizeSide - borderView.getLeftRightMargin());
     }
 
     private void rearrangeContainer(int newLeft, boolean isLeftAligned) {
@@ -391,7 +391,7 @@ public class DottedGridView extends FrameLayout {
         for (BorderView borderView : mViews) {
             if (isLeftAligned ? borderView.isLeftAligned() : borderView.isRightAligned()) {
                 LayoutParams params = (LayoutParams) borderView.getLayoutParams();
-                newTop = newTop - Math.round(borderView.getHeight() / 4);
+                newTop = newTop - borderView.getTopBottomMargin();
                 if (params.leftMargin != newLeft || params.topMargin != newTop) {
                     params.leftMargin = newLeft;
                     params.topMargin = newTop;
@@ -400,9 +400,9 @@ public class DottedGridView extends FrameLayout {
                     }
                 }
                 if (newTop < 0) {
-                    newTop += Math.round((borderView.getHeight() / 4) * 3);
+                    newTop += borderView.getMinimizedHeight() + borderView.getTopBottomMargin();
                 } else {
-                    newTop += Math.round(borderView.getHeight() / 2);
+                    newTop += borderView.getMinimizedHeight();
                 }
             }
         }
@@ -422,43 +422,41 @@ public class DottedGridView extends FrameLayout {
         int newTop = 0;
         for (BorderView view : mViews) {
             if (view.getId() != borderView.getId() && isLeftAligned && view.isLeftAligned()) {
-                newTop += Math.round(view.getHeight() / 2);
+                newTop += view.getMinimizedHeight();
             }
             if (view.getId() != borderView.getId() && !isLeftAligned && view.isRightAligned()) {
-                newTop += Math.round(view.getHeight() / 2);
+                newTop += view.getMinimizedHeight();
             }
         }
-        newTop = newTop - Math.round(borderView.getHeight() / 4);
+        newTop = newTop - borderView.getTopBottomMargin();
         borderView.minimize(isLeftAligned, newLeft, newTop);
 
         // notify listener of minimize
         notifyUpdateMinimize(borderView);
         if (isLeftAligned) {
             // and rearrange the right side in case this view came from it
-            rearrangeRightContainer();
+            rearrangeRightContainer(getWidth() - mColumnSizeSide - borderView.getLeftRightMargin());
         } else {
             // and rearrange the left side in case this view came from it
-            rearrangeLeftContainer();
+            rearrangeLeftContainer(0 - borderView.getLeftRightMargin());
         }
     }
 
-    private void rearrangeLeftContainer() {
-        int newLeft = 0 - mColumnLeftPadding;
+    private void rearrangeLeftContainer(int newLeft) {
         rearrangeContainer(newLeft, true);
     }
 
     private void rearrangeLeftContainer(BorderView borderView) {
-        int newLeft = 0 - mColumnLeftPadding;
+        int newLeft = 0 - borderView.getLeftRightMargin();
         rearrangeContainer(borderView, newLeft, true);
     }
 
-    private void rearrangeRightContainer() {
-        int newLeft = getWidth() - mColumnRightPadding;
+    private void rearrangeRightContainer(int newLeft) {
         rearrangeContainer(newLeft, false);
     }
 
     private void rearrangeRightContainer(BorderView borderView) {
-        int newLeft = getWidth() - mColumnRightPadding;
+        int newLeft = getWidth() - mColumnSizeSide - borderView.getLeftRightMargin();
         rearrangeContainer(borderView, newLeft, false);
     }
 
