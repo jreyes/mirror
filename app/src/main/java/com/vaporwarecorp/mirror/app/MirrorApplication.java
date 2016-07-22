@@ -40,6 +40,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class MirrorApplication extends BaseApplication {
 // ------------------------------ FIELDS ------------------------------
 
+    private OkHttpClient mOkHttpClient;
     private RefWatcher mRefWatcher;
 
 // -------------------------- STATIC METHODS --------------------------
@@ -49,6 +50,10 @@ public class MirrorApplication extends BaseApplication {
     }
 
 // -------------------------- OTHER METHODS --------------------------
+
+    public OkHttpClient okHttpClient() {
+        return mOkHttpClient;
+    }
 
     @Override
     public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
@@ -67,6 +72,7 @@ public class MirrorApplication extends BaseApplication {
     protected void configureApplication() {
         initializeApplication();
         initializeTimber();
+        initializeOkHttp();
         initializeGlide();
         initializeLeakCanary();
 
@@ -90,14 +96,6 @@ public class MirrorApplication extends BaseApplication {
     }
 
     private void initializeGlide() {
-        Cache cache = new Cache(new File(getCacheDir(), "http"), 25 * 1024 * 1024);
-
-        OkHttpClient mOkHttpClient = new OkHttpClient();
-        mOkHttpClient.setCache(cache);
-        mOkHttpClient.setConnectTimeout(10, SECONDS);
-        mOkHttpClient.setReadTimeout(10, SECONDS);
-        mOkHttpClient.setWriteTimeout(10, SECONDS);
-
         Glide
                 .get(getApplicationContext())
                 .register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(mOkHttpClient));
@@ -105,6 +103,16 @@ public class MirrorApplication extends BaseApplication {
 
     private void initializeLeakCanary() {
         mRefWatcher = LeakCanary.install(this);
+    }
+
+    private void initializeOkHttp() {
+        Cache cache = new Cache(new File(getCacheDir(), "http"), 25 * 1024 * 1024);
+
+        mOkHttpClient = new OkHttpClient();
+        mOkHttpClient.setCache(cache);
+        mOkHttpClient.setConnectTimeout(10, SECONDS);
+        mOkHttpClient.setReadTimeout(10, SECONDS);
+        mOkHttpClient.setWriteTimeout(10, SECONDS);
     }
 
     private void initializeTimber() {

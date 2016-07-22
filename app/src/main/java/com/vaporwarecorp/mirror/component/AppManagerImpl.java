@@ -32,6 +32,7 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.AppToolkit;
+import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.app.LocalAssets;
@@ -150,6 +151,11 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     @Override
     public boolean isNetworkAvailable() {
         return NetworkUtil.isNetworkAvailable(mApplication.getApplicationContext());
+    }
+
+    @Override
+    public OkHttpClient okHttpClient() {
+        return mApplication.okHttpClient();
     }
 
     @Override

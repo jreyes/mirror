@@ -23,6 +23,7 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.StringRes;
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 
 import java.io.File;
@@ -124,6 +125,11 @@ public interface AppManager extends Manager {
      * @return A {@code boolean} value.
      */
     boolean isNetworkAvailable();
+
+    /**
+     * Returns an OkHttpClient instance
+     */
+    OkHttpClient okHttpClient();
 
     /**
      * Starts the specified {@link Activity}.
