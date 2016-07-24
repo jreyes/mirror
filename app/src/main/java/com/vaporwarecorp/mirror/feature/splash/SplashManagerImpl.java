@@ -42,13 +42,12 @@ public class SplashManagerImpl extends AbstractMirrorManager implements SplashMa
     private static final String PREF = SplashManager.class.getName();
     private static final String PREF_URLS = PREF + ".PREF_URLS";
     private static final List<String> PREF_URLS_DEFAULT = Arrays.asList(
-            "http://k39.kn3.net/taringa/2/0/4/3/3/4/63/piledro/A12.gif",
-            "http://i.giphy.com/rR2AWZ3ip77r2.gif",
-            "http://i.giphy.com/vncgdgPWLwGRi.gif",
-            "http://m.popkey.co/76b5e7/NlZaX.gif",
-            "http://i.giphy.com/3Ow6njmLYdchW.gif",
-            "http://i.giphy.com/tptFQ8QAJYYvu.gif",
-            "http://i.giphy.com/pDLNJlazF9ljG.gif"
+            "http://i.imgur.com/BraqUmV.jpg",
+            "http://i.imgur.com/z0hP3uU.jpg",
+            "http://i.imgur.com/Vo4uUFC.jpg",
+            "http://i.imgur.com/MCQQWYY.jpg",
+            "http://i.imgur.com/JmwDKRT.jpg",
+            "http://i.imgur.com/Y0Vvy0Y.jpg"
     );
 
     @Plug
