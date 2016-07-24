@@ -296,7 +296,7 @@ public class DottedGridView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        mColumnSizeSide = 250;
+        mColumnSizeSide = 300;
         mColumnSizeCenter = getWidth() - (mColumnSizeSide * 2);
         mScaleFactor = (float) mColumnSizeSide / mColumnSizeCenter;
     }

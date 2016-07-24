@@ -32,10 +32,12 @@ body {
     font-size: 2em;
     line-height: 1.5em;
     -webkit-font-smoothing: antialiased;
+    width: 100%;
 }
 
-.center {
+.container {
     text-align: center;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
