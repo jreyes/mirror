@@ -31,6 +31,8 @@ public interface ConfigurationManager extends Manager {
 
     void enablePresenter(Class<? extends Presenter> presenterClass);
 
+    int getInt(String preferenceKey, int defaultValue);
+
     String getString(String preferenceKey, String defaultValue);
 
     ArrayList<String> getStringList(String preferenceKey, List<String> defaultValue);
@@ -44,6 +46,8 @@ public interface ConfigurationManager extends Manager {
     void start();
 
     void stop();
+
+    void updateInt(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
 
     void updateString(String preferenceKey, String preferenceValue);
 

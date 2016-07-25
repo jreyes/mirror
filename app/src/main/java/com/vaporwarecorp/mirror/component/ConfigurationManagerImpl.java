@@ -27,6 +27,7 @@ import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.component.configuration.WebServer;
+import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,8 +71,19 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     }
 
     @Override
+    public int getInt(String preferenceKey, int defaultValue) {
+        return Prefs.getInt(preferenceKey, defaultValue);
+    }
+
+    @Override
     public String getString(String preferenceKey, String defaultValue) {
-        return Prefs.getString(preferenceKey, defaultValue);
+        try {
+            return Prefs.getString(preferenceKey, defaultValue);
+        } catch (ClassCastException e) {
+            Timber.e(e, "Error getting the value for %s", preferenceKey);
+            Prefs.remove(preferenceKey);
+            return defaultValue;
+        }
     }
 
     @Override
@@ -105,6 +117,11 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
         if (mServer.isAlive()) {
             mServer.stop();
         }
+    }
+
+    @Override
+    public void updateInt(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putInt(preferenceKey, j.intValue()));
     }
 
     @Override

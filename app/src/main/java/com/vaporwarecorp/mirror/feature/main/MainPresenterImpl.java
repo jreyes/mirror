@@ -31,7 +31,7 @@ import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.common.presenter.AbstractMirrorFeaturePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
-import com.vaporwarecorp.mirror.feature.dailyxkcd.DailyXKCDPresenter;
+import com.vaporwarecorp.mirror.feature.flickr.FlickrPresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.pocketsphinx.PocketSphinxManager;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
@@ -135,7 +135,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
 
     @Override
     public void test3() {
-        mFeature.showPresenter(DailyXKCDPresenter.class);
+        mFeature.showPresenter(FlickrPresenter.class);
     }
 
     @Override

@@ -15,21 +15,31 @@
  */
 package com.vaporwarecorp.mirror.util;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
+import timber.log.Timber;
 
 import java.io.IOException;
 
 public class JsonUtil {
 // ------------------------------ FIELDS ------------------------------
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper;
 
 // -------------------------- STATIC METHODS --------------------------
+
+    static {
+        objectMapper = new ObjectMapper();
+        objectMapper.getFactory().configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+        objectMapper.getFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+    }
 
     public static ArrayNode createArrayNode() {
         return objectMapper.createArrayNode();
@@ -76,8 +86,18 @@ public class JsonUtil {
     public static JsonNode toJsonNode(String jsonString) {
         try {
             return objectMapper.readTree(jsonString);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Timber.e(e, "Error parsing toJsonNode");
             return NullNode.getInstance();
+        }
+    }
+
+    public static String toString(JsonNode node) {
+        try {
+            return objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            Timber.e(e, "Error parsing toString");
+            return null;
         }
     }
 }

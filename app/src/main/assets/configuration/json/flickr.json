@@ -1,0 +1,44 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.flickr.FlickrManager",
+  "schema": {
+    "type": "object",
+    "title": "Flickr HTML Module",
+    "properties": {
+      "flickrId": {
+        "title": "The Flickr ID of the user whose photostream to pull images from",
+        "type": "string"
+      },
+      "animationSpeed": {
+        "title": "Animation Speed in minutes",
+        "type": "number"
+      },
+      "updateInterval": {
+        "title": "How long before refreshing image list in hours",
+        "type": "number"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Flickr HTML module configuration</h3>"
+    },
+    {
+      "key": "flickrId",
+      "type": "string"
+    },
+    {
+      "key": "animationSpeed",
+      "type": "number"
+    },
+    {
+      "key": "updateInterval",
+      "type": "number"
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

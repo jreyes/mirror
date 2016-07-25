@@ -23,10 +23,13 @@ import com.squareup.okhttp.Request;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
+import com.vaporwarecorp.mirror.util.JsonUtil;
 import fi.iki.elonen.NanoHTTPD;
 import timber.log.Timber;
 
 import java.io.IOException;
+
+import static fi.iki.elonen.NanoHTTPD.Response.Status.OK;
 
 @Plugin
 @Scope(MirrorAppScope.class)
@@ -73,6 +76,8 @@ public class ProxyManagerImpl extends AbstractMirrorManager implements ProxyMana
     }
 
     private class ProxyServer extends NanoHTTPD {
+        private static final String MIME_JSON = "application/json";
+
         ProxyServer() {
             super(34000);
         }
@@ -91,7 +96,8 @@ public class ProxyManagerImpl extends AbstractMirrorManager implements ProxyMana
                 Timber.d("loading url %s", url);
                 final Request request = new Request.Builder().url(url).build();
                 final String content = mAppManager.okHttpClient().newCall(request).execute().body().string();
-                final Response response = newFixedLengthResponse(content);
+                final String jsonContent = JsonUtil.toString(JsonUtil.toJsonNode(content));
+                final Response response = newFixedLengthResponse(OK, MIME_JSON, jsonContent);
                 response.addHeader("Access-Control-Allow-Origin", "*");
                 return response;
             } catch (IOException e) {
