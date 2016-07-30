@@ -52,11 +52,16 @@ work, much of the configurable aspect of this project would not be possible.
     - [ ] Livecoding command?
     - [ ] Reddit news
     - [ ] NPR news
+- [ ] Hot word support
+    - [ ] Add support for snowboy
+    - [ ] Support multiple hotword modules
 - [X] Update commands
+    - [ ] Web module
+        - [ ] Add a proxy running on port 34000
     - [X] Spotify command
-        - [ ] Add pause/play button
-        - [ ] Make it configurable
-        - [ ] Add a spotify client check (Remove WebView login)
+        - [X] Add pause/play button
+        - [X] Make it configurable
+        - [X] Add a spotify client check (Remove WebView login)
 
 ## Hardware
 
