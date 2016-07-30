@@ -17,11 +17,18 @@ package com.vaporwarecorp.mirror.component.configuration;
 
 import android.content.Context;
 import android.text.TextUtils;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storage;
 import com.vaporwarecorp.mirror.component.ConfigurationManager.Listener;
+import fi.iki.elonen.NanoFileUpload;
 import fi.iki.elonen.NanoHTTPD;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.io.IOUtils;
 import timber.log.Timber;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -43,6 +50,7 @@ public class WebServer extends NanoHTTPD {
     private List<Configuration> mConfigurations;
     private Context mContext;
     private Listener mListener;
+    private NanoFileUpload mUploader;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
@@ -50,6 +58,7 @@ public class WebServer extends NanoHTTPD {
         super(8080);
         mContext = context;
         mCache = new HashMap<>();
+        mUploader = new NanoFileUpload(new DiskFileItemFactory());
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -57,7 +66,17 @@ public class WebServer extends NanoHTTPD {
     @Override
     public Response serve(IHTTPSession session) {
         final String uri = session.getUri().substring(1);
-        if (Method.HEAD.equals(session.getMethod())) {
+        if (NanoFileUpload.isMultipartContent(session)) {
+            try {
+                List<FileItem> files = mUploader.parseRequest(session);
+                if (files != null && files.size() > 0) {
+                    return newFixedLengthResponse(saveFileItemToDisk(files.get(0)));
+                }
+            } catch (FileUploadException e) {
+                Timber.e(e, e.getMessage());
+                return getInternalErrorResponse(e.getMessage());
+            }
+        } else if (Method.HEAD.equals(session.getMethod())) {
             if (mListener != null) {
                 mListener.onExit();
             }
@@ -105,6 +124,22 @@ public class WebServer extends NanoHTTPD {
         super.stop();
     }
 
+    private File getFile(FileItem fileItem) {
+        Storage storage;
+        if (SimpleStorage.isExternalStorageWritable()) {
+            storage = SimpleStorage.getExternalStorage();
+        } else {
+            storage = SimpleStorage.getInternalStorage(mContext);
+        }
+        storage.createDirectory("configuration/uploads");
+        storage.createFile("configuration/uploads", fileItem.getName(), new byte[0]);
+        return storage.getFile("configuration/uploads", fileItem.getName());
+    }
+
+    private Response getInternalErrorResponse(String message) {
+        return newFixedLengthResponse(INTERNAL_ERROR, MIME_PLAINTEXT, "Internal error " + message);
+    }
+
     private Response getNotFoundResponse() {
         return newFixedLengthResponse(NOT_FOUND, MIME_PLAINTEXT, "Error 404, file not found.");
     }
@@ -133,6 +168,19 @@ public class WebServer extends NanoHTTPD {
             return content;
         } catch (IOException e) {
             Timber.e(e, "Can't read file %s", filePath);
+            return "";
+        }
+    }
+
+    private String saveFileItemToDisk(FileItem fileItem) {
+        Timber.d("Received file %s", fileItem.getName());
+        try {
+            File file = getFile(fileItem);
+            Timber.d("writing file %s", file.getAbsolutePath());
+            fileItem.write(getFile(fileItem));
+            return file.getAbsolutePath();
+        } catch (Exception e) {
+            Timber.e(e, e.getMessage());
             return "";
         }
     }

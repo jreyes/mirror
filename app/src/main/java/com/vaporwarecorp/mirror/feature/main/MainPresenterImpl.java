@@ -75,6 +75,9 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     PluginFeatureManager mFeatureManager;
     @Plug
     PocketSphinxManager mPocketSphinxManager;
+
+    @Plug
+    SnowboyManager mSnowboyManager;
     @Plug
     SoundManager mSoundManager;
     @Plug
@@ -104,7 +107,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     @Override
     public void removeView(Class<? extends Presenter> presenterClass) {
         mFeature.hidePresenter(presenterClass);
-        debounce(l -> startListening(), 5);
+        startListening();
     }
 
     @Override
@@ -114,13 +117,12 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
         }
     }
 
-    @Plug
-    SnowboyManager mSnowboyManager;
-
     @Override
     public void startListening() {
-        mSnowboyManager.onFeatureResume();
-        mPocketSphinxManager.onFeatureResume();
+        debounce(l -> {
+            mSnowboyManager.onFeatureResume();
+            mPocketSphinxManager.onFeatureResume();
+        }, 3);
     }
 
     @Override

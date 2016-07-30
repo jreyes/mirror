@@ -45,6 +45,10 @@ public class JsonUtil {
         return objectMapper.createArrayNode();
     }
 
+    public static ObjectNode createBooleanNode(String key, boolean value) {
+        return createObjectNode().put(key, value);
+    }
+
     public static JsonNode createJsonNode(String key, JsonNode value) {
         return createObjectNode().set(key, value);
     }

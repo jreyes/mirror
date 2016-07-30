@@ -16,7 +16,7 @@
 'use strict';
 
 angular
-    .module('Mirror', ['schemaForm'])
+    .module('Mirror', ['ngSanitize', 'schemaForm', 'pascalprecht.translate', 'ngSchemaFormFile'])
     .controller('MirrorController', function ($scope, $http) {
 
         $scope.decorator = 'bootstrap-decorator';
@@ -72,4 +72,21 @@ angular
                     });
             }
         };
-    });
+    })
+    .config(['$translateProvider', function ($translateProvider) {
+        // Simply register translation table as object hash
+        $translateProvider.translations('en', {
+            'modules.upload.dndNotSupported': 'Drag n drop not supported by your browser',
+            'modules.attribute.fields.required.caption': 'Required',
+            'modules.upload.descriptionSinglefile': 'Drop your file here',
+            'modules.upload.descriptionMultifile': 'Drop your file(s) here',
+            'buttons.add': 'Open file browser',
+            'modules.upload.field.filename': 'Filename',
+            'modules.upload.field.preview': 'Preview',
+            'modules.upload.multiFileUpload': 'Multifile upload',
+            'modules.upload.field.progress': 'Progress',
+            'buttons.upload': 'Upload'
+        });
+        $translateProvider.preferredLanguage('en');
+        $translateProvider.useSanitizeValueStrategy('sanitize');
+    }]);

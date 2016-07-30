@@ -10,6 +10,10 @@
       "hotword": {
         "title": "Hot Word",
         "type": "string"
+      },
+      "enabled": {
+        "title": "Enable PocketSphinx?",
+        "type": "boolean"
       }
     }
   },
@@ -21,6 +25,10 @@
     {
       "key": "hotWord",
       "type": "string"
+    },
+    {
+      "key": "enabled",
+      "type": "checkbox"
     },
     {
       "type": "submit",

@@ -71,6 +71,28 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     }
 
     @Override
+    public boolean getBoolean(String preferenceKey, boolean defaultValue) {
+        try {
+            return Prefs.getBoolean(preferenceKey, defaultValue);
+        } catch (ClassCastException e) {
+            Timber.e(e, "Error getting the value for %s", preferenceKey);
+            Prefs.remove(preferenceKey);
+            return defaultValue;
+        }
+    }
+
+    @Override
+    public float getFloat(String preferenceKey, float defaultValue) {
+        try {
+            return Prefs.getFloat(preferenceKey, defaultValue);
+        } catch (ClassCastException e) {
+            Timber.e(e, "Error getting the value for %s", preferenceKey);
+            Prefs.remove(preferenceKey);
+            return defaultValue;
+        }
+    }
+
+    @Override
     public int getInt(String preferenceKey, int defaultValue) {
         return Prefs.getInt(preferenceKey, defaultValue);
     }
@@ -117,6 +139,16 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
         if (mServer.isAlive()) {
             mServer.stop();
         }
+    }
+
+    @Override
+    public void updateBoolean(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putBoolean(preferenceKey, j.booleanValue()));
+    }
+
+    @Override
+    public void updateFloat(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putFloat(preferenceKey, j.floatValue()));
     }
 
     @Override

@@ -16,8 +16,9 @@
 package com.vaporwarecorp.mirror.feature.snowboy;
 
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 
 @PlugInterface
-public interface SnowboyManager extends MirrorManager {
+public interface SnowboyManager extends MirrorManager, Configuration {
 }

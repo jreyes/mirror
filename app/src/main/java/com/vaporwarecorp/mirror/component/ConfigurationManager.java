@@ -31,6 +31,10 @@ public interface ConfigurationManager extends Manager {
 
     void enablePresenter(Class<? extends Presenter> presenterClass);
 
+    boolean getBoolean(String preferenceKey, boolean defaultValue);
+
+    float getFloat(String preferenceKey, float defaultValue);
+
     int getInt(String preferenceKey, int defaultValue);
 
     String getString(String preferenceKey, String defaultValue);
@@ -46,6 +50,10 @@ public interface ConfigurationManager extends Manager {
     void start();
 
     void stop();
+
+    void updateBoolean(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
+
+    void updateFloat(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
 
     void updateInt(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
 

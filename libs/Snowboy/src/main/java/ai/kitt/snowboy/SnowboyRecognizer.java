@@ -52,8 +52,6 @@ public class SnowboyRecognizer {
         mainHandler = new Handler(Looper.getMainLooper());
 
         snowboyDetector = new SnowboyDetect(resourcePath, modelPath);
-        snowboyDetector.SetSensitivity("0.45");
-        snowboyDetector.SetAudioGain(2F);
 
         bufferSize = Math.round(snowboyDetector.SampleRate() * BUFFER_SIZE_SECONDS);
 
@@ -78,6 +76,14 @@ public class SnowboyRecognizer {
 
     public boolean isListening() {
         return recognizerThread != null && recognizerThread.isAlive();
+    }
+
+    public void setAudioGain(float audioGain) {
+        snowboyDetector.SetAudioGain(audioGain);
+    }
+
+    public void setSensitivity(float sensitivity) {
+        snowboyDetector.SetSensitivity(String.valueOf(sensitivity));
     }
 
     public boolean startListening() {

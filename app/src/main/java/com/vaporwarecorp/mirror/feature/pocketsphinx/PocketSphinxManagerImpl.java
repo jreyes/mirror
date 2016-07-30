@@ -48,6 +48,8 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 
     private static final String KWS_SEARCH = "COMMAND";
     private static final String PREF = PocketSphinxManager.class.getName();
+    private static final String PREF_ENABLED = PREF + ".PREF_ENABLED";
+    private static final boolean PREF_ENABLED_DEFAULT = true;
     private static final String PREF_HOT_WORD = PREF + ".PREF_HOT_WORD";
     private static final String PREF_HOT_WORD_DEFAULT = "computer";
 
@@ -58,6 +60,7 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
     @Plug
     EventManager mEventManager;
 
+    private boolean mEnabled;
     private String mHotWord;
     private SpeechRecognizer mRecognizer;
 
@@ -73,12 +76,13 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 
     @Override
     public String getJsonValues() {
-        return createTextNode("hotWord", mHotWord).toString();
+        return createTextNode("hotWord", mHotWord).put("enabled", mEnabled).toString();
     }
 
     @Override
     public void updateConfiguration(JsonNode jsonNode) {
         mConfigurationManager.updateString(PREF_HOT_WORD, jsonNode, "hotWord");
+        mConfigurationManager.updateBoolean(PREF_ENABLED, jsonNode, "enabled");
         loadConfiguration();
     }
 
@@ -105,6 +109,10 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 
     @Override
     public void onFeatureStart() {
+        if (!mEnabled) {
+            return;
+        }
+
         try {
             File assetsDir = new Assets(mAppManager.getAppContext()).syncAssets();
             mRecognizer = defaultSetup()
@@ -192,5 +200,6 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
      */
     private void loadConfiguration() {
         mHotWord = mConfigurationManager.getString(PREF_HOT_WORD, PREF_HOT_WORD_DEFAULT);
+        mEnabled = mConfigurationManager.getBoolean(PREF_ENABLED, PREF_ENABLED_DEFAULT);
     }
 }

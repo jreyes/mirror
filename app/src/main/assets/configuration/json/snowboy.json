@@ -1,0 +1,72 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.snowboy.SnowboyManager",
+  "schema": {
+    "type": "object",
+    "title": "Snowboy Configuration",
+    "properties": {
+      "pmdl": {
+        "title": "Personal Model",
+        "type": "array",
+        "format": "singlefile",
+        "x-schema-form": {
+          "type": "array"
+        },
+        "pattern": {
+          "mimeType": ".pmdl",
+          "validationMessage": "Wrong file type: "
+        },
+        "maxSize": {
+          "maximum": "2MB",
+          "validationMessage": "Exceeded allowed file size: ",
+          "validationMessage2": "Current file size: "
+        },
+        "maxItems": {
+          "validationMessage": "Only a single personal model is allowed."
+        },
+        "minItems": {
+          "validationMessage": "You have to upload at least one personal model."
+        }
+      },
+      "sensitivity": {
+        "title": "Sensitivity",
+        "type": "number"
+      },
+      "audioGain": {
+        "title": "Audio gain",
+        "type": "number"
+      },
+      "enabled": {
+        "title": "Enable Snowboy?",
+        "type": "boolean"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Snowboy Configuration</h3><p>Enable and upload your personal model file that can be obtained from <a href=\"https://snowboy.kitt.ai\">snowboy.kitt.ai</a></p>"
+    },
+    {
+      "key": "pmdl",
+      "type": "nwpFileUpload",
+      "endpoint": "/upload"
+    },
+    {
+      "key": "sensitivity",
+      "type": "number"
+    },
+    {
+      "key": "audioGain",
+      "type": "number"
+    },
+    {
+      "key": "enabled",
+      "type": "checkbox"
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}
