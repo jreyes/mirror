@@ -144,6 +144,8 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-io:commons-io:2.4'
 
+    compile project(':libs:snowboy')
+
     testCompile "junit:junit:$JUNIT_VERSION"
 
     debugCompile "com.squareup.leakcanary:leakcanary-android:$LEAKCANARY_VERSION"

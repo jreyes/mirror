@@ -1,1 +1,2 @@
+include ':libs:snowboy'
 include ':app'
