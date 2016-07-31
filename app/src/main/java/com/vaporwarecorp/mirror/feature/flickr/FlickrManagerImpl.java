@@ -36,18 +36,18 @@ public class FlickrManagerImpl extends AbstractMirrorManager implements FlickrMa
 
     private static final String PREF = FlickrManager.class.getName();
     private static final String PREF_ANIMATION_SPEED = PREF + ".PREF_ANIMATION_SPEED";
-    private static final String PREF_ANIMATION_SPEED_DEFAULT = "1";
+    private static final int PREF_ANIMATION_SPEED_DEFAULT = 1;
     private static final String PREF_FLICKR_ID = PREF + ".PREF_FLICKR_ID";
     private static final String PREF_FLICKR_ID_DEFAULT = "";
     private static final String PREF_UPDATE_INTERVAL = PREF + ".PREF_UPDATE_INTERVAL";
-    private static final String PREF_UPDATE_INTERVAL_DEFAULT = "10";
+    private static final int PREF_UPDATE_INTERVAL_DEFAULT = 10;
 
     @Plug
     ConfigurationManager mConfigurationManager;
 
-    private String mAnimationSpeed;
+    private int mAnimationSpeed;
     private String mFlickrId;
-    private String mUpdateInterval;
+    private int mUpdateInterval;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -70,8 +70,8 @@ public class FlickrManagerImpl extends AbstractMirrorManager implements FlickrMa
     @Override
     public void updateConfiguration(JsonNode jsonNode) {
         mConfigurationManager.updateString(PREF_FLICKR_ID, jsonNode, "flickrId");
-        mConfigurationManager.updateString(PREF_ANIMATION_SPEED, jsonNode, "animationSpeed");
-        mConfigurationManager.updateString(PREF_UPDATE_INTERVAL, jsonNode, "updateInterval");
+        mConfigurationManager.updateInt(PREF_ANIMATION_SPEED, jsonNode, "animationSpeed");
+        mConfigurationManager.updateInt(PREF_UPDATE_INTERVAL, jsonNode, "updateInterval");
         loadConfiguration();
     }
 
@@ -87,8 +87,8 @@ public class FlickrManagerImpl extends AbstractMirrorManager implements FlickrMa
                 .appendPath("flickr")
                 .appendPath("flickr.html")
                 .appendQueryParameter("flickrId", mFlickrId)
-                .appendQueryParameter("animationSpeed", mAnimationSpeed)
-                .appendQueryParameter("updateInterval", mUpdateInterval)
+                .appendQueryParameter("animationSpeed", String.valueOf(mAnimationSpeed))
+                .appendQueryParameter("updateInterval", String.valueOf(mUpdateInterval))
                 .build()
                 .toString();
     }
@@ -103,7 +103,7 @@ public class FlickrManagerImpl extends AbstractMirrorManager implements FlickrMa
 
     private void loadConfiguration() {
         mFlickrId = mConfigurationManager.getString(PREF_FLICKR_ID, PREF_FLICKR_ID_DEFAULT);
-        mAnimationSpeed = mConfigurationManager.getString(PREF_ANIMATION_SPEED, PREF_ANIMATION_SPEED_DEFAULT);
-        mUpdateInterval = mConfigurationManager.getString(PREF_UPDATE_INTERVAL, PREF_UPDATE_INTERVAL_DEFAULT);
+        mAnimationSpeed = mConfigurationManager.getInt(PREF_ANIMATION_SPEED, PREF_ANIMATION_SPEED_DEFAULT);
+        mUpdateInterval = mConfigurationManager.getInt(PREF_UPDATE_INTERVAL, PREF_UPDATE_INTERVAL_DEFAULT);
     }
 }
