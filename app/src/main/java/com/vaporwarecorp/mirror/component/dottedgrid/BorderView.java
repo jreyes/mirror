@@ -112,7 +112,7 @@ class BorderView extends FrameLayout {
         setLayoutParams(params);
 
         // set padding
-        final int borderPadding = Math.round(convertDpToPixel(4, getContext()));
+        final int borderPadding = Math.round(convertDpToPixel(16 * mScaleFactor, getContext()));
         setPadding(borderPadding, borderPadding, borderPadding, borderPadding);
 
         // scale
