@@ -85,14 +85,8 @@ public abstract class VideoPlayerFragment<T_Presenter extends Presenter>
     }
 
     @Override
-    public void onDestroy() {
-        mVideoView.stopPlayback();
-        super.onDestroy();
-    }
-
-    @Override
     public void onPause() {
-        mVideoView.pause();
+        mVideoView.stopPlayback();
         super.onPause();
     }
 
