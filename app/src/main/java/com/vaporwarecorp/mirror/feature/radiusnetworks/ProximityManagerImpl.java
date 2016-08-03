@@ -203,7 +203,7 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
     @Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressWarnings("unused")
     public void onEvent(ApplicationEvent event) {
-        if (mManager == null) {
+        if (mManager != null) {
             mEventManager.post(new UserInRangeEvent());
             return;
         }
