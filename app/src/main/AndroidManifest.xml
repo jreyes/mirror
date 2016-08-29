@@ -90,6 +90,43 @@
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <!-- required so we can get back the result of our authentication //-->
+        <activity
+            android:name="com.amazon.identity.auth.device.authorization.AuthorizationActivity"
+            android:allowTaskReparenting="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <!-- host should be our application package //-->
+                <data
+                    android:host="com.vaporwarecorp.mirror"
+                    android:scheme="amzn"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".feature.alexa.AlexaLoginActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="adjustPan|stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="https"
+                    android:host="www.amazon.com"
+                    android:pathPattern="/ap/oa"/>
+            </intent-filter>
+        </activity>
 
         <receiver android:name=".receiver.BootReceiver">
             <intent-filter>
@@ -104,6 +141,8 @@
         <receiver
             android:name="com.radiusnetworks.proximity.SyncOnEventBroadcastReceiver"
             tools:node="remove"/>
+
+        <service android:name=".service.ConfigurationService"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

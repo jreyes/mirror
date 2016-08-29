@@ -29,6 +29,7 @@ import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.HotWordEvent;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
+import timber.log.Timber;
 
 import java.io.IOException;
 
@@ -46,7 +47,7 @@ public class SnowboyManagerImpl extends AbstractMirrorManager implements Snowboy
     private static final String PREF_ENABLED = PREF + ".PREF_ENABLED";
     private static final boolean PREF_ENABLED_DEFAULT = false;
     private static final String PREF_MODEL_PATH = PREF + ".PREF_MODEL_PATH";
-    private static final String PREF_MODEL_PATH_DEFAULT = "snowboy/computer.pmdl";
+    private static final String PREF_MODEL_PATH_DEFAULT = "snowboy/alexa.pmdl";
     private static final String PREF_SENSITIVITY = PREF + ".PREF_SENSITIVITY";
     private static final float PREF_SENSITIVITY_DEFAULT = 0.45F;
     private static final String RESOURCE_PATH = "snowboy/common.res";
@@ -119,8 +120,11 @@ public class SnowboyManagerImpl extends AbstractMirrorManager implements Snowboy
         }
 
         final String resourcePath = mAppManager.getLocalAssetPath(RESOURCE_PATH);
+        final String modelPath = mAppManager.getLocalAssetPath(PREF_MODEL_PATH_DEFAULT);
+        Timber.d("resourcePath %s", resourcePath);
+        Timber.d("modelPath %s", modelPath);
         try {
-            mRecognizer = new SnowboyRecognizer(resourcePath, mModelPath);
+            mRecognizer = new SnowboyRecognizer(resourcePath, modelPath);
             mRecognizer.setSensitivity(mSensitivity);
             mRecognizer.setAudioGain(mAudioGain);
             mRecognizer.addListener(this);

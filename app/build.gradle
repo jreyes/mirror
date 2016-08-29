@@ -3,17 +3,15 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    def globalConfiguration = rootProject.extensions.getByName("ext")
-
-    compileSdkVersion globalConfiguration.getAt("androidCompileSdkVersion")
-    buildToolsVersion globalConfiguration.getAt("androidBuildToolsVersion")
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.vaporwarecorp.mirror"
-        minSdkVersion globalConfiguration.getAt("androidMinSdkVersion")
-        targetSdkVersion globalConfiguration.getAt("androidTargetSdkVersion")
-        versionCode globalConfiguration.getAt("androidVersionCode")
-        versionName globalConfiguration.getAt("androidVersionName")
+        minSdkVersion 21
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0.0"
         multiDexEnabled true
     }
     compileOptions {
@@ -53,6 +51,8 @@ android {
         }
     }
     packagingOptions {
+        //exclude 'META-INF/maven/commons-fileupload/commons-fileupload/pom.xml'
+        //exclude 'META-INF/maven/commons-fileupload/commons-fileupload/pom.properties'
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
@@ -71,14 +71,14 @@ dependencies {
     final EVENTBUS_VERSION = '3.0.0'
     final HOUNDIFY_VERSION = '0.2.15'
     final LEAKCANARY_VERSION = '1.4-beta1'
-    final PLAY_VERSION = '9.2.1'
+    final PLAY_VERSION = '9.4.0'
     final PROXIMITY_KIT_VERSION = '0.10.2'
     final MULTIDEX_VERSION = '1.0.1'
     final RETROFIT_VERSION = '2.0.2'
     final ROBOPUPU_VERSION = '0.5.0'
     final SPOTIFY_VERSION = '1.0.0-beta12'
     final SUPPORT_LIBRARY_VERSION = '24.1.1'
-    final NANOHTTP_VERSION = '2.3.0'
+    final NANOHTTP_VERSION = '2.3.1'
     final TIMBER_VERSION = '4.1.1'
     final JUNIT_VERSION = '4.12'
 
@@ -104,6 +104,7 @@ dependencies {
     compile "org.nanohttpd:nanohttpd:$NANOHTTP_VERSION"
     compile("org.nanohttpd:nanohttpd-apache-fileupload:$NANOHTTP_VERSION") {
         exclude group: 'org.apache.httpcomponents'
+        exclude group: 'commons-fileupload'
     }
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.sromku:simple-storage:1.2.0'
@@ -149,6 +150,14 @@ dependencies {
 
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-io:commons-io:2.4'
+
+    compile('com.willblaschko.android.alexa:AlexaAndroid:2.1.4-alpha') {
+        exclude group: 'commons-fileupload'
+    }
+    compile 'com.github.Kaljurand:speechutils:3cca49c288@aar'
+    compile 'com.amazonaws:aws-android-sdk-cognito:2.3.0'
+    compile 'com.amazonaws:aws-android-sdk-iot:2.3.0'
+    compile 'com.jackpocket:pulse-indicator:1.0.4'
 
     compile project(':libs:snowboy')
 

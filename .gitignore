@@ -1,6 +1,6 @@
-*.iml
 *.md5
 .gradle
 local.properties
 /.idea
 /build
+*.iml

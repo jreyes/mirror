@@ -25,8 +25,6 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
-import com.vaporwarecorp.mirror.component.configuration.WebServer;
 import timber.log.Timber;
 
 import java.util.ArrayList;
@@ -43,15 +41,12 @@ import static solid.stream.Stream.stream;
 public class ConfigurationManagerImpl extends AbstractManager implements ConfigurationManager {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String PREFERENCE_CONFIGURED = "CONFIGURED";
-
     @Plug
     AppManager mAppManager;
     @Plug
     EventManager mEventManager;
 
     private Set<Class<? extends Presenter>> mDisabledPresenters;
-    private WebServer mServer;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -114,46 +109,31 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     }
 
     @Override
-    public void hasBeenSetup() {
-        Prefs.putBoolean(PREFERENCE_CONFIGURED, true);
-    }
-
-    @Override
     public boolean isPresenterEnabled(Class<? extends Presenter> presenterClass) {
         return !mDisabledPresenters.contains(presenterClass);
     }
 
     @Override
-    public boolean needsInitialSetup() {
-        return !Prefs.getBoolean(PREFERENCE_CONFIGURED, false);
-    }
-
-    @Override
     public void start() {
-        mServer.start(PluginBus.getPlugs(Configuration.class), () -> mAppManager.startMainFeature());
     }
 
     @Override
     public void stop() {
-        hasBeenSetup();
-        if (mServer.isAlive()) {
-            mServer.stop();
-        }
     }
 
     @Override
     public void updateBoolean(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putBoolean(preferenceKey, j.booleanValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putBoolean(preferenceKey, j.booleanValue()));
     }
 
     @Override
     public void updateFloat(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putFloat(preferenceKey, j.floatValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putFloat(preferenceKey, j.floatValue()));
     }
 
     @Override
     public void updateInt(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach((JsonNode j) -> Prefs.putInt(preferenceKey, j.intValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putInt(preferenceKey, j.intValue()));
     }
 
     @Override
@@ -168,14 +148,13 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
     @Override
     public void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey))
-                .forEach((JsonNode j) -> updateString(preferenceKey, j.textValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> updateString(preferenceKey, j.textValue()));
     }
 
     @Override
     public void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
         final Set<String> values = new HashSet<>();
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(u -> values.add(u.textValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> values.add(j.textValue()));
         Prefs.putStringSet(preferenceKey, values);
     }
 
@@ -185,7 +164,7 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     public void onPlugged(PluginBus bus) {
         super.onPlugged(bus);
         mDisabledPresenters = new HashSet<>();
-        mServer = new WebServer(mAppManager.getAppContext());
+        //mServer = new WebServer(mAppManager.getAppContext());
     }
 
     @Override

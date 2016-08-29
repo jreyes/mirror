@@ -19,7 +19,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import com.sromku.simple.storage.SimpleStorage;
 import com.sromku.simple.storage.Storage;
-import com.vaporwarecorp.mirror.component.ConfigurationManager.Listener;
 import fi.iki.elonen.NanoFileUpload;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.fileupload.FileItem;
@@ -49,7 +48,6 @@ public class WebServer extends NanoHTTPD {
     private Map<String, String> mCache;
     private List<Configuration> mConfigurations;
     private Context mContext;
-    private Listener mListener;
     private NanoFileUpload mUploader;
 
 // --------------------------- CONSTRUCTORS ---------------------------
@@ -75,10 +73,6 @@ public class WebServer extends NanoHTTPD {
             } catch (FileUploadException e) {
                 Timber.e(e, e.getMessage());
                 return getInternalErrorResponse(e.getMessage());
-            }
-        } else if (Method.HEAD.equals(session.getMethod())) {
-            if (mListener != null) {
-                mListener.onExit();
             }
         } else if (Method.POST.equals(session.getMethod())) {
             for (Configuration configuration : mConfigurations) {
@@ -107,20 +101,17 @@ public class WebServer extends NanoHTTPD {
         return newFixedLengthResponse(read("configuration/index.html"));
     }
 
-    public void start(List<Configuration> configurations, Listener listener) {
+    public void start(List<Configuration> configurations) {
         try {
             mConfigurations = configurations;
-            mListener = listener;
             super.start();
         } catch (IOException ignored) {
             mConfigurations.clear();
-            mListener = null;
         }
     }
 
     public void stop() {
         mConfigurations.clear();
-        mListener = null;
         super.stop();
     }
 

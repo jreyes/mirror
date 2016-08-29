@@ -20,6 +20,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import timber.log.Timber;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -58,6 +59,7 @@ public class LocationUtil {
     public static boolean isLocationAvailable(final Context context) {
         final LocationManager manager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         if (manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Timber.d("NETWORK_PROVIDER is enabled");
             manager.removeUpdates(LOCATION_LISTENER);
             if (manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) == null) {
                 manager.requestLocationUpdates(
@@ -69,6 +71,8 @@ public class LocationUtil {
             } else {
                 return true;
             }
+        } else {
+            Timber.e("NETWORK_PROVIDER is disabled");
         }
         return false;
     }

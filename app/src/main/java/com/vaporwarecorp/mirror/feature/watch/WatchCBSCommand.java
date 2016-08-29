@@ -27,11 +27,13 @@ import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 
 @Plugin
-public class WatchCBSCommand extends AbstractHoundifyCommand implements HoundifyCommand {
+public class WatchCBSCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
 // ------------------------------ FIELDS ------------------------------
 
+    private static final String ALEXA_COMMAND_EXPRESSION = "watch c. b. s.";
     private static final String COMMAND_EXPRESSION = "((\"watch\"|\"display\").(\"cbs\"|\"c b s\"|\"c. b. s.\"))";
     private static final String COMMAND_INTENT = "WatchCBS";
     private static final String COMMAND_RESPONSE = "Ok, displaying CBS";
@@ -52,12 +54,24 @@ public class WatchCBSCommand extends AbstractHoundifyCommand implements Houndify
 // ------------------------ INTERFACE METHODS ------------------------
 
 
+// --------------------- Interface AlexaCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mEventManager.post(new SpeechEvent(command));
+        mFeature.showPresenter(WatchCBSPresenter.class);
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return ALEXA_COMMAND_EXPRESSION.equals(command);
+    }
+
 // --------------------- Interface Command ---------------------
 
     @Override
     public void executeCommand(CommandResult result) {
-        mEventManager.post(new SpeechEvent(result.getSpokenResponseLong()));
-        mFeature.showPresenter(WatchCBSPresenter.class);
+        executeCommand(result.getSpokenResponseLong());
     }
 
     @Override

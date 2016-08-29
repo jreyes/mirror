@@ -41,11 +41,7 @@ public interface ConfigurationManager extends Manager {
 
     ArrayList<String> getStringList(String preferenceKey, List<String> defaultValue);
 
-    void hasBeenSetup();
-
     boolean isPresenterEnabled(Class<? extends Presenter> presenterClass);
-
-    boolean needsInitialSetup();
 
     void start();
 
@@ -62,8 +58,4 @@ public interface ConfigurationManager extends Manager {
     void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
 
     void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey);
-
-    interface Listener {
-        void onExit();
-    }
 }
