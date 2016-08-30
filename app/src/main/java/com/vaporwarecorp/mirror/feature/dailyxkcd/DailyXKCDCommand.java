@@ -22,21 +22,27 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.command.AbstractHoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(Command.class)
-public class DailyXKCDCommand extends AbstractHoundifyCommand implements HoundifyCommand {
+public class DailyXKCDCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
 // ------------------------------ FIELDS ------------------------------
 
+    private static final String ALEXA_COMMAND_EXPRESSION = "xkcd";
     private static final String COMMAND_EXPRESSION = "((\"show\"|\"display\").(\"xkcd\"|\"x k c d\"|\"x. k. c. d.\"))";
     private static final String COMMAND_INTENT = "DailyXKCD";
     private static final String COMMAND_RESPONSE = "Displaying the daily XKCD";
 
+    @Plug
+    EventManager mEventManager;
     @Plug
     MainFeature mFeature;
 
@@ -49,10 +55,24 @@ public class DailyXKCDCommand extends AbstractHoundifyCommand implements Houndif
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface Command ---------------------
+// --------------------- Interface AlexaCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mEventManager.post(new SpeechEvent(""));
+        mFeature.showPresenter(DailyXKCDPresenter.class);
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return ALEXA_COMMAND_EXPRESSION.equals(command);
+    }
+
+// --------------------- Interface HoundifyCommand ---------------------
 
     @Override
     public void executeCommand(CommandResult result) {
+        mEventManager.post(new SpeechEvent(""));
         mFeature.showPresenter(DailyXKCDPresenter.class);
     }
 

@@ -110,9 +110,9 @@ public class MirrorApplication extends BaseApplication {
 
         mOkHttpClient = new OkHttpClient();
         mOkHttpClient.setCache(cache);
-        mOkHttpClient.setConnectTimeout(10, SECONDS);
-        mOkHttpClient.setReadTimeout(10, SECONDS);
-        mOkHttpClient.setWriteTimeout(10, SECONDS);
+        mOkHttpClient.setConnectTimeout(30, SECONDS);
+        mOkHttpClient.setReadTimeout(30, SECONDS);
+        mOkHttpClient.setWriteTimeout(30, SECONDS);
     }
 
     private void initializeTimber() {

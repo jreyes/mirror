@@ -1,7 +1,13 @@
 package com.vaporwarecorp.mirror.feature.houndify;
 
-/**
- * Created by Johann on 8/14/2016.
- */
-public class HoundifyCommandManager {
+import android.content.Intent;
+import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.CommandManager;
+import com.vaporwarecorp.mirror.component.configuration.Configuration;
+
+@PlugInterface
+public interface HoundifyCommandManager extends CommandManager, Configuration {
+// -------------------------- OTHER METHODS --------------------------
+
+    void processCommand(int resultCode, Intent data);
 }

@@ -30,6 +30,8 @@ public interface SpotifyManager extends MirrorManager, Configuration {
 
 // -------------------------- OTHER METHODS --------------------------
 
+    void getNewReleases(NewReleasesCallback callback);
+
     void pausePlaying();
 
     void play(List<String> trackUris, Listener listener);
@@ -40,5 +42,9 @@ public interface SpotifyManager extends MirrorManager, Configuration {
         void onTrackUpdate(Track track);
 
         void onPlaylistEnd();
+    }
+
+    interface NewReleasesCallback {
+        void onComplete(List<String> trackUris);
     }
 }

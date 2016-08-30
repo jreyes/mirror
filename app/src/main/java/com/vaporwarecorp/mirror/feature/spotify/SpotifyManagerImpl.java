@@ -39,11 +39,16 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
+import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
+import java.util.Collections;
 import java.util.List;
 
 import static android.media.session.MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
@@ -157,7 +162,7 @@ public class SpotifyManagerImpl
                         if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                             mConfigurationManager.enablePresenter(SpotifyPresenter.class);
                             mPlayerConfig = new Config(mAppManager.getAppContext(), response.getAccessToken(), mClientId);
-                            mService = new SpotifyApi().getService();
+                            mService = createSpotifyService(response.getAccessToken());
                         } else {
                             disable();
                         }
@@ -247,6 +252,20 @@ public class SpotifyManagerImpl
 // --------------------- Interface SpotifyManager ---------------------
 
     @Override
+    public void getNewReleases(NewReleasesCallback callback) {
+        Observable.create((Observable.OnSubscribe<List<String>>) subscriber ->
+                subscriber.onNext(stream(mService.getNewReleases().albums.items)
+                        .flatMap(a -> mService.getAlbum(a.id).tracks.items)
+                        .map(t -> t.uri)
+                        .collect(toList())
+                        .subList(0, 10)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .unsubscribeOn(Schedulers.io())
+                .subscribe(callback::onComplete, t -> callback.onComplete(Collections.emptyList()));
+    }
+
+    @Override
     public void pausePlaying() {
         if (mPlayer != null) {
             mPlayer.pause();
@@ -284,6 +303,14 @@ public class SpotifyManagerImpl
         if (mPlayer != null) {
             mPlayer.resume();
         }
+    }
+
+    private SpotifyService createSpotifyService(String accessToken) {
+        return new RestAdapter.Builder()
+                .setEndpoint(SpotifyApi.SPOTIFY_WEB_API_ENDPOINT)
+                .setRequestInterceptor(r -> r.addHeader("Authorization", "Bearer " + accessToken))
+                .build()
+                .create(SpotifyService.class);
     }
 
     private void disable() {

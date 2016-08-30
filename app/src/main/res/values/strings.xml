@@ -38,6 +38,9 @@
     <string name="strong_wind" translatable="false">&#xf050;</string>
     <string name="umbrella" translatable="false">&#xf084;</string>
 
+    <string name="microphone_on" translatable="false">&#xf130;</string>
+    <string name="microphone_off" translatable="false">&#xf131;</string>
+
     <string name="configuration_no_ip_address">No IP address found</string>
     <string name="configuration_ip_address">http://%1$s:8080</string>
     <string name="configuration_view_description">You can now access the configuration menu from the above address.</string>

@@ -27,9 +27,10 @@ import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 
 @Plugin
-public class HomeCommand extends AbstractHoundifyCommand implements HoundifyCommand {
+public class HomeCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
 // ------------------------------ FIELDS ------------------------------
 
     private static final String COMMAND_EXPRESSION = "home";
@@ -52,7 +53,20 @@ public class HomeCommand extends AbstractHoundifyCommand implements HoundifyComm
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface Command ---------------------
+// --------------------- Interface AlexaCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mFeature.hideCurrentPresenter();
+        mEventManager.post(new SpeechEvent(""));
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return COMMAND_EXPRESSION.equals(command);
+    }
+
+// --------------------- Interface HoundifyCommand ---------------------
 
     @Override
     public void executeCommand(CommandResult result) {

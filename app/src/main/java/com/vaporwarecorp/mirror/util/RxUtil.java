@@ -35,8 +35,8 @@ public class RxUtil {
                 .subscribe(action);
     }
 
-    public static void delay(Action1<? super Long> action, long delay) {
-        Observable.timer(delay, TimeUnit.SECONDS)
+    public static Subscription delay(Action1<? super Long> action, long delay) {
+        return Observable.timer(delay, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(action);

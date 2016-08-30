@@ -16,6 +16,7 @@
 package com.vaporwarecorp.mirror.feature.main;
 
 import android.app.Activity;
+import android.widget.RelativeLayout;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
@@ -36,7 +37,15 @@ public interface MainView extends View {
 
     Class<? extends Presenter> getMainPresenterClass();
 
+    RelativeLayout getRootView();
+
     void hideView();
 
+    boolean isKeywordSpotting();
+
     void setForecast(Forecast forecast);
+
+    void startKeywordSpotting();
+
+    void stopKeywordSpotting();
 }

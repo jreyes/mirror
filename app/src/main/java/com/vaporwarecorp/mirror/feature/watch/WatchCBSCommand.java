@@ -33,7 +33,7 @@ import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 public class WatchCBSCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String ALEXA_COMMAND_EXPRESSION = "watch c. b. s.";
+    private static final String ALEXA_COMMAND_EXPRESSION = "c. b. s.";
     private static final String COMMAND_EXPRESSION = "((\"watch\"|\"display\").(\"cbs\"|\"c b s\"|\"c. b. s.\"))";
     private static final String COMMAND_INTENT = "WatchCBS";
     private static final String COMMAND_RESPONSE = "Ok, displaying CBS";
@@ -58,7 +58,7 @@ public class WatchCBSCommand extends AbstractHoundifyCommand implements Houndify
 
     @Override
     public void executeCommand(String command) {
-        mEventManager.post(new SpeechEvent(command));
+        mEventManager.post(new SpeechEvent(""));
         mFeature.showPresenter(WatchCBSPresenter.class);
     }
 
@@ -67,11 +67,12 @@ public class WatchCBSCommand extends AbstractHoundifyCommand implements Houndify
         return ALEXA_COMMAND_EXPRESSION.equals(command);
     }
 
-// --------------------- Interface Command ---------------------
+// --------------------- Interface HoundifyCommand ---------------------
 
     @Override
     public void executeCommand(CommandResult result) {
-        executeCommand(result.getSpokenResponseLong());
+        mEventManager.post(new SpeechEvent(result.getSpokenResponseLong()));
+        mFeature.showPresenter(WatchCBSPresenter.class);
     }
 
     @Override

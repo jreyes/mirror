@@ -89,4 +89,8 @@
         <item name="android:windowEnterAnimation">@anim/fade_in</item>
     </style>
 
+    <style name="MicrophoneStyle" parent="BaseBody1TextStyle">
+        <item name="android:singleLine">true</item>
+    </style>
+
 </resources>

@@ -48,6 +48,10 @@ public abstract class AbstractMirrorFeaturePresenter<T extends View> extends Abs
         super.onUnplugged(bus);
     }
 
+    protected void delay(Action1<? super Long> action, long delay) {
+        mCompositeSubscription.add(RxUtil.delay(action, delay));
+    }
+
     protected void debounce(Action1<? super Long> action, long delay) {
         mCompositeSubscription.add(RxUtil.debounce(action, delay));
     }

@@ -28,6 +28,7 @@ import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommandManager;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.common.presenter.AbstractMirrorFeaturePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
@@ -62,9 +63,9 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
 // ------------------------------ FIELDS ------------------------------
 
     @Plug
-    AppManager mAppManager;
+    AlexaCommandManager mAlexaCommandManager;
     @Plug
-    CommandManager mCommandManager;
+    AppManager mAppManager;
     @Plug
     ConfigurationManager mConfigurationManager;
     @Plug
@@ -75,7 +76,6 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     PluginFeatureManager mFeatureManager;
     @Plug
     PocketSphinxManager mPocketSphinxManager;
-
     @Plug
     SnowboyManager mSnowboyManager;
     @Plug
@@ -101,7 +101,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
 
     @Override
     public void processCommand(int resultCode, Intent data) {
-        mCommandManager.processCommand(resultCode, data);
+        //mHoundifyCommandManager.processCommand(resultCode, data);
     }
 
     @Override
@@ -119,16 +119,20 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
 
     @Override
     public void startListening() {
-        debounce(l -> {
-            mSnowboyManager.onFeatureResume();
-            mPocketSphinxManager.onFeatureResume();
-        }, 3);
+        if (mView.isKeywordSpotting()) {
+            return;
+        }
+
+        mView.startKeywordSpotting();
+        mSnowboyManager.onFeatureResume();
+        mPocketSphinxManager.onFeatureResume();
     }
 
     @Override
     public void stopListening() {
         mPocketSphinxManager.onFeaturePause();
         mSnowboyManager.onFeaturePause();
+        mView.stopKeywordSpotting();
     }
 
     @Override
@@ -184,7 +188,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
         Timber.d("onViewStop(View)");
         mView.hideView();
         managerStop();
-        mFeatureManager.stopFeature(mFeature);
+        //mFeatureManager.stopFeature(mFeature);
         super.onViewStop(view);
     }
 
@@ -227,7 +231,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     public void onEvent(HotWordEvent event) {
         stopListening();
         mSoundManager.acknowledge();
-        mCommandManager.voiceSearch();
+        delay(l -> mAlexaCommandManager.voiceSearch(), 1);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -286,14 +290,14 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     private void managerStart() {
         Timber.d("managerStart()");
         mEventManager.register(this);
-        mCommandManager.start();
+        mAlexaCommandManager.start();
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStart);
     }
 
     private void managerStop() {
         Timber.d("managerStop()");
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStop);
-        mCommandManager.stop();
+        mAlexaCommandManager.stop();
         mEventManager.unregister(this);
     }
 }

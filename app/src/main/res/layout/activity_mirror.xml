@@ -15,6 +15,7 @@
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/root_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/black"
@@ -38,10 +39,18 @@
             android:layout_alignParentTop="true"/>
 
         <com.vaporwarecorp.mirror.component.datetime.DateTimeView
-            android:layout_width="200dp"
+            android:id="@+id/date_time_view"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"/>
+
+        <com.vaporwarecorp.mirror.component.command.CommandView
+            android:id="@+id/command_view"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/date_time_view"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -96,14 +105,6 @@
         android:layout_below="@+id/header_container"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
-
-    <com.jackpocket.pulse.layouts.PulsingView
-        android:id="@+id/alexa_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone"/>
 
     <FrameLayout
         android:id="@+id/fullscreen_container"

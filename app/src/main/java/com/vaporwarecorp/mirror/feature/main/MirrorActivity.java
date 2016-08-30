@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import com.robopupu.api.feature.FeatureContainer;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
@@ -34,13 +35,18 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
+import com.vaporwarecorp.mirror.component.command.CommandView;
 import com.vaporwarecorp.mirror.component.dottedgrid.DottedGridView;
 import com.vaporwarecorp.mirror.feature.MainFeature;
 import com.vaporwarecorp.mirror.feature.MainScope;
 import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.feature.forecast.ForecastView;
 import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
+import com.vaporwarecorp.mirror.service.ConfigurationService;
 import com.vaporwarecorp.mirror.util.FullScreenUtil;
+
+import static com.vaporwarecorp.mirror.app.Constants.ACTION.CONFIGURATION_SERVICE_START;
+import static com.vaporwarecorp.mirror.app.Constants.ACTION.CONFIGURATION_SERVICE_STOP;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -55,12 +61,14 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Plug(MainScope.class)
     MainPresenter mPresenter;
 
+    private CommandView mCommandView;
     private DottedGridView mContentContainer;
     private Integer mCurrentContainerId;
     private Class mCurrentPresenterClass;
     private ForecastView mForecastView;
     private FrameLayout mFullscreenContainer;
     private View mHeaderContainer;
+    private RelativeLayout mRootView;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -153,6 +161,11 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
     @Override
+    public RelativeLayout getRootView() {
+        return mRootView;
+    }
+
+    @Override
     public void hideView() {
         mContentContainer.clear();
         mHeaderContainer.setVisibility(View.INVISIBLE);
@@ -160,8 +173,23 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
     @Override
+    public boolean isKeywordSpotting() {
+        return mCommandView.isMicrophoneOn();
+    }
+
+    @Override
     public void setForecast(Forecast forecast) {
         mForecastView.setForecast(forecast);
+    }
+
+    @Override
+    public void startKeywordSpotting() {
+        mCommandView.microphoneOn();
+    }
+
+    @Override
+    public void stopKeywordSpotting() {
+        mCommandView.microphoneOff();
     }
 
 // --------------------- Interface PresentedView ---------------------
@@ -181,6 +209,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (mPresenter == null) {
+            return;
+        }
         mPresenter.onViewResult(requestCode, resultCode, data);
     }
 
@@ -189,7 +220,9 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         super.onCreate(inState);
         setContentView(R.layout.activity_mirror);
 
+        mRootView = (RelativeLayout) findViewById(R.id.root_view);
         mHeaderContainer = findViewById(R.id.header_container);
+        mCommandView = (CommandView) findViewById(R.id.command_view);
         mContentContainer = (DottedGridView) findViewById(R.id.content_container);
         mFullscreenContainer = (FrameLayout) findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
@@ -199,10 +232,14 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         findViewById(R.id.test4).setOnClickListener(v -> mPresenter.test4());
         findViewById(R.id.test5).setOnClickListener(v -> mPresenter.test5());
         findViewById(R.id.test6).setOnClickListener(v -> mPresenter.test6());
+
+        startService(new Intent(this, ConfigurationService.class).setAction(CONFIGURATION_SERVICE_START));
     }
 
     @Override
     protected void onDestroy() {
+        startService(new Intent(this, ConfigurationService.class).setAction(CONFIGURATION_SERVICE_STOP));
+
         super.onDestroy();
         MirrorApplication.refWatcher(this);
     }

@@ -29,10 +29,10 @@ public class DisplayMetricsUtil {
      * @param context Context to get resources and device specific display metrics
      * @return A float value to represent px equivalent to dp depending on device density
      */
-    public static float convertDpToPixel(final float dp, final Context context) {
+    public static int convertDpToPixel(final float dp, final Context context) {
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        return dp * (metrics.densityDpi / 160f);
+        return (int) (dp * (metrics.densityDpi / 160f));
     }
 
     /**

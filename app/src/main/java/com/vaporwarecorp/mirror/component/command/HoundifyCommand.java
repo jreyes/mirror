@@ -16,10 +16,21 @@
 package com.vaporwarecorp.mirror.component.command;
 
 import com.hound.core.model.sdk.ClientMatch;
+import com.hound.core.model.sdk.CommandResult;
 import com.vaporwarecorp.mirror.feature.Command;
 
 public interface HoundifyCommand extends Command {
 // -------------------------- OTHER METHODS --------------------------
 
+    void executeCommand(CommandResult result);
+
     ClientMatch getClientMatch();
+
+    String getCommandKind();
+
+    String getCommandTypeKey();
+
+    String getCommandTypeValue();
+
+    boolean matches(CommandResult commandResult);
 }

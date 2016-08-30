@@ -21,20 +21,24 @@ import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.command.AbstractHoundifyCommand;
 import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
+import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.common.presenter.VideoPlayerPresenter;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 
 @Plugin
-public class InternetCommand extends AbstractHoundifyCommand implements HoundifyCommand {
+public class InternetCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
 // ------------------------------ FIELDS ------------------------------
 
     private static final String COMMAND_EXPRESSION = "connect to the internet";
     private static final String COMMAND_INTENT = "ConnectToTheInternet";
     private static final String COMMAND_RESPONSE = "Ok, connecting to the internet";
 
+    @Plug
+    EventManager mEventManager;
     @Plug
     MainFeature mFeature;
 
@@ -49,10 +53,24 @@ public class InternetCommand extends AbstractHoundifyCommand implements Houndify
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface Command ---------------------
+// --------------------- Interface AlexaCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mEventManager.post(new SpeechEvent(""));
+        mFeature.showPresenter(InternetPresenter.class);
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return COMMAND_EXPRESSION.equals(command);
+    }
+
+// --------------------- Interface HoundifyCommand ---------------------
 
     @Override
     public void executeCommand(CommandResult result) {
+        mEventManager.post(new SpeechEvent(result.getSpokenResponseLong()));
         mFeature.showPresenter(InternetPresenter.class);
     }
 
