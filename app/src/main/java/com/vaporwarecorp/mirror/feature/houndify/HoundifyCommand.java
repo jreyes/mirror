@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaporwarecorp.mirror.component;
+package com.vaporwarecorp.mirror.feature.houndify;
 
-import com.robopupu.api.component.Manager;
-import com.robopupu.api.plugin.PlugInterface;
+import com.hound.core.model.sdk.ClientMatch;
+import com.hound.core.model.sdk.CommandResult;
+import com.vaporwarecorp.mirror.feature.Command;
 
-/**
- * Manager in charge to do a search using Houndify or Alexa if they are enabled.
- */
-@PlugInterface
-public interface CommandManager extends Manager {
+public interface HoundifyCommand extends Command {
 // -------------------------- OTHER METHODS --------------------------
 
-    void start();
+    void executeCommand(CommandResult result);
 
-    void stop();
+    ClientMatch getClientMatch();
 
-    void voiceSearch();
+    String getCommandKind();
+
+    String getCommandTypeKey();
+
+    String getCommandTypeValue();
+
+    boolean matches(CommandResult commandResult);
 }

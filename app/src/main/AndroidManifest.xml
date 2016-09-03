@@ -84,7 +84,7 @@
             android:stateNotNeeded="true"
             android:windowSoftInputMode="adjustPan|stateHidden"/>
         <activity
-            android:name=".component.command.HoundifyVoiceSearchActivity"
+            android:name=".feature.houndify.HoundifyVoiceSearchActivity"
             android:screenOrientation="landscape"
             android:theme="@style/houndify_Houndify"/>
         <activity

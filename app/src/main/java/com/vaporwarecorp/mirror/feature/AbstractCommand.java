@@ -20,7 +20,7 @@ import com.hound.core.model.sdk.ClientMatch;
 import com.hound.core.model.sdk.CommandResult;
 import com.robopupu.api.plugin.AbstractPluginComponent;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import org.apache.commons.lang3.StringUtils;
 

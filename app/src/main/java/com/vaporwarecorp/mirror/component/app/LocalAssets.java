@@ -93,7 +93,7 @@ public class LocalAssets {
                 }
             }
             if (list.length == 0) {
-                Timber.i("adding " + path);
+                Timber.i("adding %s", path);
                 items.add(path);
             }
         }
@@ -108,7 +108,7 @@ public class LocalAssets {
         for (String assetPath : assetsPath) {
             String localAssetPath = copy(assetPath).getAbsolutePath();
             mAssetPaths.put(assetPath, localAssetPath);
-            Timber.i("localAssetPath " + localAssetPath);
+            Timber.i("localAssetPath %s", localAssetPath);
         }
     }
 }

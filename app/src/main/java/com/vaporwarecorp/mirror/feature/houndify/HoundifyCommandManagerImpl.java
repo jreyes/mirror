@@ -21,8 +21,6 @@ import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
-import com.vaporwarecorp.mirror.component.command.HoundifyCommand;
-import com.vaporwarecorp.mirror.component.command.HoundifyVoiceSearchActivity;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
