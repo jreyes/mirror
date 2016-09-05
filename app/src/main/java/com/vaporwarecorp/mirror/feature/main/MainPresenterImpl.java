@@ -35,7 +35,6 @@ import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
 import com.vaporwarecorp.mirror.feature.flickr.FlickrPresenter;
 import com.vaporwarecorp.mirror.feature.greet.GreetPresenter;
 import com.vaporwarecorp.mirror.feature.pocketsphinx.PocketSphinxManager;
-import com.vaporwarecorp.mirror.feature.snowboy.SnowboyManager;
 import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import com.vaporwarecorp.mirror.feature.texttospeech.TextToSpeechManager;
 import com.vaporwarecorp.mirror.feature.twilio.TwilioPresenter;
@@ -76,8 +75,6 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     PluginFeatureManager mFeatureManager;
     @Plug
     PocketSphinxManager mPocketSphinxManager;
-    @Plug
-    SnowboyManager mSnowboyManager;
     @Plug
     SoundManager mSoundManager;
     @Plug
@@ -124,14 +121,12 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
         }
 
         mView.startKeywordSpotting();
-        mSnowboyManager.onFeatureResume();
         mPocketSphinxManager.onFeatureResume();
     }
 
     @Override
     public void stopListening() {
         mPocketSphinxManager.onFeaturePause();
-        mSnowboyManager.onFeaturePause();
         mView.stopKeywordSpotting();
     }
 
