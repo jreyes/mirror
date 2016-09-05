@@ -142,7 +142,7 @@
             android:name="com.radiusnetworks.proximity.SyncOnEventBroadcastReceiver"
             tools:node="remove"/>
 
-        <service android:name=".service.ConfigurationService"/>
+        <service android:name=".service.WebServerService"/>
         <service android:name=".service.AlexaCommandService"/>
 
         <meta-data
