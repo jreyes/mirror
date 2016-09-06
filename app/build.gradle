@@ -13,6 +13,9 @@ android {
         versionCode 1
         versionName "1.0.0"
         multiDexEnabled true
+        ndk {
+            abiFilter "armeabi-v7a"
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -157,8 +160,6 @@ dependencies {
     compile 'com.github.Kaljurand:speechutils:3cca49c288@aar'
     compile 'com.amazonaws:aws-android-sdk-cognito:2.3.0'
     compile 'com.amazonaws:aws-android-sdk-iot:2.3.0'
-
-    compile project(':libs:snowboy')
 
     testCompile "junit:junit:$JUNIT_VERSION"
 
