@@ -31,7 +31,7 @@ public class WebServerService extends Service {
         if (intent.getAction().equals(WEB_SERVER_SERVICE_START) && server == null) {
             Timber.i("Starting web server service");
             final AppManager appManager = PluginBus.getPlug(AppManager.class);
-            server = new WebServer(appManager.getAppContext());
+            server = new WebServer(appManager);
             server.start(PluginBus.getPlugs(Configuration.class));
         } else if (intent.getAction().equals(WEB_SERVER_SERVICE_STOP)) {
             Timber.i("Stopping web server service");

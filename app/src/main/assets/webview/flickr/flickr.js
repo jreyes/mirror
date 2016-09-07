@@ -44,7 +44,7 @@ angular
 
         this.grabPhotos = function () {
             $http
-                .get('http://localhost:34000/proxy', this.getParams())
+                .get('http://localhost:4000/proxy', this.getParams())
                 .then(function (response) {
                     if (angular.isDefined($scope.displayPhotoInterval)) {
                         $interval.cancel($scope.displayPhotoInterval);

@@ -15,10 +15,12 @@
  */
 package com.vaporwarecorp.mirror.component.configuration;
 
-import android.content.Context;
 import android.text.TextUtils;
+import com.squareup.okhttp.Request;
 import com.sromku.simple.storage.SimpleStorage;
 import com.sromku.simple.storage.Storage;
+import com.vaporwarecorp.mirror.component.AppManager;
+import com.vaporwarecorp.mirror.util.JsonUtil;
 import fi.iki.elonen.NanoFileUpload;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.fileupload.FileItem;
@@ -41,20 +43,21 @@ import static fi.iki.elonen.NanoHTTPD.Response.Status.*;
 public class WebServer extends NanoHTTPD {
 // ------------------------------ FIELDS ------------------------------
 
-    private final static String JAVASCRIPT_APP = "app.js";
-    private final static String MODEL_PLACEHOLDER = ",\"model\":";
-    private final static String MODULES_PLACEHOLDER = "/* {{modules}} */";
+    private static final String JAVASCRIPT_APP = "app.js";
+    private static final String MIME_JSON = "application/json";
+    private static final String MODEL_PLACEHOLDER = ",\"model\":";
+    private static final String MODULES_PLACEHOLDER = "/* {{modules}} */";
 
+    private AppManager mAppManager;
     private Map<String, String> mCache;
     private List<Configuration> mConfigurations;
-    private Context mContext;
     private NanoFileUpload mUploader;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    public WebServer(Context context) {
-        super(8080);
-        mContext = context;
+    public WebServer(AppManager appManager) {
+        super(4000);
+        mAppManager = appManager;
         mCache = new HashMap<>();
         mUploader = new NanoFileUpload(new DiskFileItemFactory());
     }
@@ -64,7 +67,9 @@ public class WebServer extends NanoHTTPD {
     @Override
     public Response serve(IHTTPSession session) {
         final String uri = session.getUri().substring(1);
-        if (NanoFileUpload.isMultipartContent(session)) {
+        if (Method.GET.equals(session.getMethod()) && "proxy".equals(uri)) {
+            return get(session.getParms().get("url"));
+        } else if (NanoFileUpload.isMultipartContent(session)) {
             try {
                 List<FileItem> files = mUploader.parseRequest(session);
                 if (files != null && files.size() > 0) {
@@ -115,12 +120,27 @@ public class WebServer extends NanoHTTPD {
         super.stop();
     }
 
+    private Response get(String url) {
+        try {
+            Timber.d("loading url %s", url);
+            final Request request = new Request.Builder().url(url).build();
+            final String content = mAppManager.okHttpClient().newCall(request).execute().body().string();
+            final String jsonContent = JsonUtil.toString(JsonUtil.toJsonNode(content));
+            final Response response = newFixedLengthResponse(OK, MIME_JSON, jsonContent);
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            return response;
+        } catch (IOException e) {
+            Timber.e(e, "Error loading the url %s", url);
+            return newFixedLengthResponse(null);
+        }
+    }
+
     private File getFile(FileItem fileItem) {
         Storage storage;
         if (SimpleStorage.isExternalStorageWritable()) {
             storage = SimpleStorage.getExternalStorage();
         } else {
-            storage = SimpleStorage.getInternalStorage(mContext);
+            storage = SimpleStorage.getInternalStorage(mAppManager.getAppContext());
         }
         storage.createDirectory("configuration/uploads");
         storage.createFile("configuration/uploads", fileItem.getName(), new byte[0]);
@@ -152,7 +172,7 @@ public class WebServer extends NanoHTTPD {
 
         try {
             StringWriter writer = new StringWriter();
-            IOUtils.copy(mContext.getAssets().open(filePath), writer, "UTF-8");
+            IOUtils.copy(mAppManager.getAppContext().getAssets().open(filePath), writer, "UTF-8");
 
             final String content = writer.toString();
             mCache.put(filePath, content);

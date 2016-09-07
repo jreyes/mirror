@@ -21,7 +21,7 @@ angular
     .controller('comicController', function ($scope, $http, $interval) {
 
         this.fetchComic = function () {
-            $http.get('http://localhost:34000/proxy', {
+            $http.get('http://localhost:4000/proxy', {
                 params: {url: 'http://xkcd.com/info.0.json'}
             }).then(function (response) {
                 var comic = response.data;
