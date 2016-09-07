@@ -29,8 +29,8 @@ work, much of the configurable aspect of this project would not be possible.
     - [X] On minimized panels, mute audio for videos? but no for audio play?
 - [ ] New logo
 - [ ] Multiple user support
-- [ ] Integration with Alexa
-    -   [ ] Smarthings support
+- [X] Integration with Alexa
+    -  [X] Smarthings support
 - [ ] Improve Gesture control module
     - [ ] Integration with Leap Motion
     - [ ] Improve OpenCV module
@@ -52,12 +52,9 @@ work, much of the configurable aspect of this project would not be possible.
     - [ ] Livecoding command?
     - [ ] Reddit news
     - [ ] NPR news
-- [ ] Hot word support
-    - [ ] Add support for snowboy
-    - [ ] Support multiple hotword modules
 - [X] Update commands
-    - [ ] Web module
-        - [ ] Add a proxy running on port 34000
+    - [X] Web module
+        - [X] Add a proxy running on port 4000
     - [X] Spotify command
         - [X] Add pause/play button
         - [X] Make it configurable
