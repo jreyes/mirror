@@ -28,7 +28,6 @@ import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.component.*;
 import com.vaporwarecorp.mirror.event.*;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommandManager;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.common.presenter.AbstractMirrorFeaturePresenter;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
@@ -39,6 +38,7 @@ import com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter;
 import com.vaporwarecorp.mirror.feature.texttospeech.TextToSpeechManager;
 import com.vaporwarecorp.mirror.feature.twilio.TwilioPresenter;
 import com.vaporwarecorp.mirror.feature.watch.WatchCBSPresenter;
+import com.vaporwarecorp.mirror.service.WebServerService;
 import com.vaporwarecorp.mirror.util.PermissionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,6 +47,8 @@ import timber.log.Timber;
 
 import java.util.List;
 
+import static com.vaporwarecorp.mirror.app.Constants.ACTION.WEB_SERVER_SERVICE_START;
+import static com.vaporwarecorp.mirror.app.Constants.ACTION.WEB_SERVER_SERVICE_STOP;
 import static com.vaporwarecorp.mirror.event.CommandEvent.TYPE_COMMAND_SUCCESS;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_GOODBYE;
 import static com.vaporwarecorp.mirror.event.GreetEvent.TYPE_WELCOME;
@@ -61,8 +63,6 @@ import static solid.stream.Stream.stream;
 public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> implements MainPresenter {
 // ------------------------------ FIELDS ------------------------------
 
-    @Plug
-    AlexaCommandManager mAlexaCommandManager;
     @Plug
     AppManager mAppManager;
     @Plug
@@ -119,7 +119,6 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
         if (mView.isKeywordSpotting()) {
             return;
         }
-
         mView.startKeywordSpotting();
         mPocketSphinxManager.onFeatureResume();
     }
@@ -164,6 +163,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     public void verifyPermissions() {
         if (PermissionUtil.checkPermissions(mView.activity()).isEmpty()) {
             managerStart();
+            webServerStart();
         } else {
             mAppManager.exitApplication();
         }
@@ -182,6 +182,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     public void onViewStop(View view) {
         Timber.d("onViewStop(View)");
         mView.hideView();
+        webServerStop();
         managerStop();
         //mFeatureManager.stopFeature(mFeature);
         super.onViewStop(view);
@@ -225,8 +226,10 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     @SuppressWarnings("unused")
     public void onEvent(HotWordEvent event) {
         stopListening();
+        /*
         mSoundManager.acknowledge();
         delay(l -> mAlexaCommandManager.voiceSearch(), 1);
+        */
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -267,6 +270,7 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
         final List<String> neededPermissions = PermissionUtil.checkPermissions(mView.activity());
         if (neededPermissions.isEmpty()) {
             managerStart();
+            webServerStart();
         } else {
             PermissionUtil.requestPermissions(mView.activity(), neededPermissions);
         }
@@ -285,14 +289,26 @@ public class MainPresenterImpl extends AbstractMirrorFeaturePresenter<MainView> 
     private void managerStart() {
         Timber.d("managerStart()");
         mEventManager.register(this);
-        mAlexaCommandManager.start();
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStart);
     }
 
     private void managerStop() {
         Timber.d("managerStop()");
         stream(PluginBus.getPlugs(MirrorManager.class)).forEach(MirrorManager::onFeatureStop);
-        mAlexaCommandManager.stop();
         mEventManager.unregister(this);
+    }
+
+    /**
+     * Start the web server
+     */
+    private void webServerStart() {
+        mAppManager.startService(WebServerService.class, WEB_SERVER_SERVICE_START);
+    }
+
+    /**
+     * Stop the web server
+     */
+    private void webServerStop() {
+        mAppManager.startService(WebServerService.class, WEB_SERVER_SERVICE_STOP);
     }
 }

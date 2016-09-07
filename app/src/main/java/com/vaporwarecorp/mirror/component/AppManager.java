@@ -141,4 +141,9 @@ public interface AppManager extends Manager {
     void startConfigurableFeature();
 
     void startMainFeature();
+
+    /**
+     * Start a service.
+     */
+    void startService(Class serviceClass, String action);
 }

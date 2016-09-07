@@ -42,11 +42,7 @@ import com.vaporwarecorp.mirror.feature.MainScope;
 import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.feature.forecast.ForecastView;
 import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
-import com.vaporwarecorp.mirror.service.ConfigurationService;
 import com.vaporwarecorp.mirror.util.FullScreenUtil;
-
-import static com.vaporwarecorp.mirror.app.Constants.ACTION.CONFIGURATION_SERVICE_START;
-import static com.vaporwarecorp.mirror.app.Constants.ACTION.CONFIGURATION_SERVICE_STOP;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -226,20 +222,10 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         mContentContainer = (DottedGridView) findViewById(R.id.content_container);
         mFullscreenContainer = (FrameLayout) findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
-        findViewById(R.id.test1).setOnClickListener(v -> mPresenter.test1());
-        findViewById(R.id.test2).setOnClickListener(v -> mPresenter.test2());
-        findViewById(R.id.test3).setOnClickListener(v -> mPresenter.test3());
-        findViewById(R.id.test4).setOnClickListener(v -> mPresenter.test4());
-        findViewById(R.id.test5).setOnClickListener(v -> mPresenter.test5());
-        findViewById(R.id.test6).setOnClickListener(v -> mPresenter.test6());
-
-        startService(new Intent(this, ConfigurationService.class).setAction(CONFIGURATION_SERVICE_START));
     }
 
     @Override
     protected void onDestroy() {
-        startService(new Intent(this, ConfigurationService.class).setAction(CONFIGURATION_SERVICE_STOP));
-
         super.onDestroy();
         MirrorApplication.refWatcher(this);
     }

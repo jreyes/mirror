@@ -179,6 +179,15 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
         startActivity(i);
     }
 
+    @Override
+    public void startService(Class serviceClass, String action) {
+        final Intent intent = new Intent(mApplication, serviceClass);
+        if (action != null) {
+            intent.setAction(action);
+        }
+        mApplication.startService(intent);
+    }
+
     private LocalAssets getLocalAssets() {
         if (mLocalAssets == null) {
             try {
