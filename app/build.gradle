@@ -37,17 +37,14 @@ android {
         lintConfig rootProject.file('lint.xml')
     }
     signingConfigs {
-        // You must set up an environment var before release signing
-        // Run: export APP_KEY={password}
-        // TODO Add your release keystore in /keystore folder
         release {
-            storeFile file('keystore/release.keystore')
-            keyAlias 'alias'
-            storePassword "$System.env.APP_KEY"
-            keyPassword "$System.env.APP_KEY"
+            storeFile file('keystore/release.jks')
+            keyAlias "$System.env.APP_KEY_ALIAS"
+            storePassword "$System.env.APP_STORE_PASSWORD"
+            keyPassword "$System.env.APP_KEY_PASSWORD"
         }
         debug {
-            storeFile file('keystore/debug.keystore')
+            storeFile file('keystore/debug.jks')
             keyAlias 'androiddebugkey'
             storePassword 'android'
             keyPassword 'android'

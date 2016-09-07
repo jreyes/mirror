@@ -16,4 +16,24 @@
 package com.vaporwarecorp.mirror.event;
 
 public class HotWordEvent implements Event {
+// ------------------------------ FIELDS ------------------------------
+
+    public static int TYPE_ALEXA = 2;
+    public static int TYPE_HOUNDIFY = 3;
+    public static int TYPE_NONE = 0;
+    public static int TYPE_POCKET_SPHINX = 1;
+
+    private final int type;
+
+// --------------------------- CONSTRUCTORS ---------------------------
+
+    public HotWordEvent(int type) {
+        this.type = type;
+    }
+
+// --------------------- GETTER / SETTER METHODS ---------------------
+
+    public int getType() {
+        return type;
+    }
 }

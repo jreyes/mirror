@@ -27,17 +27,23 @@ import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.HotWordEvent;
+import com.vaporwarecorp.mirror.feature.alexa.AlexaCommandManager;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommandManager;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import timber.log.Timber;
 
 import java.io.File;
 import java.io.IOException;
 
-import static com.vaporwarecorp.mirror.feature.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
+import static com.vaporwarecorp.mirror.event.HotWordEvent.TYPE_ALEXA;
+import static com.vaporwarecorp.mirror.event.HotWordEvent.TYPE_HOUNDIFY;
+import static com.vaporwarecorp.mirror.event.HotWordEvent.TYPE_POCKET_SPHINX;
 import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
+import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 
 
 @Plugin
@@ -47,6 +53,7 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 // ------------------------------ FIELDS ------------------------------
 
     private static final String KWS_SEARCH = "COMMAND";
+    private static final String MENU_SEARCH = "MENU";
     private static final String PREF = PocketSphinxManager.class.getName();
     private static final String PREF_ENABLED = PREF + ".PREF_ENABLED";
     private static final boolean PREF_ENABLED_DEFAULT = true;
@@ -54,11 +61,15 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
     private static final String PREF_HOT_WORD_DEFAULT = "computer";
 
     @Plug
+    AlexaCommandManager mAlexaCommandManager;
+    @Plug
     AppManager mAppManager;
     @Plug
     ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
+    @Plug
+    HoundifyCommandManager mHoundifyCommandManager;
 
     private boolean mEnabled;
     private String mHotWord;
@@ -101,10 +112,13 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         if (mRecognizer == null) {
             return;
         }
+        mRecognizer.stop();
+        /*
         if (mRecognizer.isListening()) {
             mRecognizer.stop();
         }
-        mRecognizer.startListening(KWS_SEARCH);
+        */
+        mRecognizer.startListening(MENU_SEARCH);
     }
 
     @Override
@@ -114,15 +128,22 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         }
 
         try {
-            File assetsDir = new Assets(mAppManager.getAppContext()).syncAssets();
+            final File assetsDir = new Assets(mAppManager.getAppContext()).syncAssets();
             mRecognizer = defaultSetup()
                     .setAcousticModel(new File(assetsDir, "en-us-ptm"))
-                    .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
+                    .setDictionary(new File(assetsDir, "6117.dic"))
                     .setKeywordThreshold(1e-20f)
                     .setBoolean("-allphone_ci", true)
                     .getRecognizer();
             mRecognizer.addListener(this);
-            mRecognizer.addKeyphraseSearch(KWS_SEARCH, mHotWord);
+
+            final File menuGrammar = new File(assetsDir, "menu.gram");
+            mRecognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
+
+            mAlexaCommandManager.start();
+            mHoundifyCommandManager.start();
+
+            //mRecognizer.addKeyphraseSearch(KWS_SEARCH, mHotWord);
         } catch (IOException e) {
             Timber.e(e, e.getMessage());
             disable();
@@ -136,6 +157,9 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 
     @Override
     public void onFeatureStop() {
+        mHoundifyCommandManager.stop();
+        mAlexaCommandManager.stop();
+
         if (mRecognizer == null) {
             return;
         }
@@ -166,11 +190,21 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
     public void onPartialResult(Hypothesis hypothesis) {
         if (hypothesis == null) return;
 
-        String text = hypothesis.getHypstr().trim().toLowerCase();
+        final String text = hypothesis.getHypstr().trim().toLowerCase();
         Timber.d("onPartialResult %s", text);
-        if (text.equals(mHotWord)) {
+        if ("computer".equals(text)) {
             mRecognizer.stop();
-            mEventManager.post(new HotWordEvent());
+            mEventManager.post(new HotWordEvent(TYPE_POCKET_SPHINX));
+        } else if ("alexa".equals(text)) {
+            mRecognizer.stop();
+            mEventManager.post(new HotWordEvent(TYPE_ALEXA));
+            mAlexaCommandManager.voiceSearch();
+        } else if ("houndify".equals(text)) {
+            mRecognizer.stop();
+            mEventManager.post(new HotWordEvent(TYPE_HOUNDIFY));
+            mHoundifyCommandManager.voiceSearch();
+        } else {
+            Timber.e("Can't recognize %s", text);
         }
     }
 

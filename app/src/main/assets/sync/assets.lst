@@ -1,5 +1,8 @@
-cmudict-en-us.dict
-en-phone.dmp
+6117.dic
+6117.lm
+6117.log_pronounce
+6117.sent
+6117.vocab
 en-us-ptm/feat.params
 en-us-ptm/mdef
 en-us-ptm/means
@@ -7,3 +10,4 @@ en-us-ptm/noisedict
 en-us-ptm/sendump
 en-us-ptm/transition_matrices
 en-us-ptm/variances
+menu.gram

@@ -1,2 +1,4 @@
-/build
-google-services.json
+keystore/release.jks
+build
+src/debug
+src/release

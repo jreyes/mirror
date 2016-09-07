@@ -55,6 +55,7 @@
     <application
         android:name=".app.MirrorApplication"
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -73,6 +74,7 @@
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
@@ -122,9 +124,9 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:scheme="https"
                     android:host="www.amazon.com"
-                    android:pathPattern="/ap/oa"/>
+                    android:pathPattern="/ap/oa"
+                    android:scheme="https"/>
             </intent-filter>
         </activity>
 
@@ -133,7 +135,9 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.ForecastReceiver">
+        <receiver
+            android:name=".receiver.ForecastReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.vaporwarecorp.mirror.FORECAST_UPDATE"/>
             </intent-filter>
