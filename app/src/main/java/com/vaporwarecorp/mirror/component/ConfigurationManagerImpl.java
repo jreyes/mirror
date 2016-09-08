@@ -164,7 +164,6 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
     public void onPlugged(PluginBus bus) {
         super.onPlugged(bus);
         mDisabledPresenters = new HashSet<>();
-        //mServer = new WebServer(mAppManager.getAppContext());
     }
 
     @Override

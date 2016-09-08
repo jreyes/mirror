@@ -10,6 +10,7 @@ import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.component.configuration.WebServer;
 import timber.log.Timber;
 
+import static com.vaporwarecorp.mirror.app.Constants.ACTION.WEB_SERVER_SERVICE_REFRESH;
 import static com.vaporwarecorp.mirror.app.Constants.ACTION.WEB_SERVER_SERVICE_START;
 import static com.vaporwarecorp.mirror.app.Constants.ACTION.WEB_SERVER_SERVICE_STOP;
 
@@ -28,12 +29,19 @@ public class WebServerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(WEB_SERVER_SERVICE_START) && server == null) {
+        if (intent == null) {
+            return START_STICKY;
+        }
+
+        if (WEB_SERVER_SERVICE_START.equals(intent.getAction()) && server == null) {
             Timber.i("Starting web server service");
             final AppManager appManager = PluginBus.getPlug(AppManager.class);
             server = new WebServer(appManager);
             server.start(PluginBus.getPlugs(Configuration.class));
-        } else if (intent.getAction().equals(WEB_SERVER_SERVICE_STOP)) {
+        } else if (WEB_SERVER_SERVICE_REFRESH.equals(intent.getAction()) && server != null) {
+            Timber.i("Refreshing the web server service");
+            server.refresh(PluginBus.getPlugs(Configuration.class));
+        } else if (WEB_SERVER_SERVICE_STOP.equals(intent.getAction())) {
             Timber.i("Stopping web server service");
             if (server != null) {
                 if (server.isAlive()) {

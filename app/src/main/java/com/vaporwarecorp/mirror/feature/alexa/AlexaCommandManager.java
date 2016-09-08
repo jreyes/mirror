@@ -17,14 +17,8 @@ package com.vaporwarecorp.mirror.feature.alexa;
 
 import com.robopupu.api.plugin.PlugInterface;
 import com.vaporwarecorp.mirror.component.CommandManager;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
+import com.vaporwarecorp.mirror.component.WebAuthentication;
 
 @PlugInterface
-public interface AlexaCommandManager extends CommandManager, Configuration {
-// ------------------------------ FIELDS ------------------------------
-
-    String PREF = AlexaCommandManager.class.getName();
-    String PREF_COGNITO_POOL_ID = PREF + ".PREF_COGNITO_POOL_ID";
-    String PREF_IOT_ENDPOINT = PREF + ".PREF_IOT_ENDPOINT";
-    String PREF_IOT_TOPIC = PREF + ".PREF_IOT_TOPIC";
+public interface AlexaCommandManager extends CommandManager, WebAuthentication {
 }

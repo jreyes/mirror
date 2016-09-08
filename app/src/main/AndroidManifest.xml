@@ -78,14 +78,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".feature.configurable.ConfigurableActivity"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleInstance"
-            android:screenOrientation="landscape"
-            android:stateNotNeeded="true"
-            android:windowSoftInputMode="adjustPan|stateHidden"/>
-        <activity
             android:name=".feature.houndify.HoundifyVoiceSearchActivity"
             android:screenOrientation="landscape"
             android:theme="@style/houndify_Houndify"/>
@@ -146,8 +138,9 @@
             android:name="com.radiusnetworks.proximity.SyncOnEventBroadcastReceiver"
             tools:node="remove"/>
 
-        <service android:name=".service.WebServerService"/>
-        <service android:name=".service.AlexaCommandService"/>
+        <service
+            android:name=".service.WebServerService"
+            android:exported="false"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

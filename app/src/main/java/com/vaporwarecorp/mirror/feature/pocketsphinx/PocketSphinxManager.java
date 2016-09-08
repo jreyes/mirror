@@ -17,9 +17,8 @@
 package com.vaporwarecorp.mirror.feature.pocketsphinx;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 
 @PlugInterface
-public interface PocketSphinxManager extends MirrorManager, Configuration {
+public interface PocketSphinxManager extends MirrorManager {
 }

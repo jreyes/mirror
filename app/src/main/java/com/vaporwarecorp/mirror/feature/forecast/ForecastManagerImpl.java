@@ -42,6 +42,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -107,9 +108,9 @@ public class ForecastManagerImpl extends AbstractMirrorManager implements Foreca
         }
 
         Timber.i("ForecastManager - refreshing forecast information");
-        String latitudeLongitude = String.format("%s,%s", mLocation.getLatitude(), mLocation.getLongitude());
-        String language = Locale.getDefault().getLanguage();
-        mApi
+        final String latitudeLongitude = String.format("%s,%s", mLocation.getLatitude(), mLocation.getLongitude());
+        final String language = Locale.getDefault().getLanguage();
+        final Subscription subscription = mApi
                 .getForecast(latitudeLongitude, mApiKey, "us", language)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Forecast>() {
@@ -127,6 +128,7 @@ public class ForecastManagerImpl extends AbstractMirrorManager implements Foreca
                         mEventManager.post(new ForecastEvent(forecast));
                     }
                 });
+        subscribe(subscription);
     }
 
 // --------------------- Interface MirrorManager ---------------------
@@ -164,6 +166,7 @@ public class ForecastManagerImpl extends AbstractMirrorManager implements Foreca
                 .build()
                 .create(Api.class);
         mLocation = LocationUtil.getLastKnownLocation(mAppManager.getAppContext());
+        onFeatureStart();
     }
 
     private interface Api {

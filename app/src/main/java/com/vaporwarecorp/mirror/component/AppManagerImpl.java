@@ -15,7 +15,6 @@
  */
 package com.vaporwarecorp.mirror.component;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -36,8 +35,6 @@ import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.app.LocalAssets;
-import com.vaporwarecorp.mirror.feature.configurable.ConfigurableActivity;
-import com.vaporwarecorp.mirror.feature.main.MirrorActivity;
 import com.vaporwarecorp.mirror.util.BluetoothUtil;
 import com.vaporwarecorp.mirror.util.LocationUtil;
 import com.vaporwarecorp.mirror.util.NetworkUtil;
@@ -156,27 +153,6 @@ public class AppManagerImpl extends AbstractManager implements AppManager {
     @Override
     public OkHttpClient okHttpClient() {
         return mApplication.okHttpClient();
-    }
-
-    @Override
-    public void startActivity(final Intent intent) {
-        Activity activity = mFeatureManager.getForegroundActivity();
-        activity.startActivity(intent);
-        activity.finish();
-    }
-
-    @Override
-    public void startConfigurableFeature() {
-        Intent i = new Intent(getAppContext(), ConfigurableActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
-    }
-
-    @Override
-    public void startMainFeature() {
-        Intent i = new Intent(getAppContext(), MirrorActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
     }
 
     @Override

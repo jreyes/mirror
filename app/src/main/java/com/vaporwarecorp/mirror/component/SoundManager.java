@@ -22,7 +22,15 @@ import com.robopupu.api.plugin.PlugInterface;
 public interface SoundManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
-    void acknowledge();
+    void acknowledge(Listener listener);
 
     void error();
+
+    void releaseAudioFocus();
+
+    boolean requestAudioFocus();
+
+    interface Listener {
+        void onCompleted();
+    }
 }

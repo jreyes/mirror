@@ -71,7 +71,8 @@ public class SplashPresenterImpl extends AbstractFeaturePresenter<SplashView> im
             Timber.d("mAppManager.isBluetoothAvailable() %s", mAppManager.isBluetoothAvailable());
             Timber.d("mAppManager.isNetworkAvailable() %s", mAppManager.isNetworkAvailable());
             Timber.d("mAppManager.isLocationAvailable() %s", mAppManager.isLocationAvailable());
-            if (mAppManager.isBluetoothAvailable() && mAppManager.isNetworkAvailable() &&
+            if (mAppManager.isBluetoothAvailable() &&
+                    mAppManager.isNetworkAvailable() &&
                     mAppManager.isLocationAvailable()) {
                 mFeature.onApplicationReady();
             } else {

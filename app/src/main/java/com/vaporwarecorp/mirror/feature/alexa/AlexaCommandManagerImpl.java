@@ -20,26 +20,18 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.RelativeLayout;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.hound.android.fd.view.SearchPanelView;
-import com.robopupu.api.dependency.D;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
-import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
-import com.vaporwarecorp.mirror.event.AlexaCommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
-import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
 import com.vaporwarecorp.mirror.feature.main.MainView;
-import com.vaporwarecorp.mirror.service.AlexaCommandService;
 import com.vaporwarecorp.mirror.util.DisplayMetricsUtil;
 import com.willblaschko.android.alexa.AlexaManager;
 import com.willblaschko.android.alexa.audioplayer.AlexaAudioPlayer;
@@ -59,27 +51,23 @@ import ee.ioc.phon.android.speechutils.RawAudioRecorder;
 import okio.BufferedSink;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.hound.android.fd.view.SearchPanelView.State.LISTENING;
 import static com.hound.android.fd.view.SearchPanelView.State.SEARCHING;
-import static com.vaporwarecorp.mirror.app.Constants.ACTION.ALEXA_COMMAND_SERVICE_START;
-import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
-import static solid.stream.Stream.stream;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(AlexaCommandManager.class)
-public class AlexaCommandManagerImpl extends AbstractMirrorManager implements AlexaCommandManager {
+public class AlexaCommandManagerImpl
+        extends AbstractMirrorManager
+        implements AlexaCommandManager {
 // ------------------------------ FIELDS ------------------------------
 
     private static final int AUDIO_RATE = 16000;
@@ -89,8 +77,6 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
 
     @Plug
     AppManager mAppManager;
-    @Plug
-    ConfigurationManager mConfigurationManager;
     @Plug
     EventManager mEventManager;
     @Plug
@@ -149,10 +135,7 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
         }
     };
     private Deque<AvsItem> mAvsQueue;
-    private String mCognitoPoolId;
-    private Collection<AlexaCommand> mCommands;
-    private String mIotEndpoint;
-    private String mIotTopic;
+    private boolean mEnabled = true;
     private RawAudioRecorder mRecorder;
     private DataRequestBody mRequestBody = new DataRequestBody() {
         @Override
@@ -187,87 +170,45 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
     };
     private SearchPanelView mSearchPanelView;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    public AlexaCommandManagerImpl() {
-        mCommands = new ArrayList<>();
-    }
-
 // ------------------------ INTERFACE METHODS ------------------------
 
 
 // --------------------- Interface CommandManager ---------------------
 
     @Override
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    @Override
     public void start() {
-        if ("".equals(mCognitoPoolId) || "".equals(mIotEndpoint) || "".equals(mIotTopic)) {
-            Timber.w("Tried to start Alexa commands but is hasn't been configured");
+        // check if AlexaManager is already running
+        if (mAlexaManager != null) {
             return;
         }
 
         Timber.d("Starting Alexa commands");
         //get our AlexaManager instance for convenience
         mAlexaManager = AlexaManager.getInstance(mAppManager.getAppContext(), "MirrorApp");
-        mAlexaManager.checkLoggedIn(new AsyncCallback<Boolean, Throwable>() {
-            @Override
-            public void start() {
-            }
-
-            @Override
-            public void success(Boolean result) {
-                initializeAlexa();
-                initializePubSub();
-                initializeCommands();
-            }
-
-            @Override
-            public void failure(Throwable error) {
-                mAlexaManager.logIn(new AuthorizationCallback() {
-                    @Override
-                    public void onCancel() {
-                        stop();
-                    }
-
-                    @Override
-                    public void onSuccess() {
-                        initializeAlexa();
-                        initializePubSub();
-                        initializeCommands();
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        Timber.e(e, "Error trying to login to amazon");
-                        stop();
-                    }
-                });
-            }
-
-            @Override
-            public void complete() {
-            }
-        });
-
         createSearchPanelView();
     }
 
     @Override
     public void stop() {
         Timber.d("Stopping Alexa commands");
-        stopPubSub();
         stopListening();
         if (mAudioPlayer != null) {
             mAudioPlayer.removeCallback(mAudioPlayerCallback);
             mAudioPlayer = null;
         }
-        mCommands.clear();
+        mEventManager.unregister(this);
         mAlexaManager = null;
     }
 
     @Override
     public void voiceSearch() {
         // if AlexaManager hasn't started, do nothing
-        if (mAlexaManager == null) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -278,52 +219,55 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
         mAlexaManager.sendAudioRequest(mRequestBody, mAudioRequestCallback);
     }
 
-// --------------------- Interface Configuration ---------------------
+// --------------------- Interface WebAuthentication ---------------------
 
     @Override
-    public String getJsonConfiguration() {
-        return "configuration/json/alexa.json";
+    public void doAuthentication() {
+        mAlexaManager.logIn(new AuthorizationCallback() {
+            @Override
+            public void onCancel() {
+            }
+
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Timber.e(e, "Error trying to login to amazon");
+            }
+        });
     }
 
     @Override
-    public String getJsonValues() {
-        return createTextNode("cognitoPoolId", mCognitoPoolId)
-                .put("iotEndpoint", mIotEndpoint)
-                .put("iotTopic", mIotTopic)
-                .toString();
+    public void isAuthenticated(@NotNull IsAuthenticatedCallback callback) {
+        if (mAlexaManager == null) {
+            mAlexaManager = AlexaManager.getInstance(mAppManager.getAppContext(), "MirrorApp");
+        }
+        mAlexaManager.checkLoggedIn(new AsyncCallback<Boolean, Throwable>() {
+            @Override
+            public void start() {
+            }
+
+            @Override
+            public void success(Boolean result) {
+                Timber.d("checkLoggedIn success");
+                callback.onResult(result);
+            }
+
+            @Override
+            public void failure(Throwable error) {
+                Timber.e(error, "Error checking if amazon is logged in");
+            }
+
+            @Override
+            public void complete() {
+            }
+        });
     }
 
     @Override
-    public void updateConfiguration(JsonNode jsonNode) {
-        mConfigurationManager.updateString(PREF_COGNITO_POOL_ID, jsonNode, "cognitoPoolId");
-        mConfigurationManager.updateString(PREF_IOT_ENDPOINT, jsonNode, "iotEndpoint");
-        mConfigurationManager.updateString(PREF_IOT_TOPIC, jsonNode, "iotTopic");
-        loadConfiguration();
-        start();
-    }
-
-// --------------------- Interface MirrorManager ---------------------
-
-    @Override
-    public void onFeatureResult(int requestCode, int resultCode, Intent data) {
-    }
-
-// --------------------- Interface PluginComponent ---------------------
-
-    @Override
-    public void onPlugged(PluginBus bus) {
-        super.onPlugged(bus);
-        loadConfiguration();
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(AlexaCommandEvent event) {
-        stream(mCommands)
-                .filter(c -> c.matches(event.getCommand()))
-                .forEach(c -> c.executeCommand(event.getCommand()));
+    public void onAuthenticationResult(int requestCode, int resultCode, Intent data) {
     }
 
     private void addVoiceView() {
@@ -433,40 +377,6 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
         mAudioPlayer.addCallback(mAudioPlayerCallback);
     }
 
-    private void initializeCommands() {
-        if (mCommands.isEmpty()) {
-            stream(D.getAll(Command.class))
-                    .filter(c -> c instanceof AlexaCommand)
-                    .forEach(c -> {
-                        PluginBus.plug(c);
-                        mCommands.add((AlexaCommand) c);
-                        Timber.i("loaded %s alexa command", c.getClass().getCanonicalName());
-                    });
-        }
-    }
-
-    private void initializePubSub() {
-        Timber.d("Initializing Pub/Sub module");
-
-        mEventManager.register(this);
-
-        Intent intent = new Intent(mAppManager.getAppContext(), AlexaCommandService.class)
-                .setAction(ALEXA_COMMAND_SERVICE_START)
-                .putExtra(PREF_COGNITO_POOL_ID, mCognitoPoolId)
-                .putExtra(PREF_IOT_ENDPOINT, mIotEndpoint)
-                .putExtra(PREF_IOT_TOPIC, mIotTopic);
-        mAppManager.getAppContext().startService(intent);
-    }
-
-    /**
-     * Load the configuration of the component.
-     */
-    private void loadConfiguration() {
-        mCognitoPoolId = mConfigurationManager.getString(PREF_COGNITO_POOL_ID, "");
-        mIotEndpoint = mConfigurationManager.getString(PREF_IOT_ENDPOINT, "");
-        mIotTopic = mConfigurationManager.getString(PREF_IOT_TOPIC, "");
-    }
-
     private void removeVoiceView() {
         Activity activity = mFeatureManager.getForegroundActivity();
         if (activity instanceof MainView) {
@@ -493,13 +403,5 @@ public class AlexaCommandManagerImpl extends AbstractMirrorManager implements Al
             mRecorder.release();
             mRecorder = null;
         }
-    }
-
-    private void stopPubSub() {
-        mEventManager.unregister(this);
-
-        Intent intent = new Intent(mAppManager.getAppContext(), AlexaCommandService.class)
-                .setAction(ALEXA_COMMAND_SERVICE_START);
-        mAppManager.getAppContext().startService(intent);
     }
 }

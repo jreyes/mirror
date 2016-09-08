@@ -28,12 +28,9 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.event.ApplicationEvent;
 import com.vaporwarecorp.mirror.event.UserInRangeEvent;
 import com.vaporwarecorp.mirror.event.UserOutOfRangeEvent;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import timber.log.Timber;
 
 import java.util.Collection;
@@ -111,12 +108,10 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
 
     @Override
     public void onFeatureStart() {
-        // register the EventManager
-        mEventManager.register(this);
-
         // if this manager hasn't been setup, then start the application by default
         if (isEmpty(mKitName) || isEmpty(mUserIdentifier) || isEmpty(mUserEmail) || isEmpty(mGlobalUserIdentifier) ||
                 isEmpty(mApiToken) || isEmpty(mKitUrl)) {
+            mEventManager.post(new UserInRangeEvent());
             return;
         }
 
@@ -143,13 +138,12 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
             beaconManager.getLicenseManager().reconfigure(new Configuration(mAppManager.getAppContext(), kitConfig));
         }
         mManager.setProximityKitRangeNotifier(this);
+        mManager.start();
+        mManager.sync();
     }
 
     @Override
     public void onFeatureStop() {
-        // unregister the EventManager
-        mEventManager.unregister(this);
-
         // if the manager is null then don't do anything
         if (mManager == null) {
             return;
@@ -196,20 +190,6 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
                 mEventManager.post(new UserOutOfRangeEvent());
             }
         }
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    @SuppressWarnings("unused")
-    public void onEvent(ApplicationEvent event) {
-        //if (mManager == null) {
-            mEventManager.post(new UserInRangeEvent());
-          //  return;
-        //}
-
-        //mManager.start();
-        //mManager.sync();
     }
 
     /**

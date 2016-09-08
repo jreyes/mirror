@@ -25,6 +25,8 @@ import com.robopupu.api.plugin.PlugInterface;
 public interface CommandManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
+    boolean isEnabled();
+
     void start();
 
     void stop();

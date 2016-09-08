@@ -23,7 +23,6 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
-import com.vaporwarecorp.mirror.feature.Command;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import timber.log.Timber;
@@ -60,6 +59,7 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
     private List<ClientMatch> mClientMatches;
     private Collection<HoundifyCommand> mCommands;
     private JsonNode mConversationState;
+    private boolean mEnabled;
     private Houndify mHoundify;
 
 // --------------------------- CONSTRUCTORS ---------------------------
@@ -75,8 +75,13 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
 // --------------------- Interface CommandManager ---------------------
 
     @Override
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    @Override
     public void start() {
-        if (isEmpty(mClientId) || isEmpty(mClientKey)) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -99,7 +104,9 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
 
     @Override
     public void voiceSearch() {
-        HoundifyVoiceSearchActivity.newInstance(mFeatureManager.getForegroundActivity());
+        if (isEnabled()) {
+            HoundifyVoiceSearchActivity.newInstance(mFeatureManager.getForegroundActivity());
+        }
     }
 
 // --------------------- Interface Configuration ---------------------
@@ -160,11 +167,6 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
         loadConfiguration();
     }
 
-    @Override
-    public void onUnplugged(PluginBus bus) {
-        PluginBus.unplug(Command.class);
-    }
-
     private void initializeCommands() {
         if (mCommands.isEmpty()) {
             for (HoundifyCommand command : D.getAll(HoundifyCommand.class)) {
@@ -191,6 +193,8 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
     private void loadConfiguration() {
         mClientId = mConfigurationManager.getString(PREF_CLIENT_ID, "");
         mClientKey = mConfigurationManager.getString(PREF_CLIENT_KEY, "");
+        mEnabled = !(isEmpty(mClientId) || isEmpty(mClientKey));
+        Timber.i("loaded HoundifyCommandManager configuration");
     }
 
     private void onError(String message) {

@@ -30,6 +30,7 @@ public class AlexaLoginActivity extends Activity {
 
     private static final int RESULT_LOGIN = 7887;
 
+    private WebView mWebView;
     private WebViewClient mWebViewClient = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -48,6 +49,20 @@ public class AlexaLoginActivity extends Activity {
         }
     };
 
+// -------------------------- OTHER METHODS --------------------------
+
+    @Override
+    public void finish() {
+        if (mWebView != null) {
+            mWebView.clearHistory();
+            mWebView.clearCache(true);
+            mWebView.loadUrl("about:blank");
+            mWebView.pauseTimers();
+            mWebView = null;
+        }
+        super.finish();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -64,9 +79,9 @@ public class AlexaLoginActivity extends Activity {
         // Get the intent that started this activity
         Uri data = getIntent().getData();
         if (data != null) {
-            WebView webView = (WebView) findViewById(R.id.webview);
-            webView.setWebViewClient(mWebViewClient);
-            webView.loadUrl(data.toString());
+            mWebView = (WebView) findViewById(R.id.webview);
+            mWebView.setWebViewClient(mWebViewClient);
+            mWebView.loadUrl(data.toString());
         } else {
             finish();
         }

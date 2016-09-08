@@ -155,8 +155,6 @@ dependencies {
         exclude group: 'commons-fileupload'
     }
     compile 'com.github.Kaljurand:speechutils:3cca49c288@aar'
-    compile 'com.amazonaws:aws-android-sdk-cognito:2.3.0'
-    compile 'com.amazonaws:aws-android-sdk-iot:2.3.0'
 
     testCompile "junit:junit:$JUNIT_VERSION"
 

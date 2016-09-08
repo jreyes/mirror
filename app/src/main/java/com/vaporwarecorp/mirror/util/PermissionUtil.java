@@ -17,13 +17,14 @@ package com.vaporwarecorp.mirror.util;
 
 
 import android.app.Activity;
-import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.*;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static solid.collectors.ToList.toList;
+import static solid.stream.Stream.stream;
 
 public class PermissionUtil {
 // ------------------------------ FIELDS ------------------------------
@@ -36,18 +37,12 @@ public class PermissionUtil {
 // -------------------------- STATIC METHODS --------------------------
 
     public static List<String> checkPermissions(Activity activity) {
-        List<String> neededPermissions = new ArrayList<>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (String permission : PERMISSIONS_REQUIRED) {
-                if (activity.checkSelfPermission(permission) != PERMISSION_GRANTED) {
-                    neededPermissions.add(permission);
-                }
-            }
-        }
-        return neededPermissions;
+        return stream(PERMISSIONS_REQUIRED)
+                .filter(p -> ActivityCompat.checkSelfPermission(activity, p) != PERMISSION_GRANTED)
+                .collect(toList());
     }
 
     public static void requestPermissions(Activity activity, List<String> permissions) {
-        activity.requestPermissions(permissions.toArray(new String[permissions.size()]), REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, permissions.toArray(new String[permissions.size()]), REQUEST_CODE);
     }
 }

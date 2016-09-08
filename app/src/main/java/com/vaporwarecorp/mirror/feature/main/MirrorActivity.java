@@ -199,8 +199,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mPresenter.verifyPermissions();
+        mPresenter.tryToStart();
     }
 
     @Override
@@ -267,7 +266,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                     if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
                         MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
                         if (currentMirrorView != null) {
-                            mPresenter.removeView(currentMirrorView.presenterClass());
+                            //mPresenter.removeView(currentMirrorView.presenterClass());
                         }
                     }
                     mCurrentPresenterClass = mirrorView.presenterClass();
@@ -333,7 +332,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         // remove any full screen fragment before proceeding
         MirrorView fullScreenMirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
         if (fullScreenMirrorView != null) {
-            mPresenter.removeView(fullScreenMirrorView.presenterClass());
+            //mPresenter.removeView(fullScreenMirrorView.presenterClass());
         }
     }
 
@@ -365,7 +364,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                 mCurrentPresenterClass = null;
                 mCurrentContainerId = null;
             }
-            mPresenter.removeView(mirrorView.presenterClass());
+            //mPresenter.removeView(mirrorView.presenterClass());
         }
     }
 
@@ -428,7 +427,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @SuppressWarnings("unchecked")
     private void updateCurrentPresenterClass(Fragment fragment, int containerId) {
         if (mCurrentPresenterClass != null) {
-            mPresenter.removeView(mCurrentPresenterClass);
+            //mPresenter.removeView(mCurrentPresenterClass);
             mCurrentPresenterClass = null;
         }
 

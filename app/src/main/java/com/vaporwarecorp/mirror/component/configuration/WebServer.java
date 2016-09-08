@@ -64,6 +64,10 @@ public class WebServer extends NanoHTTPD {
 
 // -------------------------- OTHER METHODS --------------------------
 
+    public void refresh(List<Configuration> configurations) {
+        mConfigurations = configurations;
+    }
+
     @Override
     public Response serve(IHTTPSession session) {
         final String uri = session.getUri().substring(1);

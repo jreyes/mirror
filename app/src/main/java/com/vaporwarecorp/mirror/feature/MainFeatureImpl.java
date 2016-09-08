@@ -15,28 +15,25 @@
  */
 package com.vaporwarecorp.mirror.feature;
 
-import com.robopupu.api.dependency.D;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.feature.AbstractFeature;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
-import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.ApplicationEvent;
-import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import com.vaporwarecorp.mirror.feature.main.MainView;
-import com.vaporwarecorp.mirror.feature.splash.SplashPresenter;
 import timber.log.Timber;
 
 import static com.vaporwarecorp.mirror.event.ApplicationEvent.READY;
-import static solid.stream.Stream.stream;
 
 @Plugin
+@Scope(MirrorAppScope.class)
+@Provides(MainFeature.class)
 public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 // ------------------------------ FIELDS ------------------------------
 
@@ -49,11 +46,8 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    @Scope(MirrorAppScope.class)
-    @Provides(MainFeature.class)
     public MainFeatureImpl() {
         super(MainScope.class, true);
-        initializeManagers();
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -103,13 +97,6 @@ public class MainFeatureImpl extends AbstractFeature implements MainFeature {
     protected void onStart() {
         Timber.d("MainFeatureImpl.onStart");
         super.onStart();
-        showPresenter(SplashPresenter.class);
-    }
-
-    private void initializeManagers() {
-        stream(D.getAll(MirrorAppScope.class, MirrorManager.class, null)).forEach(value -> {
-            Timber.d("initializeManagers plugin %s", value.getClass().getName());
-            PluginBus.plug(value);
-        });
+        //showPresenter(SplashPresenter.class);
     }
 }

@@ -132,17 +132,6 @@ public interface AppManager extends Manager {
     OkHttpClient okHttpClient();
 
     /**
-     * Starts the specified {@link Activity}.
-     *
-     * @param intent An {@link Intent} specifying the {@link Activity} to be started.
-     */
-    void startActivity(Intent intent);
-
-    void startConfigurableFeature();
-
-    void startMainFeature();
-
-    /**
      * Start a service.
      */
     void startService(Class serviceClass, String action);

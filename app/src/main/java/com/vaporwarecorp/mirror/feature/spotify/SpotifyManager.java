@@ -16,14 +16,14 @@
 package com.vaporwarecorp.mirror.feature.spotify;
 
 import com.robopupu.api.plugin.PlugInterface;
-import com.vaporwarecorp.mirror.component.configuration.Configuration;
+import com.vaporwarecorp.mirror.component.WebAuthentication;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
 import kaaes.spotify.webapi.android.models.Track;
 
 import java.util.List;
 
 @PlugInterface
-public interface SpotifyManager extends MirrorManager, Configuration {
+public interface SpotifyManager extends MirrorManager, WebAuthentication {
 // ------------------------------ FIELDS ------------------------------
 
     int REQUEST_CODE = 1337;

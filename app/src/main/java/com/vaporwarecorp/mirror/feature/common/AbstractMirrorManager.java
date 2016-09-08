@@ -15,10 +15,16 @@
  */
 package com.vaporwarecorp.mirror.feature.common;
 
-import android.content.Intent;
 import com.robopupu.api.plugin.AbstractPluginComponent;
+import com.robopupu.api.plugin.PluginBus;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 public abstract class AbstractMirrorManager extends AbstractPluginComponent implements MirrorManager {
+// ------------------------------ FIELDS ------------------------------
+
+    private CompositeSubscription mCompositeSubscription;
+
 // ------------------------ INTERFACE METHODS ------------------------
 
 
@@ -26,10 +32,6 @@ public abstract class AbstractMirrorManager extends AbstractPluginComponent impl
 
     @Override
     public void onFeaturePause() {
-    }
-
-    @Override
-    public void onFeatureResult(int requestCode, int resultCode, Intent data) {
     }
 
     @Override
@@ -50,5 +52,29 @@ public abstract class AbstractMirrorManager extends AbstractPluginComponent impl
 
     @Override
     public void onViewStop() {
+    }
+
+// --------------------- Interface PluginComponent ---------------------
+
+    @Override
+    public void onPlugged(PluginBus bus) {
+        super.onPlugged(bus);
+        mCompositeSubscription = new CompositeSubscription();
+    }
+
+    @Override
+    public void onUnplugged(PluginBus bus) {
+        if (mCompositeSubscription != null && !mCompositeSubscription.isUnsubscribed()) {
+            mCompositeSubscription.unsubscribe();
+            mCompositeSubscription = null;
+        }
+        super.onUnplugged(bus);
+    }
+
+    protected void subscribe(Subscription subscription) {
+        if (mCompositeSubscription == null || mCompositeSubscription.isUnsubscribed()) {
+            return;
+        }
+        mCompositeSubscription.add(subscription);
     }
 }
