@@ -26,6 +26,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.vaporwarecorp.mirror.R;
+import com.vaporwarecorp.mirror.feature.common.MirrorView;
+
+import solid.functions.Action1;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -183,7 +186,7 @@ public class DottedGridView extends FrameLayout {
      */
     public void clear() {
         final BorderView[] views = mViews.toArray(new BorderView[mViews.size()]);
-        stream(views).forEach(this::notifyUpdateClose);
+        stream(views).forEach((Action1<BorderView>) this::notifyUpdateClose);
     }
 
     /**
@@ -209,6 +212,46 @@ public class DottedGridView extends FrameLayout {
         return -1;
     }
 
+    public boolean moveCenterToLeftContainer() {
+        for (BorderView borderView : mViews) {
+            if (!borderView.isLeftAligned() && !borderView.isRightAligned()) {
+                rearrangeLeftContainer(borderView);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean moveCenterToRightContainer() {
+        for (BorderView borderView : mViews) {
+            if (!borderView.isLeftAligned() && !borderView.isRightAligned()) {
+                rearrangeRightContainer(borderView);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean moveLeftToCenterContainer() {
+        for (BorderView borderView : mViews) {
+            if (borderView.isLeftAligned()) {
+                rearrangeCenterContainer(borderView);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean moveRightToCenterContainer() {
+        for (BorderView borderView : mViews) {
+            if (borderView.isRightAligned()) {
+                rearrangeCenterContainer(borderView);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Override method to intercept only touch events over the drag view and to cancel the drag when
      * the action associated to the MotionEvent is equals to ACTION_CANCEL or ACTION_UP.
@@ -225,7 +268,7 @@ public class DottedGridView extends FrameLayout {
         mDraggedView = null;
         stream(mViews)
                 .filter(v -> isViewHit(v, (int) ev.getX(), (int) ev.getY()))
-                .forEach((BorderView v) -> mDraggedView = v);
+                .forEach((Action1<BorderView>) v -> mDraggedView = v);
 
         final int actionMasked = MotionEventCompat.getActionMasked(ev);
         switch (actionMasked & MotionEventCompat.ACTION_MASK) {

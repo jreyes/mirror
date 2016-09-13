@@ -15,12 +15,8 @@
  */
 package com.vaporwarecorp.mirror.feature.alexa;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.RelativeLayout;
-import com.hound.android.fd.view.SearchPanelView;
+import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
@@ -29,10 +25,8 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
+import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
-import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
-import com.vaporwarecorp.mirror.feature.main.MainView;
-import com.vaporwarecorp.mirror.util.DisplayMetricsUtil;
 import com.willblaschko.android.alexa.AlexaManager;
 import com.willblaschko.android.alexa.audioplayer.AlexaAudioPlayer;
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
@@ -58,15 +52,11 @@ import java.io.IOException;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.hound.android.fd.view.SearchPanelView.State.LISTENING;
-import static com.hound.android.fd.view.SearchPanelView.State.SEARCHING;
-
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(AlexaCommandManager.class)
 public class AlexaCommandManagerImpl
-        extends AbstractMirrorManager
+        extends AbstractManager
         implements AlexaCommandManager {
 // ------------------------------ FIELDS ------------------------------
 
@@ -135,7 +125,7 @@ public class AlexaCommandManagerImpl
         }
     };
     private Deque<AvsItem> mAvsQueue;
-    private boolean mEnabled = true;
+    private boolean mEnabled;
     private RawAudioRecorder mRecorder;
     private DataRequestBody mRequestBody = new DataRequestBody() {
         @Override
@@ -144,13 +134,12 @@ public class AlexaCommandManagerImpl
             int count = 0;
             final long timeout = System.currentTimeMillis() + (90 * 1000);
             while (mRecorder != null && !mRecorder.isPausing()) {
-                final float rmsdb = mRecorder.getRmsdb();
-                Timber.d("Recorder rmsdb %s", rmsdb);
-                mSearchPanelView.setVolume(Math.round(rmsdb));
+                final int rmsdb = Math.round(mRecorder.getRmsdb());
+                mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_VOLUME, String.valueOf(rmsdb)));
                 if (sink != null) {
                     sink.write(mRecorder.consumeRecording());
                 }
-                if (rmsdb > 25F) {
+                if (rmsdb > 25) {
                     count = 0;
                 }
                 if (count > 400 || System.currentTimeMillis() > timeout) {
@@ -168,7 +157,6 @@ public class AlexaCommandManagerImpl
             stopListening();
         }
     };
-    private SearchPanelView mSearchPanelView;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -187,10 +175,18 @@ public class AlexaCommandManagerImpl
             return;
         }
 
+        // get our AlexaManager instance for convenience
         Timber.d("Starting Alexa commands");
-        //get our AlexaManager instance for convenience
+
+        // prepare our queue
+        mAvsQueue = new LinkedBlockingDeque<>();
+
+        // instantiate our audio player
+        mAudioPlayer = AlexaAudioPlayer.getInstance(mAppManager.getAppContext());
+        mAudioPlayer.addCallback(mAudioPlayerCallback);
+
+        // create the AlexaManager
         mAlexaManager = AlexaManager.getInstance(mAppManager.getAppContext(), "MirrorApp");
-        createSearchPanelView();
     }
 
     @Override
@@ -216,6 +212,7 @@ public class AlexaCommandManagerImpl
 
         mRecorder = new RawAudioRecorder(AUDIO_RATE);
         mRecorder.start();
+
         mAlexaManager.sendAudioRequest(mRequestBody, mAudioRequestCallback);
     }
 
@@ -230,10 +227,12 @@ public class AlexaCommandManagerImpl
 
             @Override
             public void onSuccess() {
+                mEnabled = true;
             }
 
             @Override
             public void onError(Exception e) {
+                mEnabled = false;
                 Timber.e(e, "Error trying to login to amazon");
             }
         });
@@ -242,7 +241,7 @@ public class AlexaCommandManagerImpl
     @Override
     public void isAuthenticated(@NotNull IsAuthenticatedCallback callback) {
         if (mAlexaManager == null) {
-            mAlexaManager = AlexaManager.getInstance(mAppManager.getAppContext(), "MirrorApp");
+            start();
         }
         mAlexaManager.checkLoggedIn(new AsyncCallback<Boolean, Throwable>() {
             @Override
@@ -252,6 +251,7 @@ public class AlexaCommandManagerImpl
             @Override
             public void success(Boolean result) {
                 Timber.d("checkLoggedIn success");
+                mEnabled = result;
                 callback.onResult(result);
             }
 
@@ -271,24 +271,14 @@ public class AlexaCommandManagerImpl
     }
 
     private void addVoiceView() {
-        Activity activity = mFeatureManager.getForegroundActivity();
-        if (activity instanceof MainView) {
-            Timber.d("Adding pulse view");
-            new Handler(Looper.getMainLooper())
-                    .post(() -> {
-                        if (mSearchPanelView.getParent() == null) {
-                            ((MainView) activity).getRootView().addView(mSearchPanelView);
-                        }
-                        mSearchPanelView.changeState(LISTENING, true);
-                    });
-        }
+        mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_START, KEYWORD_ALEXA));
     }
 
     private void checkQueue() {
         //if we're out of things, hang up the phone and move on
         if (mAvsQueue.size() == 0) {
-            mEventManager.post(new SpeechEvent(""));
             removeVoiceView();
+            mEventManager.post(new SpeechEvent(""));
             return;
         }
 
@@ -333,22 +323,13 @@ public class AlexaCommandManagerImpl
         }
     }
 
-    private void createSearchPanelView() {
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(MATCH_PARENT, DisplayMetricsUtil.convertDpToPixel(171f, mAppManager.getAppContext()));
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.bottomMargin = 0;
-
-        mSearchPanelView = new SearchPanelView(mAppManager.getAppContext());
-        mSearchPanelView.setLayoutParams(params);
-    }
-
     /**
      * Handle the response sent back from Alexa's parsing of the Intent, these can be any of the AvsItem types (play, speak, stop, clear, listen)
      *
      * @param response a List<AvsItem> returned from the mAlexaManager.sendTextRequest() call in sendVoiceToAlexa()
      */
     private void handleResponse(AvsResponse response) {
-        new Handler(Looper.getMainLooper()).post(() -> mSearchPanelView.changeState(SEARCHING, true));
+        mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_SEARCHING, KEYWORD_ALEXA));
 
         if (response != null) {
             //if we have a clear queue item in the list, we need to clear the current queue before proceeding
@@ -368,22 +349,8 @@ public class AlexaCommandManagerImpl
         checkQueue();
     }
 
-    private void initializeAlexa() {
-        Timber.d("Initializing Alexa module");
-        mAvsQueue = new LinkedBlockingDeque<>();
-
-        //instantiate our audio player
-        mAudioPlayer = AlexaAudioPlayer.getInstance(mAppManager.getAppContext());
-        mAudioPlayer.addCallback(mAudioPlayerCallback);
-    }
-
     private void removeVoiceView() {
-        Activity activity = mFeatureManager.getForegroundActivity();
-        if (activity instanceof MainView) {
-            Timber.d("Removing pulse view");
-            new Handler(Looper.getMainLooper())
-                    .post(() -> ((MainView) activity).getRootView().removeView(mSearchPanelView));
-        }
+        mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_STOP, KEYWORD_ALEXA));
     }
 
     private void setState(final int state) {

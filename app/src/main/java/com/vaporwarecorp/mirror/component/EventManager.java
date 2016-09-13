@@ -31,11 +31,7 @@ public interface EventManager extends Manager {
 
     void register(Presenter presenter);
 
-    void register(Feature feature);
-
     void unregister(Manager manager);
 
     void unregister(Presenter presenter);
-
-    void unregister(Feature feature);
 }

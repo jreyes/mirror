@@ -1,5 +1,5 @@
 {
-  "component": "com.vaporwarecorp.mirror.component.CommandManager",
+  "component": "com.vaporwarecorp.mirror.feature.houndify.HoundifyCommandManager",
   "schema": {
     "type": "object",
     "title": "Houndify Configuration",

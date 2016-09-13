@@ -19,6 +19,7 @@ public class ApplicationEvent implements Event {
 // ------------------------------ FIELDS ------------------------------
 
     public static final String READY = "READY";
+    public static final String TRY_TO_START = "TRY_TO_START";
 
     private final String type;
 

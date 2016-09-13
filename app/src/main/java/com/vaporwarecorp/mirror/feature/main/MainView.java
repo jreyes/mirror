@@ -17,7 +17,7 @@ package com.vaporwarecorp.mirror.feature.main;
 
 import android.app.Activity;
 import android.widget.RelativeLayout;
-import com.robopupu.api.feature.FeatureContainer;
+
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.mvp.View;
 import com.robopupu.api.plugin.PlugInterface;
@@ -29,19 +29,31 @@ public interface MainView extends View {
 
     Activity activity();
 
+    void displaySearchPanel();
+
+    void displaySearchPanelSearching();
+
     void displayView();
 
     void finish();
 
-    FeatureContainer getMainFeatureContainer();
-
     Class<? extends Presenter> getMainPresenterClass();
 
-    RelativeLayout getRootView();
+    void hideSearchPanel();
 
     void hideView();
 
     boolean isKeywordSpotting();
+
+    void moveCenterToLeftContainer();
+
+    void moveCenterToRightContainer();
+
+    void moveLeftToCenterContainer();
+
+    void moveRightToCenterContainer();
+
+    void searchPanelVolume(int volume);
 
     void setForecast(Forecast forecast);
 

@@ -19,12 +19,13 @@ import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
-import com.robopupu.api.feature.Feature;
 import com.robopupu.api.mvp.Presenter;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.event.Event;
+
 import org.greenrobot.eventbus.EventBus;
+
 import timber.log.Timber;
 
 @Plugin
@@ -51,7 +52,10 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
 
     @Override
     public void post(Event event) {
-        Timber.d("posting %s", event.getClass().getSimpleName());
+        final String className = event.getClass().getSimpleName();
+        if (!"CommandEvent".equals(className)) {
+            Timber.d("posting %s", event.toString());
+        }
         mEventBus.post(event);
     }
 
@@ -62,12 +66,9 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
 
     @Override
     public void register(Presenter presenter) {
-        mEventBus.register(presenter);
-    }
-
-    @Override
-    public void register(Feature feature) {
-        mEventBus.register(feature);
+        if (!mEventBus.isRegistered(presenter)) {
+            mEventBus.register(presenter);
+        }
     }
 
     @Override
@@ -78,10 +79,5 @@ public class EventManagerImpl extends AbstractManager implements EventManager {
     @Override
     public void unregister(Presenter presenter) {
         mEventBus.unregister(presenter);
-    }
-
-    @Override
-    public void unregister(Feature feature) {
-        mEventBus.unregister(feature);
     }
 }

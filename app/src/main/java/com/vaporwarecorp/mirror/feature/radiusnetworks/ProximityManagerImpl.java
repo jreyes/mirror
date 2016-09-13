@@ -15,10 +15,14 @@
  */
 package com.vaporwarecorp.mirror.feature.radiusnetworks;
 
+import android.support.annotation.NonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.radiusnetworks.proximity.*;
-import com.radiusnetworks.proximity.beacon.BeaconManager;
-import com.radiusnetworks.proximity.licensing.Configuration;
+import com.radiusnetworks.proximity.KitConfig;
+import com.radiusnetworks.proximity.ProximityKitBeacon;
+import com.radiusnetworks.proximity.ProximityKitBeaconRegion;
+import com.radiusnetworks.proximity.ProximityKitManager;
+import com.radiusnetworks.proximity.ProximityKitRangeNotifier;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
@@ -28,13 +32,18 @@ import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.ConfigurationManager;
 import com.vaporwarecorp.mirror.component.EventManager;
+import com.vaporwarecorp.mirror.event.ProximityEvent;
 import com.vaporwarecorp.mirror.event.UserInRangeEvent;
 import com.vaporwarecorp.mirror.event.UserOutOfRangeEvent;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
-import timber.log.Timber;
+
+import org.altbeacon.beacon.service.RangedBeacon;
 
 import java.util.Collection;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
+
+import timber.log.Timber;
 
 import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -45,15 +54,12 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class ProximityManagerImpl extends AbstractMirrorManager implements ProximityManager, ProximityKitRangeNotifier {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final int BEACON_MAX_DISTANCE = 2;
-    private static final int BEACON_MAX_RETRIES = 5;
+    private static final double BEACON_MAX_DISTANCE = 8.0;
+    private static final int BEACON_MAX_RETRIES = 10;
+    private static final double BEACON_SHARE_DISTANCE = 1.85;
     private static final String PREF = ProximityManager.class.getName();
     private static final String PREF_API_TOKEN = PREF + ".PREF_API_TOKEN";
-    private static final String PREF_GLOBAL_USER_IDENTIFIER = PREF + ".PREF_GLOBAL_USER_IDENTIFIER";
-    private static final String PREF_KIT_NAME = PREF + ".PREF_KIT_NAME";
     private static final String PREF_KIT_URL = PREF + ".PREF_KIT_URL";
-    private static final String PREF_USER_EMAIL = PREF + ".PREF_USER_EMAIL";
-    private static final String PREF_USER_IDENTIFIER = PREF + ".PREF_USER_IDENTIFIER";
 
     @Plug
     AppManager mAppManager;
@@ -64,13 +70,10 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
 
     private String mApiToken;
     private int mBeaconRetries;
-    private String mGlobalUserIdentifier;
     private boolean mInRange;
-    private String mKitName;
+    private boolean mInSharingRange;
     private String mKitUrl;
     private ProximityKitManager mManager;
-    private String mUserEmail;
-    private String mUserIdentifier;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -84,21 +87,13 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
 
     @Override
     public String getJsonValues() {
-        return createTextNode("kitName", mKitName)
-                .put("useIdentifier", mUserIdentifier)
-                .put("userEmail", mUserEmail)
-                .put("globalUserIdentifier", mGlobalUserIdentifier)
-                .put("apiToken", mApiToken)
+        return createTextNode("apiToken", mApiToken)
                 .put("kitUrl", mKitUrl)
                 .toString();
     }
 
     @Override
     public void updateConfiguration(JsonNode jsonNode) {
-        mConfigurationManager.updateString(PREF_KIT_NAME, jsonNode, "kitName");
-        mConfigurationManager.updateString(PREF_USER_IDENTIFIER, jsonNode, "useIdentifier");
-        mConfigurationManager.updateString(PREF_USER_EMAIL, jsonNode, "userEmail");
-        mConfigurationManager.updateString(PREF_GLOBAL_USER_IDENTIFIER, jsonNode, "globalUserIdentifier");
         mConfigurationManager.updateString(PREF_API_TOKEN, jsonNode, "apiToken");
         mConfigurationManager.updateString(PREF_KIT_URL, jsonNode, "kitUrl");
         loadConfiguration();
@@ -108,9 +103,10 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
 
     @Override
     public void onFeatureStart() {
+        Timber.d("onFeatureStart");
+
         // if this manager hasn't been setup, then start the application by default
-        if (isEmpty(mKitName) || isEmpty(mUserIdentifier) || isEmpty(mUserEmail) || isEmpty(mGlobalUserIdentifier) ||
-                isEmpty(mApiToken) || isEmpty(mKitUrl)) {
+        if (isEmpty(mApiToken) || isEmpty(mKitUrl)) {
             mEventManager.post(new UserInRangeEvent());
             return;
         }
@@ -118,32 +114,37 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
         // reset some variables
         mBeaconRetries = 0;
         mInRange = false;
+        mInSharingRange = false;
 
         // create a Properties object to initialize the ProximityKitManager
-        final Properties properties = new Properties();
-        properties.put("PKKitName", mKitName);
-        properties.put("PKUserIdentifier", mUserIdentifier);
-        properties.put("PKUserEmail", mUserEmail);
-        properties.put("PKGlobalUserIdentifier", mGlobalUserIdentifier);
-        properties.put("PKAPIToken", mApiToken);
-        properties.put("PKKitURL", mKitUrl);
+        final Map<String, String> settings = new HashMap<>();
+        settings.put(KitConfig.CONFIG_API_URL, mKitUrl);
+        settings.put(KitConfig.CONFIG_API_TOKEN, mApiToken);
 
         // start the ProximityKitManager
-        final KitConfig kitConfig = new KitConfig(properties);
         if (mManager == null) {
+            final KitConfig kitConfig = new KitConfig(settings);
             mManager = ProximityKitManager.getInstance(mAppManager.getAppContext(), kitConfig);
+            mManager.getBeaconManager().setForegroundScanPeriod(2000L);
+            mManager.sync();
+
+            RangedBeacon.setSampleExpirationMilliseconds(2000L);
+        }
+
+        mManager.setProximityKitRangeNotifier(this);
+        mManager.start();
+            /*
         } else {
-            BeaconManager beaconManager = BeaconManager.getInstanceForApplication(mAppManager.getAppContext());
             beaconManager.licenseChanged(mAppManager.getAppContext());
             beaconManager.getLicenseManager().reconfigure(new Configuration(mAppManager.getAppContext(), kitConfig));
         }
-        mManager.setProximityKitRangeNotifier(this);
-        mManager.start();
-        mManager.sync();
+        */
     }
 
     @Override
     public void onFeatureStop() {
+        Timber.d("onFeatureStop");
+
         // if the manager is null then don't do anything
         if (mManager == null) {
             return;
@@ -165,29 +166,47 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
 // --------------------- Interface ProximityKitRangeNotifier ---------------------
 
     @Override
-    public void didRangeBeaconsInRegion(Collection<ProximityKitBeacon> beacons, ProximityKitBeaconRegion region) {
+    public void didRangeBeaconsInRegion(@NonNull Collection<ProximityKitBeacon> beacons,
+                                        @NonNull ProximityKitBeaconRegion region) {
         if (beacons.size() == 0) {
-            mBeaconRetries++;
             if (mInRange && mBeaconRetries > BEACON_MAX_RETRIES) {
-                mInRange = false;
                 Timber.d("beacons.size() == 0");
+                mInRange = false;
+                mInSharingRange = false;
                 mEventManager.post(new UserOutOfRangeEvent());
             }
+            mBeaconRetries++;
             return;
         }
 
         mBeaconRetries = 0;
 
         for (ProximityKitBeacon beacon : beacons) {
-            if (!mInRange && beacon.getDistance() < BEACON_MAX_DISTANCE) {
-                Timber.d("UserInRangeEvent - beacons.getDistance() = %s", beacon.getDistance());
+            double distance = beacon.getDistance();
+            if (!mInRange && distance < BEACON_MAX_DISTANCE) {
+                Timber.d("UserInRangeEvent - beacons.getDistance() = %s", distance);
                 mInRange = true;
                 mEventManager.post(new UserInRangeEvent());
             }
-            if (mInRange && beacon.getDistance() >= BEACON_MAX_DISTANCE) {
-                Timber.d("UserOutOfRangeEvent - beacons.getDistance() = %s", beacon.getDistance());
-                mInRange = false;
-                mEventManager.post(new UserOutOfRangeEvent());
+            if (mInRange) {
+                if (!mInSharingRange && distance < BEACON_SHARE_DISTANCE) {
+                    Timber.d("BEACON_SHARE_DISTANCE - in distance");
+                    mInSharingRange = true;
+                    mEventManager.post(new ProximityEvent(ProximityEvent.SHARE_START));
+                }
+                if (mInSharingRange && distance >= BEACON_SHARE_DISTANCE) {
+                    Timber.d("BEACON_SHARE_DISTANCE - out distance");
+                    mInSharingRange = false;
+                }
+            }
+            if (mInRange && distance >= BEACON_MAX_DISTANCE) {
+                if (mBeaconRetries > BEACON_MAX_RETRIES) {
+                    Timber.d("UserOutOfRangeEvent - beacons.getDistance() = %s", distance);
+                    mInRange = false;
+                    mInSharingRange = false;
+                    mEventManager.post(new UserOutOfRangeEvent());
+                }
+                mBeaconRetries++;
             }
         }
     }
@@ -196,10 +215,6 @@ public class ProximityManagerImpl extends AbstractMirrorManager implements Proxi
      * Load the configuration of the component.
      */
     private void loadConfiguration() {
-        mKitName = mConfigurationManager.getString(PREF_KIT_NAME, "");
-        mUserIdentifier = mConfigurationManager.getString(PREF_USER_IDENTIFIER, "");
-        mUserEmail = mConfigurationManager.getString(PREF_USER_EMAIL, "");
-        mGlobalUserIdentifier = mConfigurationManager.getString(PREF_GLOBAL_USER_IDENTIFIER, "");
         mApiToken = mConfigurationManager.getString(PREF_API_TOKEN, "");
         mKitUrl = mConfigurationManager.getString(PREF_KIT_URL, "");
     }

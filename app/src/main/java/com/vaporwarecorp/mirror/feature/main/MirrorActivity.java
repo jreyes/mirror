@@ -15,16 +15,21 @@
  */
 package com.vaporwarecorp.mirror.feature.main;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import com.robopupu.api.feature.FeatureContainer;
+
+import com.hound.android.fd.view.SearchPanelView;
 import com.robopupu.api.feature.FeatureView;
 import com.robopupu.api.mvp.PluginActivity;
 import com.robopupu.api.mvp.Presenter;
@@ -43,6 +48,9 @@ import com.vaporwarecorp.mirror.feature.common.MirrorView;
 import com.vaporwarecorp.mirror.feature.forecast.ForecastView;
 import com.vaporwarecorp.mirror.feature.forecast.model.Forecast;
 import com.vaporwarecorp.mirror.util.FullScreenUtil;
+
+import static com.hound.android.fd.view.SearchPanelView.State.LISTENING;
+import static com.hound.android.fd.view.SearchPanelView.State.SEARCHING;
 
 @Plugin
 public class MirrorActivity extends PluginActivity<MainPresenter> implements MainView {
@@ -64,7 +72,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     private ForecastView mForecastView;
     private FrameLayout mFullscreenContainer;
     private View mHeaderContainer;
-    private RelativeLayout mRootView;
+    private SearchPanelView mSearchPanelView;
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -122,15 +130,21 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
     @Override
+    public void displaySearchPanel() {
+        mSearchPanelView.changeState(LISTENING, true);
+        mSearchPanelView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void displaySearchPanelSearching() {
+        mSearchPanelView.changeState(SEARCHING, true);
+    }
+
+    @Override
     public void displayView() {
         mHeaderContainer.setVisibility(View.VISIBLE);
         mContentContainer.setVisibility(View.VISIBLE);
         hideFullScreenView();
-    }
-
-    @Override
-    public FeatureContainer getMainFeatureContainer() {
-        return this;
     }
 
     @Override
@@ -157,8 +171,8 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     }
 
     @Override
-    public RelativeLayout getRootView() {
-        return mRootView;
+    public void hideSearchPanel() {
+        mSearchPanelView.setVisibility(View.GONE);
     }
 
     @Override
@@ -171,6 +185,45 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @Override
     public boolean isKeywordSpotting() {
         return mCommandView.isMicrophoneOn();
+    }
+
+    @Override
+    public void moveCenterToLeftContainer() {
+        int containerId = mCurrentContainerId;
+        if (mContentContainer.moveCenterToLeftContainer()) {
+            ViewCompat.postInvalidateOnAnimation(mContentContainer);
+            getMirrorViewByContainerId(containerId).onMinimize();
+        }
+    }
+
+    @Override
+    public void moveCenterToRightContainer() {
+        int containerId = mCurrentContainerId;
+        if (mContentContainer.moveCenterToRightContainer()) {
+            ViewCompat.postInvalidateOnAnimation(mContentContainer);
+            getMirrorViewByContainerId(containerId).onMinimize();
+        }
+    }
+
+    @Override
+    public void moveLeftToCenterContainer() {
+        if (mContentContainer.moveLeftToCenterContainer()) {
+            ViewCompat.postInvalidateOnAnimation(mContentContainer);
+            getMirrorViewByContainerId(mCurrentContainerId).onMaximize();
+        }
+    }
+
+    @Override
+    public void moveRightToCenterContainer() {
+        if (mContentContainer.moveRightToCenterContainer()) {
+            ViewCompat.postInvalidateOnAnimation(mContentContainer);
+            getMirrorViewByContainerId(mCurrentContainerId).onMaximize();
+        }
+    }
+
+    @Override
+    public void searchPanelVolume(int volume) {
+        mSearchPanelView.setVolume(volume);
     }
 
     @Override
@@ -215,12 +268,15 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         super.onCreate(inState);
         setContentView(R.layout.activity_mirror);
 
-        mRootView = (RelativeLayout) findViewById(R.id.root_view);
         mHeaderContainer = findViewById(R.id.header_container);
         mCommandView = (CommandView) findViewById(R.id.command_view);
         mContentContainer = (DottedGridView) findViewById(R.id.content_container);
         mFullscreenContainer = (FrameLayout) findViewById(R.id.fullscreen_container);
         mForecastView = (ForecastView) findViewById(R.id.forecast_view);
+        mSearchPanelView = (SearchPanelView) findViewById(R.id.search_panel_view);
+
+        findViewById(R.id.test1).setOnClickListener(v -> mPresenter.test1());
+        findViewById(R.id.test2).setOnClickListener(v -> mPresenter.test2());
     }
 
     @Override
@@ -260,18 +316,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
 
             @Override
             public void onMaximize(int containerId) {
-                MirrorView mirrorView = getMirrorViewByContainerId(containerId);
-                if (mirrorView != null) {
-                    mirrorView.onMaximize();
-                    if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
-                        MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
-                        if (currentMirrorView != null) {
-                            //mPresenter.removeView(currentMirrorView.presenterClass());
-                        }
-                    }
-                    mCurrentPresenterClass = mirrorView.presenterClass();
-                    mCurrentContainerId = containerId;
-                }
+                maximizeMirrorView(containerId);
             }
 
             @Override
@@ -284,6 +329,21 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                 minimizeMirrorView(containerId);
             }
         });
+    }
+
+    private void maximizeMirrorView(int containerId) {
+        MirrorView mirrorView = getMirrorViewByContainerId(containerId);
+        if (mirrorView != null) {
+            mirrorView.onMaximize();
+            if (mCurrentPresenterClass != null && !mCurrentPresenterClass.equals(mirrorView.presenterClass())) {
+                MirrorView currentMirrorView = getMirrorViewByContainerId(mCurrentContainerId);
+                if (currentMirrorView != null) {
+                    mPresenter.removeView(currentMirrorView.presenterClass());
+                }
+            }
+            mCurrentPresenterClass = mirrorView.presenterClass();
+            mCurrentContainerId = containerId;
+        }
     }
 
     private MirrorView getMirrorViewByContainerId(int containerId) {
@@ -332,7 +392,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
         // remove any full screen fragment before proceeding
         MirrorView fullScreenMirrorView = getMirrorViewByContainerId(mFullscreenContainer.getId());
         if (fullScreenMirrorView != null) {
-            //mPresenter.removeView(fullScreenMirrorView.presenterClass());
+            mPresenter.removeView(fullScreenMirrorView.presenterClass());
         }
     }
 
@@ -364,7 +424,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
                 mCurrentPresenterClass = null;
                 mCurrentContainerId = null;
             }
-            //mPresenter.removeView(mirrorView.presenterClass());
+            mPresenter.removeView(mirrorView.presenterClass());
         }
     }
 
@@ -427,7 +487,7 @@ public class MirrorActivity extends PluginActivity<MainPresenter> implements Mai
     @SuppressWarnings("unchecked")
     private void updateCurrentPresenterClass(Fragment fragment, int containerId) {
         if (mCurrentPresenterClass != null) {
-            //mPresenter.removeView(mCurrentPresenterClass);
+            mPresenter.removeView(mCurrentPresenterClass);
             mCurrentPresenterClass = null;
         }
 

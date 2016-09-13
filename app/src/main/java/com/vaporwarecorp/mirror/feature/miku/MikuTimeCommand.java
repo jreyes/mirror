@@ -23,20 +23,20 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
-import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
 import com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter;
+import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextCommand;
 
 import java.util.Random;
 
 import static com.vaporwarecorp.mirror.feature.common.presenter.YoutubePresenter.YOUTUBE_VIDEO_ID;
 
 @Plugin
-public class MikuTimeCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
+public class MikuTimeCommand extends AbstractHoundifyCommand implements HoundifyCommand, SpeechToTextCommand {
 // ------------------------------ FIELDS ------------------------------
 
     private static final String COMMAND_EXPRESSION = "miku time";
@@ -60,20 +60,6 @@ public class MikuTimeCommand extends AbstractHoundifyCommand implements Houndify
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface AlexaCommand ---------------------
-
-    @Override
-    public void executeCommand(String command) {
-        final String youtubeVideoId = MIKU_VIDEO_IDS[new Random().nextInt(MIKU_VIDEO_IDS.length)];
-        mEventManager.post(new SpeechEvent(""));
-        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, youtubeVideoId));
-    }
-
-    @Override
-    public boolean matches(String command) {
-        return COMMAND_EXPRESSION.equals(command);
-    }
-
 // --------------------- Interface HoundifyCommand ---------------------
 
     @Override
@@ -86,5 +72,19 @@ public class MikuTimeCommand extends AbstractHoundifyCommand implements Houndify
     @Override
     public String getCommandTypeValue() {
         return COMMAND_INTENT;
+    }
+
+// --------------------- Interface SpeechToTextCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        final String youtubeVideoId = MIKU_VIDEO_IDS[new Random().nextInt(MIKU_VIDEO_IDS.length)];
+        mEventManager.post(new SpeechEvent(""));
+        mFeature.showPresenter(YoutubePresenter.class, new Params(YOUTUBE_VIDEO_ID, youtubeVideoId));
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return COMMAND_EXPRESSION.equalsIgnoreCase(command);
     }
 }

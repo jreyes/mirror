@@ -15,6 +15,8 @@
  */
 package com.vaporwarecorp.mirror.feature.spotify;
 
+import android.content.Intent;
+
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
 import com.robopupu.api.mvp.View;
@@ -23,9 +25,12 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.ResetEvent;
-import kaaes.spotify.webapi.android.models.Track;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import kaaes.spotify.webapi.android.models.Track;
 
 @Plugin
 @Provides(SpotifyPresenter.class)
@@ -48,6 +53,17 @@ public class SpotifyPresenterImpl extends AbstractFeaturePresenter<SpotifyView> 
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
         plug(SpotifyView.class);
+    }
+
+// --------------------- Interface Shareable ---------------------
+
+    @Override
+    public Map<String, Object> content() {
+        final Map<String, Object> content = new HashMap<>();
+        content.put(ACTION, Intent.ACTION_VIEW);
+        content.put(URL, mSpotifyManger.getCurrentUri());
+        mEventManager.post(new ResetEvent(SpotifyPresenter.class));
+        return content;
     }
 
 // --------------------- Interface SpotifyPresenter ---------------------

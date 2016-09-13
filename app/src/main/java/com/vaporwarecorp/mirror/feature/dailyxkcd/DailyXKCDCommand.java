@@ -23,23 +23,23 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
-import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
+import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextCommand;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(Command.class)
-public class DailyXKCDCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
+public class DailyXKCDCommand extends AbstractHoundifyCommand implements HoundifyCommand, SpeechToTextCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String ALEXA_COMMAND_EXPRESSION = "xkcd";
     private static final String COMMAND_EXPRESSION = "((\"show\"|\"display\").(\"xkcd\"|\"x k c d\"|\"x. k. c. d.\"))";
     private static final String COMMAND_INTENT = "DailyXKCD";
     private static final String COMMAND_RESPONSE = "Displaying the daily XKCD";
+    private static final String GOOGLE_COMMAND_EXPRESSION = "display xkcd";
 
     @Plug
     EventManager mEventManager;
@@ -55,19 +55,6 @@ public class DailyXKCDCommand extends AbstractHoundifyCommand implements Houndif
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface AlexaCommand ---------------------
-
-    @Override
-    public void executeCommand(String command) {
-        mEventManager.post(new SpeechEvent(""));
-        mFeature.showPresenter(DailyXKCDPresenter.class);
-    }
-
-    @Override
-    public boolean matches(String command) {
-        return ALEXA_COMMAND_EXPRESSION.equals(command);
-    }
-
 // --------------------- Interface HoundifyCommand ---------------------
 
     @Override
@@ -79,5 +66,18 @@ public class DailyXKCDCommand extends AbstractHoundifyCommand implements Houndif
     @Override
     public String getCommandTypeValue() {
         return COMMAND_INTENT;
+    }
+
+// --------------------- Interface SpeechToTextCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mEventManager.post(new SpeechEvent(""));
+        mFeature.showPresenter(DailyXKCDPresenter.class);
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return GOOGLE_COMMAND_EXPRESSION.equalsIgnoreCase(command);
     }
 }

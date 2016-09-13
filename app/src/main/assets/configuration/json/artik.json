@@ -1,0 +1,49 @@
+{
+  "component": "com.vaporwarecorp.mirror.feature.artik.ArtikManager",
+  "schema": {
+    "type": "object",
+    "title": "Artik Cloud Configuration",
+    "required": [
+      "applicationId",
+      "controlDeviceId",
+      "sidekickDeviceId"
+    ],
+    "properties": {
+      "applicationId": {
+        "title": "Application ID",
+        "type": "string"
+      },
+      "controlDeviceId": {
+        "title": "Control Device ID",
+        "type": "string"
+      },
+      "sidekickDeviceId": {
+        "title": "Sidekick Device ID",
+        "type": "string"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<h3>Artik Cloud Configuration</h3><p>Enter here your API key from <a href=\"http://www.forecast.io\">http://www.forecast.io</a>.</p>"
+    },
+    {
+      "key": "applicationId",
+      "type": "string"
+    },
+    {
+      "key": "controlDeviceId",
+      "type": "string"
+    },
+    {
+      "key": "sidekickDeviceId",
+      "type": "string"
+    },
+    {
+      "type": "submit",
+      "style": "btn-info",
+      "title": "Next"
+    }
+  ]
+}

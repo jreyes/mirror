@@ -17,12 +17,13 @@ package com.vaporwarecorp.mirror.component;
 
 import com.robopupu.api.component.Manager;
 import com.robopupu.api.plugin.PlugInterface;
+import rx.Observable;
 
 @PlugInterface
 public interface SoundManager extends Manager {
 // -------------------------- OTHER METHODS --------------------------
 
-    void acknowledge(Listener listener);
+    Observable<Long> acknowledge();
 
     void error();
 
@@ -30,7 +31,7 @@ public interface SoundManager extends Manager {
 
     boolean requestAudioFocus();
 
-    interface Listener {
-        void onCompleted();
-    }
+    void volumeDown();
+
+    void volumeUp();
 }

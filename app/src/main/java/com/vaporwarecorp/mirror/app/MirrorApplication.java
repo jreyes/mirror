@@ -30,8 +30,6 @@ import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.vaporwarecorp.mirror.app.error.MirrorAppError;
 import com.vaporwarecorp.mirror.component.*;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommandManager;
-import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommandManager;
 import timber.log.Timber;
 
 import java.io.File;
@@ -89,10 +87,9 @@ public class MirrorApplication extends BaseApplication {
         PluginBus.plug(AppManager.class);
         PluginBus.plug(PreferenceManager.class);
         PluginBus.plug(ConfigurationManager.class);
-        PluginBus.plug(AlexaCommandManager.class);
-        PluginBus.plug(HoundifyCommandManager.class);
         PluginBus.plug(EventManager.class);
         PluginBus.plug(SoundManager.class);
+        PluginBus.plug(WebAuthentication.class);
 
         final PluginFeatureManager featureManager = PluginBus.plug(PluginFeatureManager.class);
         registerActivityLifecycleCallbacks(featureManager.getActivityLifecycleCallback());

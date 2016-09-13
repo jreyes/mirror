@@ -23,6 +23,12 @@ import com.robopupu.api.plugin.PlugInterface;
  */
 @PlugInterface
 public interface CommandManager extends Manager {
+// ------------------------------ FIELDS ------------------------------
+
+    String KEYWORD_ALEXA = "alexa";
+    String KEYWORD_GOOGLE = "computer";
+    String KEYWORD_HOUNDIFY = "houndify";
+
 // -------------------------- OTHER METHODS --------------------------
 
     boolean isEnabled();

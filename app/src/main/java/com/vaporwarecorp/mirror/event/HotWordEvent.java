@@ -19,9 +19,9 @@ public class HotWordEvent implements Event {
 // ------------------------------ FIELDS ------------------------------
 
     public static int TYPE_ALEXA = 2;
+    public static int TYPE_GOOGLE = 1;
     public static int TYPE_HOUNDIFY = 3;
     public static int TYPE_NONE = 0;
-    public static int TYPE_POCKET_SPHINX = 1;
 
     private final int type;
 

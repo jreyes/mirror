@@ -17,9 +17,10 @@ package com.vaporwarecorp.mirror.feature.common.presenter;
 
 import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.Shareable;
 
 @PlugInterface
-public interface MapPresenter extends FeaturePresenter {
+public interface MapPresenter extends FeaturePresenter, Shareable {
 // ------------------------------ FIELDS ------------------------------
 
     String MAP_FROM_LATITUDE = "MAP_FROM_LATITUDE";

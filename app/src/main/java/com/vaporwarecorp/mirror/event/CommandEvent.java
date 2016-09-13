@@ -18,8 +18,12 @@ package com.vaporwarecorp.mirror.event;
 public class CommandEvent implements Event {
 // ------------------------------ FIELDS ------------------------------
 
-    public static final String TYPE_COMMAND_SUCCESS = "TYPE_COMMAND_SUCCESS";
     public static final String TYPE_COMMAND_ERROR = "TYPE_COMMAND_ERROR";
+    public static final String TYPE_COMMAND_SEARCHING = "TYPE_COMMAND_SEARCHING";
+    public static final String TYPE_COMMAND_START = "TYPE_COMMAND_START";
+    public static final String TYPE_COMMAND_STOP = "TYPE_COMMAND_STOP";
+    public static final String TYPE_COMMAND_SUCCESS = "TYPE_COMMAND_SUCCESS";
+    public static final String TYPE_COMMAND_VOLUME = "TYPE_COMMAND_VOLUME";
 
     private final String message;
     private final String type;

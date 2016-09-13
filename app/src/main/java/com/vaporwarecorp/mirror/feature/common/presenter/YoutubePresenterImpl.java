@@ -15,6 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.common.presenter;
 
+import android.content.Intent;
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.feature.AbstractFeaturePresenter;
 import com.robopupu.api.mvp.View;
@@ -25,10 +26,15 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.ResetEvent;
 import com.vaporwarecorp.mirror.feature.common.view.YoutubeView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Plugin
 @Provides(YoutubePresenter.class)
 public class YoutubePresenterImpl extends AbstractFeaturePresenter<YoutubeView> implements YoutubePresenter {
 // ------------------------------ FIELDS ------------------------------
+
+    private static final String YOUTUBE_URL = "https://youtu.be/%s";
 
     @Plug
     EventManager mEventManager;
@@ -44,6 +50,17 @@ public class YoutubePresenterImpl extends AbstractFeaturePresenter<YoutubeView> 
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
         plug(YoutubeView.class);
+    }
+
+// --------------------- Interface Shareable ---------------------
+
+    @Override
+    public Map<String, Object> content() {
+        final String youtubeVideoId = getParams().getString(YOUTUBE_VIDEO_ID);
+        final Map<String, Object> content = new HashMap<>();
+        content.put(ACTION, Intent.ACTION_VIEW);
+        content.put(URL, String.format(YOUTUBE_URL, youtubeVideoId));
+        return content;
     }
 
 // --------------------- Interface ViewObserver ---------------------

@@ -18,7 +18,6 @@ package com.vaporwarecorp.mirror.component;
 
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.D;
@@ -29,7 +28,12 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.R;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
+
+import java.util.concurrent.TimeUnit;
 
 @Plugin
 @Scope(MirrorAppScope.class)
@@ -40,7 +44,7 @@ public class SoundManagerImpl extends AbstractManager implements SoundManager {
     @Plug
     AppManager mAppManager;
 
-    private MediaPlayer mAcknowledgePlayer;
+    private int mAcknowledgeId;
     private AudioManager mAudioManager;
     private int mErrorId;
     private SoundPool mSoundPool;
@@ -61,25 +65,25 @@ public class SoundManagerImpl extends AbstractManager implements SoundManager {
                         .build()
         ).build();
 
-        mAcknowledgePlayer = MediaPlayer.create(mAppManager.getAppContext(), R.raw.acknowledge);
         mAudioManager = D.get(AudioManager.class);
-        //mAcknowledgeId = mSoundPool.load(mAppManager.getAppContext(), R.raw.acknowledge, 1);
+        mAcknowledgeId = mSoundPool.load(mAppManager.getAppContext(), R.raw.acknowledge, 1);
         mErrorId = mSoundPool.load(mAppManager.getAppContext(), R.raw.error, 1);
     }
 
 // --------------------- Interface SoundManager ---------------------
 
     @Override
-    public void acknowledge(Listener listener) {
-        mAcknowledgePlayer.setOnCompletionListener(mp -> listener.onCompleted());
-        mAcknowledgePlayer.start();
+    public Observable<Long> acknowledge() {
+        mSoundPool.play(mAcknowledgeId, 1f, 1f, 1, 0, 1f);
+        return Observable.timer(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
     public void error() {
         mSoundPool.play(mErrorId, 1f, 1f, 1, 0, 1f);
     }
-
 
     @Override
     public void releaseAudioFocus() {
@@ -102,5 +106,15 @@ public class SoundManagerImpl extends AbstractManager implements SoundManager {
             Timber.d("Audio focus NOT received");
             return false;
         }
+    }
+
+    @Override
+    public void volumeDown() {
+        mAudioManager.adjustVolume(AudioManager.ADJUST_LOWER, 0);
+    }
+
+    @Override
+    public void volumeUp() {
+        mAudioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0);
     }
 }

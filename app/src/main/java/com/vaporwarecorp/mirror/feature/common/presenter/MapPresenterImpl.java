@@ -15,6 +15,7 @@
  */
 package com.vaporwarecorp.mirror.feature.common.presenter;
 
+import android.content.Intent;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.robopupu.api.dependency.Provides;
@@ -27,9 +28,15 @@ import com.vaporwarecorp.mirror.app.MirrorApplication;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.feature.common.view.MapView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Plugin
 public class MapPresenterImpl extends AbstractFeaturePresenter<MapView> implements MapPresenter {
 // ------------------------------ FIELDS ------------------------------
+
+    private static final String DIRECTIONS_URL = "http://maps.google.com/maps?saddr=%s,%s(%s)&daddr=%s,%s(%s)";
+    private static final String MAP_URL = "https://maps.google.com/maps?q=loc:%s,%s(%s)";
 
     @Plug
     AppManager mAppManager;
@@ -51,6 +58,28 @@ public class MapPresenterImpl extends AbstractFeaturePresenter<MapView> implemen
     public void onPlugged(final PluginBus bus) {
         super.onPlugged(bus);
         plug(MapView.class);
+    }
+
+// --------------------- Interface Shareable ---------------------
+
+    @Override
+    public Map<String, Object> content() {
+        final String title = getParams().getString(MAP_FROM_TITLE);
+        final double lat = getDouble(MAP_FROM_LATITUDE);
+        final double lng = getDouble(MAP_FROM_LONGITUDE);
+        final String toTitle = getParams().getString(MAP_TO_TITLE);
+        final double toLat = getDouble(MAP_TO_LATITUDE);
+        final double toLng = getDouble(MAP_TO_LONGITUDE);
+        final Map<String, Object> content = new HashMap<>();
+        content.put(ACTION, Intent.ACTION_VIEW);
+        if (toTitle == null) {
+            content.put(URL, String.format(MAP_URL, lat, lng, title));
+        } else {
+            content.put(URL, String.format(DIRECTIONS_URL, lat, lng, title, toLat, toLng, toTitle));
+        }
+        content.put(CLASS_NAME_KEY, "com.google.android.apps.maps");
+        content.put(CLASS_NAME_VALUE, "com.google.android.maps.MapsActivity");
+        return content;
     }
 
 // --------------------- Interface ViewObserver ---------------------

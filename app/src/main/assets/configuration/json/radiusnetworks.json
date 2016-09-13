@@ -4,30 +4,10 @@
     "type": "object",
     "title": "Radius Networks Configuration",
     "required": [
-      "kitName",
-      "useIdentifier",
-      "userEmail",
-      "globalUserIdentifier",
       "apiToken",
       "kitUrl"
     ],
     "properties": {
-      "kitName": {
-        "title": "PKKitName",
-        "type": "string"
-      },
-      "useIdentifier": {
-        "title": "PKUserIdentifier",
-        "type": "string"
-      },
-      "userEmail": {
-        "title": "PKUserEmail",
-        "type": "string"
-      },
-      "globalUserIdentifier": {
-        "title": "PKGlobalUserIdentifier",
-        "type": "string"
-      },
       "apiToken": {
         "title": "PKAPIToken",
         "type": "string"
@@ -42,22 +22,6 @@
     {
       "type": "help",
       "helpvalue": "<h3>Radius Networks Configuration</h3><p>Enter here your kit details from your &quot;.Properties&quot; file that you got from <a href=\"https://proximitykit.radiusnetworks.com/kits\">https://proximitykit.radiusnetworks.com/kits</a>.</p>"
-    },
-    {
-      "key": "kitName",
-      "type": "password"
-    },
-    {
-      "key": "useIdentifier",
-      "type": "password"
-    },
-    {
-      "key": "userEmail",
-      "type": "password"
-    },
-    {
-      "key": "globalUserIdentifier",
-      "type": "password"
     },
     {
       "key": "apiToken",

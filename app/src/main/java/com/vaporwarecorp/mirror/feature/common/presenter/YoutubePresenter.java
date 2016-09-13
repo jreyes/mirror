@@ -17,9 +17,10 @@ package com.vaporwarecorp.mirror.feature.common.presenter;
 
 import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.Shareable;
 
 @PlugInterface
-public interface YoutubePresenter extends FeaturePresenter {
+public interface YoutubePresenter extends FeaturePresenter, Shareable {
 // ------------------------------ FIELDS ------------------------------
 
     String YOUTUBE_VIDEO_ID = "YOUTUBE_VIDEO_ID";

@@ -19,14 +19,16 @@ import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
+import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.AppManager;
 import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.SoundManager;
-import com.vaporwarecorp.mirror.event.HotWordEvent;
+import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.feature.alexa.AlexaCommandManager;
 import com.vaporwarecorp.mirror.feature.common.AbstractMirrorManager;
 import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommandManager;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextManager;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -36,7 +38,7 @@ import timber.log.Timber;
 import java.io.File;
 import java.io.IOException;
 
-import static com.vaporwarecorp.mirror.event.HotWordEvent.*;
+import static com.vaporwarecorp.mirror.component.CommandManager.*;
 import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 
 @Plugin
@@ -45,10 +47,6 @@ import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 public class PocketSphinxManagerImpl extends AbstractMirrorManager implements PocketSphinxManager, RecognitionListener {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String KEYWORD_ALEXA = "alexa";
-    private static final String KEYWORD_HOUNDIFY = "houndify";
-    private static final String KEYWORD_POCKET_SPHINX = "computer";
-    private static final String KWS_SEARCH = "COMMAND";
     private static final String MENU_SEARCH = "MENU";
 
     @Plug
@@ -61,6 +59,8 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
     HoundifyCommandManager mHoundifyCommandManager;
     @Plug
     SoundManager mSoundManager;
+    @Plug
+    SpeechToTextManager mSpeechToTextManager;
 
     private SpeechRecognizer mRecognizer;
 
@@ -74,11 +74,7 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         if (mRecognizer == null) {
             return;
         }
-
         mRecognizer.stop();
-
-        mAlexaCommandManager.stop();
-        mHoundifyCommandManager.stop();
     }
 
     @Override
@@ -86,9 +82,6 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         if (mRecognizer == null) {
             return;
         }
-
-        mAlexaCommandManager.start();
-        mHoundifyCommandManager.start();
 
         mRecognizer.stop();
         mRecognizer.startListening(MENU_SEARCH);
@@ -101,14 +94,28 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
             mRecognizer = defaultSetup()
                     .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                     .setDictionary(new File(assetsDir, "6117.dic"))
-                    .setKeywordThreshold(1e-10f)
+                    .setKeywordThreshold(1e-40f)
                     .setBoolean("-allphone_ci", true)
+                    .setFloat("-lw", 6.5)
                     .getRecognizer();
             mRecognizer.addListener(this);
 
-            final File menuGrammar = new File(assetsDir, "menu.gram");
-            mRecognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-            //mRecognizer.addKeyphraseSearch(KWS_SEARCH, mHotWord);
+            final File menuKeywords = new File(assetsDir, "menu.gram");
+            mRecognizer.addKeywordSearch(MENU_SEARCH, menuKeywords);
+
+            if (!PluginBus.isPlugged(AlexaCommandManager.class)) {
+                PluginBus.plug(AlexaCommandManager.class);
+            }
+            if (!PluginBus.isPlugged(HoundifyCommandManager.class)) {
+                PluginBus.plug(HoundifyCommandManager.class);
+            }
+            if (!PluginBus.isPlugged(SpeechToTextManager.class)) {
+                PluginBus.plug(SpeechToTextManager.class);
+            }
+
+            mAlexaCommandManager.start();
+            mHoundifyCommandManager.start();
+            mSpeechToTextManager.start();
         } catch (IOException e) {
             Timber.e(e, e.getMessage());
             throw new RuntimeException(e);
@@ -120,6 +127,10 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
 
     @Override
     public void onFeatureStop() {
+        mAlexaCommandManager.stop();
+        mHoundifyCommandManager.stop();
+        mSpeechToTextManager.stop();
+
         if (mRecognizer == null) {
             return;
         }
@@ -137,8 +148,8 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
     @Override
     public void onEndOfSpeech() {
         if (!mRecognizer.getSearchName().equals(MENU_SEARCH)) {
-            Timber.d("onEndOfSpeech");
-            switchSearch(MENU_SEARCH);
+            mRecognizer.stop();
+            mRecognizer.startListening(MENU_SEARCH);
         }
     }
 
@@ -147,11 +158,8 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         if (hypothesis == null) return;
 
         final String text = hypothesis.getHypstr().trim().toLowerCase();
-        if (KEYWORD_ALEXA.equals(text) || KEYWORD_HOUNDIFY.equals(text)) {
+        if (KEYWORD_ALEXA.equals(text) || KEYWORD_HOUNDIFY.equals(text) || KEYWORD_GOOGLE.equals(text)) {
             mRecognizer.stop();
-        } else if (KEYWORD_POCKET_SPHINX.equals(text)) {
-            mRecognizer.stop();
-            mEventManager.post(new HotWordEvent(TYPE_POCKET_SPHINX));
         }
     }
 
@@ -160,39 +168,29 @@ public class PocketSphinxManagerImpl extends AbstractMirrorManager implements Po
         if (hypothesis == null) return;
 
         final String text = hypothesis.getHypstr().trim().toLowerCase();
-        Timber.d("onResult %s", text);
         if (KEYWORD_ALEXA.equals(text) && mAlexaCommandManager.isEnabled()) {
-            mEventManager.post(new HotWordEvent(TYPE_ALEXA));
-            mSoundManager.acknowledge(() -> {
-                mSoundManager.requestAudioFocus();
-                mAlexaCommandManager.voiceSearch();
-            });
+            mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_START, KEYWORD_ALEXA));
+            mAlexaCommandManager.voiceSearch();
         } else if (KEYWORD_HOUNDIFY.equals(text) && mHoundifyCommandManager.isEnabled()) {
-            mEventManager.post(new HotWordEvent(TYPE_HOUNDIFY));
-            mSoundManager.acknowledge(() -> {
-                mSoundManager.requestAudioFocus();
-                mHoundifyCommandManager.voiceSearch();
-            });
+            mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_START, KEYWORD_HOUNDIFY));
+            mHoundifyCommandManager.voiceSearch();
+        } else if (KEYWORD_GOOGLE.equals(text)) {
+            mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_START, KEYWORD_GOOGLE));
+            mSpeechToTextManager.voiceSearch();
         } else {
-            switchSearch(MENU_SEARCH);
+            mRecognizer.startListening(MENU_SEARCH);
         }
     }
 
     @Override
     public void onError(Exception e) {
+        Timber.e(e, "onError");
+        mRecognizer.startListening(MENU_SEARCH);
     }
 
     @Override
     public void onTimeout() {
-    }
-
-    private void switchSearch(String searchName) {
-        mRecognizer.stop();
-
-        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
-        if (searchName.equals(MENU_SEARCH))
-            mRecognizer.startListening(searchName);
-        else
-            mRecognizer.startListening(searchName, 10000);
+        Timber.e("onTimeout");
+        mRecognizer.startListening(MENU_SEARCH);
     }
 }

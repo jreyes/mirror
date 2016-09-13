@@ -22,15 +22,15 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
-import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
+import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextCommand;
 
 @Plugin
-public class HomeCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
+public class HomeCommand extends AbstractHoundifyCommand implements HoundifyCommand, SpeechToTextCommand {
 // ------------------------------ FIELDS ------------------------------
 
     private static final String COMMAND_EXPRESSION = "home";
@@ -53,19 +53,6 @@ public class HomeCommand extends AbstractHoundifyCommand implements HoundifyComm
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface AlexaCommand ---------------------
-
-    @Override
-    public void executeCommand(String command) {
-        mFeature.hideCurrentPresenter();
-        mEventManager.post(new SpeechEvent(""));
-    }
-
-    @Override
-    public boolean matches(String command) {
-        return COMMAND_EXPRESSION.equals(command);
-    }
-
 // --------------------- Interface HoundifyCommand ---------------------
 
     @Override
@@ -77,5 +64,18 @@ public class HomeCommand extends AbstractHoundifyCommand implements HoundifyComm
     @Override
     public String getCommandTypeValue() {
         return COMMAND_INTENT;
+    }
+
+// --------------------- Interface SpeechToTextCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mFeature.hideCurrentPresenter();
+        mEventManager.post(new SpeechEvent(""));
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return COMMAND_EXPRESSION.equalsIgnoreCase(command);
     }
 }

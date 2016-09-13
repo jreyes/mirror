@@ -23,23 +23,23 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
 import com.vaporwarecorp.mirror.component.EventManager;
-import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
-import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
+import com.vaporwarecorp.mirror.feature.houndify.AbstractHoundifyCommand;
+import com.vaporwarecorp.mirror.feature.houndify.HoundifyCommand;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextCommand;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(Command.class)
-public class FlickrCommand extends AbstractHoundifyCommand implements HoundifyCommand, AlexaCommand {
+public class FlickrCommand extends AbstractHoundifyCommand implements HoundifyCommand, SpeechToTextCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String ALEXA_COMMAND_EXPRESSION = "flickr";
     private static final String COMMAND_EXPRESSION = "((\"show\"|\"display\").(\"my flickr stream\"))";
     private static final String COMMAND_INTENT = "Flickr";
     private static final String COMMAND_RESPONSE = "Displaying your Flicr stream";
+    private static final String GOOGLE_COMMAND_EXPRESSION = "display flickr";
 
     @Plug
     EventManager mEventManager;
@@ -55,19 +55,6 @@ public class FlickrCommand extends AbstractHoundifyCommand implements HoundifyCo
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface AlexaCommand ---------------------
-
-    @Override
-    public void executeCommand(String command) {
-        mEventManager.post(new SpeechEvent(""));
-        mFeature.showPresenter(FlickrPresenter.class);
-    }
-
-    @Override
-    public boolean matches(String command) {
-        return ALEXA_COMMAND_EXPRESSION.equals(command);
-    }
-
 // --------------------- Interface HoundifyCommand ---------------------
 
     @Override
@@ -79,5 +66,18 @@ public class FlickrCommand extends AbstractHoundifyCommand implements HoundifyCo
     @Override
     public String getCommandTypeValue() {
         return COMMAND_INTENT;
+    }
+
+// --------------------- Interface SpeechToTextCommand ---------------------
+
+    @Override
+    public void executeCommand(String command) {
+        mEventManager.post(new SpeechEvent(""));
+        mFeature.showPresenter(FlickrPresenter.class);
+    }
+
+    @Override
+    public boolean matches(String command) {
+        return GOOGLE_COMMAND_EXPRESSION.equalsIgnoreCase(command);
     }
 }

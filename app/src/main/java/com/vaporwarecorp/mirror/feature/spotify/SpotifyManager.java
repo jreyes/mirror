@@ -18,9 +18,10 @@ package com.vaporwarecorp.mirror.feature.spotify;
 import com.robopupu.api.plugin.PlugInterface;
 import com.vaporwarecorp.mirror.component.WebAuthentication;
 import com.vaporwarecorp.mirror.feature.common.MirrorManager;
-import kaaes.spotify.webapi.android.models.Track;
 
 import java.util.List;
+
+import kaaes.spotify.webapi.android.models.Track;
 
 @PlugInterface
 public interface SpotifyManager extends MirrorManager, WebAuthentication {
@@ -37,6 +38,8 @@ public interface SpotifyManager extends MirrorManager, WebAuthentication {
     void play(List<String> trackUris, Listener listener);
 
     void resumePlaying();
+
+    String getCurrentUri();
 
     interface Listener {
         void onTrackUpdate(Track track);

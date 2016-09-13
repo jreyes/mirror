@@ -1,14 +1,15 @@
 package com.vaporwarecorp.mirror.feature.houndify;
 
 import android.content.Intent;
+import android.os.Handler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hound.android.fd.DefaultRequestInfoFactory;
 import com.hound.android.fd.HoundSearchResult;
 import com.hound.android.fd.Houndify;
-import com.hound.core.model.sdk.ClientMatch;
-import com.hound.core.model.sdk.CommandResult;
-import com.hound.core.model.sdk.HoundRequestInfo;
-import com.hound.core.model.sdk.HoundResponse;
+import com.hound.android.sdk.VoiceSearch;
+import com.hound.android.sdk.VoiceSearchInfo;
+import com.hound.android.sdk.VoiceSearchListener;
+import com.hound.core.model.sdk.*;
 import com.robopupu.api.component.AbstractManager;
 import com.robopupu.api.dependency.D;
 import com.robopupu.api.dependency.Provides;
@@ -23,8 +24,10 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.component.PluginFeatureManager;
 import com.vaporwarecorp.mirror.event.CommandEvent;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
+import com.vaporwarecorp.mirror.feature.Command;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import solid.functions.Action1;
 import timber.log.Timber;
 
 import java.util.ArrayList;
@@ -32,13 +35,16 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.vaporwarecorp.mirror.util.JsonUtil.createTextNode;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static solid.collectors.ToList.toList;
 import static solid.stream.Stream.stream;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(HoundifyCommandManager.class)
-public class HoundifyCommandManagerImpl extends AbstractManager implements HoundifyCommandManager {
+public class HoundifyCommandManagerImpl
+        extends AbstractManager
+        implements HoundifyCommandManager, VoiceSearchListener {
 // ------------------------------ FIELDS ------------------------------
 
     private static final String PREF = HoundifyCommandManager.class.getName();
@@ -59,14 +65,24 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
     private List<ClientMatch> mClientMatches;
     private Collection<HoundifyCommand> mCommands;
     private JsonNode mConversationState;
-    private boolean mEnabled;
-    private Houndify mHoundify;
+    private Handler mHandler;
+    private VoiceSearch mVoiceSearch;
+
+    private final Runnable pollVolumeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_VOLUME,
+                    String.valueOf(mVoiceSearch.getCurrentVolume())));
+            mHandler.postDelayed(pollVolumeRunnable, 5);
+        }
+    };
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
     public HoundifyCommandManagerImpl() {
         mClientMatches = new ArrayList<>();
         mCommands = new ArrayList<>();
+        mHandler = new Handler();
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -76,36 +92,43 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
 
     @Override
     public boolean isEnabled() {
-        return mEnabled;
+        return isNotEmpty(mClientId) && isNotEmpty(mClientKey);
     }
 
     @Override
     public void start() {
-        if (!isEnabled()) {
+        if (mVoiceSearch != null || mClientId == null || mClientKey == null) {
             return;
         }
 
-        initializeHoundify();
         initializeCommands();
     }
 
     @Override
     public void stop() {
-        stream(mCommands).forEach(PluginBus::unplug);
+        stream(mCommands).forEach((Action1<HoundifyCommand>) PluginBus::unplug);
 
         mClientMatches.clear();
         mCommands.clear();
 
-        if (mHoundify != null) {
-            mHoundify.setRequestInfoFactory(null);
-            mHoundify = null;
+        if (mVoiceSearch != null) {
+            mVoiceSearch.abort();
+            mVoiceSearch = null;
         }
     }
 
     @Override
     public void voiceSearch() {
-        if (isEnabled()) {
-            HoundifyVoiceSearchActivity.newInstance(mFeatureManager.getForegroundActivity());
+        if (mVoiceSearch == null) {
+            mVoiceSearch = new VoiceSearch.Builder()
+                    .setRequestInfo(new RequestInfoFactory().create())
+                    .setAudioSource(Houndify.get(mAppManager.getAppContext()).getAudioInputStream())
+                    .setClientId(mClientId)
+                    .setClientKey(mClientKey)
+                    .setListener(this)
+                    .build();
+            mVoiceSearch.start();
+            mHandler.post(pollVolumeRunnable);
         }
     }
 
@@ -132,7 +155,46 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
 
     @Override
     public void processCommand(int resultCode, Intent data) {
-        final HoundSearchResult result = mHoundify.fromActivityResult(resultCode, data);
+    }
+
+// --------------------- Interface PluginComponent ---------------------
+
+    @Override
+    public void onPlugged(PluginBus bus) {
+        super.onPlugged(bus);
+        loadConfiguration();
+    }
+
+// --------------------- Interface VoiceSearchListener ---------------------
+
+    @Override
+    public void onTranscriptionUpdate(final PartialTranscript transcript) {
+    }
+
+    @Override
+    public void onResponse(final HoundResponse response, final VoiceSearchInfo info) {
+        updateUiState();
+        deliverResult(HoundSearchResult.createSuccess(response, info));
+    }
+
+    @Override
+    public void onError(final Exception ex, final VoiceSearchInfo info) {
+        deliverResult(HoundSearchResult.createError(ex, info.getErrorType(), info));
+    }
+
+    @Override
+    public void onAbort(final VoiceSearchInfo info) {
+        deliverResult(HoundSearchResult.createAborted());
+    }
+
+    @Override
+    public void onRecordingStopped() {
+        updateUiState();
+    }
+
+    private void deliverResult(HoundSearchResult result) {
+        mHandler.removeCallbacks(pollVolumeRunnable);
+
         if (result.hasResult()) {
             HoundResponse response = result.getResponse();
             if (response.getResults().isEmpty()) {
@@ -159,32 +221,22 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
         }
     }
 
-// --------------------- Interface PluginComponent ---------------------
-
-    @Override
-    public void onPlugged(PluginBus bus) {
-        super.onPlugged(bus);
-        loadConfiguration();
-    }
-
     private void initializeCommands() {
-        if (mCommands.isEmpty()) {
-            for (HoundifyCommand command : D.getAll(HoundifyCommand.class)) {
-                PluginBus.plug(command);
-                mCommands.add(command);
-                if (command.getClientMatch() != null) {
-                    mClientMatches.add(command.getClientMatch());
-                }
-                Timber.i("loaded %s command", command.getClass().getCanonicalName());
-            }
-        }
-    }
-
-    private void initializeHoundify() {
-        mHoundify = Houndify.get(mAppManager.getAppContext());
-        mHoundify.setClientId(mClientId);
-        mHoundify.setClientKey(mClientKey);
-        mHoundify.setRequestInfoFactory(new RequestInfoFactory());
+        mClientMatches.clear();
+        mCommands = stream(D.getAll(Command.class))
+                .filter(c -> c instanceof HoundifyCommand)
+                .map(c -> {
+                    HoundifyCommand command = (HoundifyCommand) c;
+                    if (!PluginBus.isPlugged(c)) {
+                        PluginBus.plug(c);
+                        if (command.getClientMatch() != null) {
+                            mClientMatches.add(command.getClientMatch());
+                        }
+                    }
+                    Timber.i("loaded %s houndify command", c.getClass().getCanonicalName());
+                    return command;
+                })
+                .collect(toList());
     }
 
     /**
@@ -193,12 +245,32 @@ public class HoundifyCommandManagerImpl extends AbstractManager implements Hound
     private void loadConfiguration() {
         mClientId = mConfigurationManager.getString(PREF_CLIENT_ID, "");
         mClientKey = mConfigurationManager.getString(PREF_CLIENT_KEY, "");
-        mEnabled = !(isEmpty(mClientId) || isEmpty(mClientKey));
         Timber.i("loaded HoundifyCommandManager configuration");
     }
 
     private void onError(String message) {
         mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_ERROR, message));
+    }
+
+    private void updateUiState() {
+        switch (mVoiceSearch.getState()) {
+            case STATE_SEARCHING:
+                mHandler.removeCallbacks(pollVolumeRunnable);
+                mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_SEARCHING, KEYWORD_HOUNDIFY));
+                break;
+            case STATE_ERROR:
+            case STATE_ABORTED:
+            case STATE_FINISHED:
+                mHandler.removeCallbacks(pollVolumeRunnable);
+                if (mVoiceSearch != null) {
+                    mVoiceSearch.abort();
+                    mVoiceSearch = null;
+                }
+                mEventManager.post(new CommandEvent(CommandEvent.TYPE_COMMAND_STOP, KEYWORD_HOUNDIFY));
+                break;
+            default:
+                throw new IllegalStateException("This should never happen!");
+        }
     }
 
     private class RequestInfoFactory extends DefaultRequestInfoFactory {

@@ -11,17 +11,17 @@ import com.vaporwarecorp.mirror.component.EventManager;
 import com.vaporwarecorp.mirror.event.SpeechEvent;
 import com.vaporwarecorp.mirror.feature.Command;
 import com.vaporwarecorp.mirror.feature.MainFeature;
-import com.vaporwarecorp.mirror.feature.alexa.AlexaCommand;
+import com.vaporwarecorp.mirror.feature.speechtotext.SpeechToTextCommand;
 
 import static com.vaporwarecorp.mirror.feature.spotify.SpotifyPresenter.TRACK_IDS;
 
 @Plugin
 @Scope(MirrorAppScope.class)
 @Provides(Command.class)
-public class SpotifyNewReleasesCommand extends AbstractPluginComponent implements AlexaCommand {
+public class SpotifyNewReleasesCommand extends AbstractPluginComponent implements SpeechToTextCommand {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final String COMMAND_EXPRESSION = "new releases from spot";
+    private static final String COMMAND_EXPRESSION = "play spotify";
 
     @Plug
     EventManager mEventManager;
@@ -33,7 +33,7 @@ public class SpotifyNewReleasesCommand extends AbstractPluginComponent implement
 // ------------------------ INTERFACE METHODS ------------------------
 
 
-// --------------------- Interface AlexaCommand ---------------------
+// --------------------- Interface SpeechToTextCommand ---------------------
 
     @Override
     public void executeCommand(String command) {
@@ -48,6 +48,6 @@ public class SpotifyNewReleasesCommand extends AbstractPluginComponent implement
 
     @Override
     public boolean matches(String command) {
-        return COMMAND_EXPRESSION.equals(command);
+        return COMMAND_EXPRESSION.equalsIgnoreCase(command);
     }
 }

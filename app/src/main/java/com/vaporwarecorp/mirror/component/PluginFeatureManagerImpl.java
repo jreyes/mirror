@@ -15,6 +15,8 @@
  */
 package com.vaporwarecorp.mirror.component;
 
+import android.app.Activity;
+
 import com.robopupu.api.dependency.Provides;
 import com.robopupu.api.dependency.Scope;
 import com.robopupu.api.feature.AbstractFeatureManager;
@@ -24,6 +26,8 @@ import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.robopupu.api.util.Params;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import com.vaporwarecorp.mirror.feature.main.MainView;
+
 import timber.log.Timber;
 
 @Plugin

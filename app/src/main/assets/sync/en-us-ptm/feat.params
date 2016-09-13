@@ -9,5 +9,4 @@
 -cmn current
 -varnorm no
 -model ptm
--cmninit 40,10,10
-
+-cmninit 40,3,-1

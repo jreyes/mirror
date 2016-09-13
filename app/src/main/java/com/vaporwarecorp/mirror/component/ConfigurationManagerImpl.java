@@ -25,6 +25,7 @@ import com.robopupu.api.plugin.Plug;
 import com.robopupu.api.plugin.Plugin;
 import com.robopupu.api.plugin.PluginBus;
 import com.vaporwarecorp.mirror.app.MirrorAppScope;
+import solid.functions.Action1;
 import timber.log.Timber;
 
 import java.util.ArrayList;
@@ -123,17 +124,17 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
     @Override
     public void updateBoolean(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putBoolean(preferenceKey, j.booleanValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((Action1<JsonNode>) j -> Prefs.putBoolean(preferenceKey, j.booleanValue()));
     }
 
     @Override
     public void updateFloat(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putFloat(preferenceKey, j.floatValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((Action1<JsonNode>) j -> Prefs.putFloat(preferenceKey, j.floatValue()));
     }
 
     @Override
     public void updateInt(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> Prefs.putInt(preferenceKey, j.intValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((Action1<JsonNode>) j -> Prefs.putInt(preferenceKey, j.intValue()));
     }
 
     @Override
@@ -148,13 +149,13 @@ public class ConfigurationManagerImpl extends AbstractManager implements Configu
 
     @Override
     public void updateString(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> updateString(preferenceKey, j.textValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((Action1<JsonNode>) j -> updateString(preferenceKey, j.textValue()));
     }
 
     @Override
     public void updateStringSet(String preferenceKey, JsonNode jsonNode, String jsonNodeKey) {
         final Set<String> values = new HashSet<>();
-        stream(jsonNode.findValues(jsonNodeKey)).forEach(j -> values.add(j.textValue()));
+        stream(jsonNode.findValues(jsonNodeKey)).forEach((Action1<JsonNode>) j -> values.add(j.textValue()));
         Prefs.putStringSet(preferenceKey, values);
     }
 

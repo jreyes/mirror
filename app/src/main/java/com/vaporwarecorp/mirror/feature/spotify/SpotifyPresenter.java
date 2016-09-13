@@ -17,9 +17,10 @@ package com.vaporwarecorp.mirror.feature.spotify;
 
 import com.robopupu.api.feature.FeaturePresenter;
 import com.robopupu.api.plugin.PlugInterface;
+import com.vaporwarecorp.mirror.component.Shareable;
 
 @PlugInterface
-public interface SpotifyPresenter extends FeaturePresenter {
+public interface SpotifyPresenter extends FeaturePresenter, Shareable {
 // ------------------------------ FIELDS ------------------------------
 
     String TRACK_IDS = "TRACK_IDS";

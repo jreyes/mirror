@@ -70,30 +70,6 @@
                 android:layout_height="wrap_content"
                 android:text="Test2"/>
 
-            <Button
-                android:id="@+id/test3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Test3"/>
-
-            <Button
-                android:id="@+id/test4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Test4"/>
-
-            <Button
-                android:id="@+id/test5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Test5"/>
-
-            <Button
-                android:id="@+id/test6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Configuration"/>
-
         </LinearLayout>
 
     </RelativeLayout>
@@ -111,6 +87,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/black"
+        android:visibility="gone"/>
+
+    <com.hound.android.fd.view.SearchPanelView
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
+        android:id="@+id/search_panel_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/houndify_search_panel_height"
         android:visibility="gone"/>
 
 </RelativeLayout>

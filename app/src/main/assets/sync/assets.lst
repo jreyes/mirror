@@ -6,6 +6,7 @@
 en-us-ptm/feat.params
 en-us-ptm/mdef
 en-us-ptm/means
+en-us-ptm/mixture_weights
 en-us-ptm/noisedict
 en-us-ptm/sendump
 en-us-ptm/transition_matrices
