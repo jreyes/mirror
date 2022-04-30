@@ -35,4 +35,4 @@ install:
 before_script:
   - chmod +x gradlew
 
-script: "./gradlew build --no-daemon --stacktrace"
+script: "./gradlew build --stacktrace"
